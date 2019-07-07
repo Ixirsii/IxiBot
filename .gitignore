@@ -1,0 +1,21 @@
+# Build files
+MANIFEST.MF
+target
+build
+
+# Folder config file
+Desktop.ini
+.DS_Store
+
+# Windows shortcuts
+*.lnk
+
+# Thumbnails
+._*
+
+# IntelliJ Project files
+.idea
+*.iml
+
+# Log files
+log

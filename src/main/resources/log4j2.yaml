@@ -1,0 +1,32 @@
+Configuration:
+  status: warn
+  name: YAMLConfigTest
+  properties:
+    property:
+      name: filename
+      value: log/Slf4JTest.log
+  thresholdFilter:
+    level: debug
+  appenders:
+    Console:
+      name: CONSOLE
+      PatternLayout:
+        Pattern: "%d{HH:mm:ss.SSS} [%t] %-5level - %m%n"
+    RollingRandomAccessFile:
+      name: APPLICATION_LOG
+      filePattern: "log/%d{yyyy}/%d{MM}/%d{dd}/ixibot-%d{yyyy-MM-dd-HH}.log.gz"
+      PatternLayout:
+        Pattern: "%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %m%n"
+      Filters:
+        ThresholdFilter:
+          level: debug
+      Policies:
+        TimeBasedTriggeringPolicy:
+          interval: 1
+
+  Loggers:
+    Root:
+      level: debug
+      AppenderRef:
+        - ref: CONSOLE
+        - ref: APPLICATION_LOG
