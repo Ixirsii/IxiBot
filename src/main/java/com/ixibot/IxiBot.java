@@ -34,6 +34,11 @@ package com.ixibot;
 
 import com.ixibot.api.DiscordAPI;
 import com.ixibot.data.BotConfiguration;
+import com.ixibot.data.RoleReaction;
+import com.ixibot.database.Database;
+
+import java.sql.SQLException;
+import java.util.List;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +49,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Ryan Porterfield
  */
 @Slf4j
-public class IxiBot {
+public class IxiBot implements AutoCloseable, Runnable {
     /**
      * Bot configuration.
      */
@@ -55,22 +60,63 @@ public class IxiBot {
      */
     @NonNull
     private final DiscordAPI discordAPI;
+    /**
+     * Database interface.
+     */
+    @NonNull
+    private final Database database;
 
     /**
      * Constructor.
      *
      * @param botConfiguration Bot configuration parsed from user config file.
+     * @throws ClassNotFoundException on failure to load JDBC driver.
+     * @throws SQLException if a database access error occurs.
      */
-    IxiBot(@NonNull final BotConfiguration botConfiguration) {
+    IxiBot(@NonNull final BotConfiguration botConfiguration)
+            throws ClassNotFoundException, SQLException {
         this.botConfiguration = botConfiguration;
-        this.discordAPI = new DiscordAPI(botConfiguration.getDiscordToken());
+        this.database = new Database();
+        this.discordAPI = new DiscordAPI(botConfiguration.getDiscordToken(),
+                database.getAllRoleReactions());
     }
 
     /**
-     * Stop the bot and clean up resources.
+     * {@inheritDoc}
      */
-    void quit() {
-        log.info("Shutting down bot");
+    @Override
+    public void close() {
+        log.trace("Shutting down bot");
+
+        try {
+            database.close();
+        } catch (final SQLException sqle) {
+            log.error("Caught SQLException while attempting to close database", sqle);
+        }
+
         discordAPI.logout();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void run() {
+        if (discordAPI.getRoleReactions().isEmpty()) {
+            final RoleReaction roleReaction0 = new RoleReaction(0, 0, 0, 0, 0);
+            final RoleReaction roleReaction1 = new RoleReaction(1, 1, 1, 1, 1);
+
+            database.addRoleReaction(roleReaction0);
+            database.addRoleReaction(roleReaction1);
+            discordAPI.addRoleReaction(roleReaction0);
+            discordAPI.addRoleReaction(roleReaction1);
+        }
+
+        try {
+            final List<RoleReaction> roleReactions = database.getAllRoleReactions();
+            log.info("Got role reactions from database {}", roleReactions);
+        } catch (final SQLException sqle) {
+            log.error("Caught SQLException attempting to get roll reactions from database", sqle);
+        }
     }
 }

@@ -36,6 +36,7 @@ import com.ixibot.data.BotConfiguration;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -66,6 +67,10 @@ public final class Main {
      * Exit code for configuration errors.
      */
     private static final int STATUS_CODE_CONFIGURATION_ERROR = 1;
+    /**
+     * Exit code for database errors.
+     */
+    private static final int STATUS_CODE_DATABASE_ERROR = 2;
 
     /**
      * Program loop control.
@@ -98,19 +103,25 @@ public final class Main {
             return;
         }
 
-        final IxiBot ixiBot = new IxiBot(botConfiguration);
-        final Scanner scanner = new Scanner(System.in);
+        try (final IxiBot ixiBot = new IxiBot(botConfiguration)) {
+            ixiBot.run();
+            final Scanner scanner = new Scanner(System.in);
 
-        do {
-            log.info("Type \"quit\" to exit");
-            final String s = scanner.nextLine();
-            log.info("Got user input: {}", s);
+            do {
+                log.info("Type \"quit\" to exit");
+                final String s = scanner.nextLine();
+                log.info("Got user input: {}", s);
 
-            if (QUIT_COMMAND.equals(s)) {
-                isRunning = false;
-            }
-        } while (isRunning);
-
-        ixiBot.quit();
+                if (QUIT_COMMAND.equals(s)) {
+                    isRunning = false;
+                }
+            } while (isRunning);
+        } catch (final ClassNotFoundException cnfe) {
+            log.error("Caught ClassNotFoundException, exiting", cnfe);
+            System.exit(STATUS_CODE_DATABASE_ERROR);
+        } catch (final SQLException sqle) {
+            log.error("Caught SQLException, exiting", sqle);
+            System.exit(STATUS_CODE_DATABASE_ERROR);
+        }
     }
 }

@@ -32,6 +32,9 @@
 
 package com.ixibot.api;
 
+import com.ixibot.data.RoleReaction;
+
+import java.util.List;
 import java.util.Optional;
 
 import discord4j.core.DiscordClient;
@@ -58,25 +61,51 @@ public class DiscordAPI {
      */
     @NonNull
     private final DiscordClient discordClient;
+    /**
+     * Role assignment reactions.
+     */
+    @NonNull
+    private final List<RoleReaction> roleReactions;
 
     /**
      * Constructor.
      *
      * @param discordToken Discord bot token.
+     * @param roleReactions Role assignment reactions.
      */
-    public DiscordAPI(@NonNull final String discordToken) {
+    public DiscordAPI(@NonNull final String discordToken,
+                      @NonNull final List<RoleReaction> roleReactions) {
         this.discordClient = new DiscordClientBuilder(discordToken)
                 .build();
+        this.roleReactions = roleReactions;
 
         registerDiscordListeners();
         discordClient.login().subscribe();
     }
 
     /**
+     * Add a role assignment reaction.
+     *
+     * @param roleReaction Role assignment reaction.
+     */
+    public void addRoleReaction(@NonNull final RoleReaction roleReaction) {
+        roleReactions.add(roleReaction);
+    }
+
+    /**
+     * Get role assignment reactions.
+     *
+     * @return role assignment reactions.
+     */
+    public List<RoleReaction> getRoleReactions() {
+        return this.roleReactions;
+    }
+
+    /**
      * Stop the bot and clean up resources.
      */
     public void logout() {
-        log.info("Logging out of Discord");
+        log.debug("Logging out of Discord");
         discordClient.logout().block();
     }
 
