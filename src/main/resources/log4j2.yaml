@@ -6,7 +6,7 @@ Configuration:
       name: filename
       value: log/Slf4JTest.log
   thresholdFilter:
-    level: debug
+    level: all
   appenders:
     Console:
       name: CONSOLE
@@ -19,14 +19,21 @@ Configuration:
         Pattern: "%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %m%n"
       Filters:
         ThresholdFilter:
-          level: debug
+          level: all
       Policies:
         TimeBasedTriggeringPolicy:
           interval: 1
 
   Loggers:
     Root:
-      level: debug
+      level: all
       AppenderRef:
         - ref: CONSOLE
         - ref: APPLICATION_LOG
+    Logger:
+      - name: discord4j
+        level: info
+      - name: io.netty
+        level: info
+      - name: reactor
+        level: info
