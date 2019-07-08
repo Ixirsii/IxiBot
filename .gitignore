@@ -13,9 +13,10 @@ Desktop.ini
 # Thumbnails
 ._*
 
-# IntelliJ Project files
+# IntelliJ project files
 .idea
 *.iml
 
-# Log files
+# Application resources
 log
+**/sqlite.db
