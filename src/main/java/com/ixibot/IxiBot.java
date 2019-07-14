@@ -39,6 +39,9 @@ import com.ixibot.database.Database;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -65,6 +68,11 @@ public class IxiBot implements AutoCloseable, Runnable {
      */
     @NonNull
     private final Database database;
+    /**
+     * Thread pool executor for scheduled async actions.
+     */
+    @NonNull
+    private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
     /**
      * Constructor.
@@ -79,6 +87,8 @@ public class IxiBot implements AutoCloseable, Runnable {
         this.database = new Database();
         this.discordAPI = new DiscordAPI(botConfiguration.getDiscordToken(),
                 database.getAllRoleReactions());
+        this.scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(
+                1, Executors.defaultThreadFactory());
     }
 
     /**
@@ -87,6 +97,8 @@ public class IxiBot implements AutoCloseable, Runnable {
     @Override
     public void close() {
         log.trace("Shutting down bot");
+
+        scheduledThreadPoolExecutor.shutdown();
 
         try {
             database.close();
@@ -98,19 +110,22 @@ public class IxiBot implements AutoCloseable, Runnable {
     }
 
     /**
+     * Initialize bot before running.
+     */
+    private void init() {
+        scheduledThreadPoolExecutor.scheduleAtFixedRate(
+                discordAPI::updateAllRoles,
+                0,
+                botConfiguration.getRoleVerificationInterval(),
+                TimeUnit.MINUTES);
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
     public void run() {
-        if (discordAPI.getRoleReactions().isEmpty()) {
-            final RoleReaction roleReaction0 = new RoleReaction(0, 0, 0, 0, 0);
-            final RoleReaction roleReaction1 = new RoleReaction(1, 1, 1, 1, 1);
-
-            database.addRoleReaction(roleReaction0);
-            database.addRoleReaction(roleReaction1);
-            discordAPI.addRoleReaction(roleReaction0);
-            discordAPI.addRoleReaction(roleReaction1);
-        }
+        init();
 
         try {
             final List<RoleReaction> roleReactions = database.getAllRoleReactions();

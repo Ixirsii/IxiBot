@@ -39,6 +39,14 @@ package com.ixibot.database;
  */
 final class RoleReactionContract {
     /**
+     * Add verified key.
+     */
+    static final String ADD_VERIFIED = "add_verified";
+    /**
+     * Reaction emoji is animated key.
+     */
+    static final String ANIMATED = "animated";
+    /**
      * Channel ID key.
      */
     static final String CHANNEL_ID = "channel_id";
@@ -51,9 +59,17 @@ final class RoleReactionContract {
      */
     static final String MESSAGE_ID = "message_id";
     /**
-     * Reaction ID key.
+     * Reaction emoji ID key.
      */
     static final String REACTION_ID = "reaction_id";
+    /**
+     * Reaction emoji name key.
+     */
+    static final String REACTION_NAME = "reaction_name";
+    /**
+     * Remove verified key.
+     */
+    static final String REMOVE_VERIFIED = "remove_verified";
     /**
      * Guild role ID key.
      */
@@ -67,20 +83,25 @@ final class RoleReactionContract {
      * SQL statement for creating the table.
      */
     static final String CREATE_TABLE_STATEMENT = String.format(
-            "CREATE TABLE IF NOT EXISTS %s (%s INTEGER NOT NULL, %s INTEGER NOT NULL, "
-                    + "%s INTEGER NOT NULL, %s INTEGER NOT NULL, %s INTEGER NOT NULL, "
+            "CREATE TABLE IF NOT EXISTS %s (%s INTEGER NOT NULL, %s INTEGER NOT NULL,"
+                    + " %s INTEGER NOT NULL, %s INTEGER, %s INTEGER NOT NULL, %s INTEGER NOT NULL,"
+                    + " %s TEXT NOT NULL, %s INTEGER NOT NULL, %s INTEGER NOT NULL, "
                     + "PRIMARY KEY(%s, %s))",
             /* Table name */
             TABLE_NAME,
             /* Columns */
-            MESSAGE_ID,
-            REACTION_ID,
+            ADD_VERIFIED,
+            ANIMATED,
             CHANNEL_ID,
             GUILD_ID,
+            MESSAGE_ID,
+            REACTION_ID,
+            REACTION_NAME,
+            REMOVE_VERIFIED,
             ROLE_ID,
             /* Primary key */
             MESSAGE_ID,
-            REACTION_ID
+            REACTION_NAME
     );
 
     /**

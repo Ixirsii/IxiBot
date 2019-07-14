@@ -32,7 +32,12 @@
 
 package com.ixibot.data;
 
+import java.util.Optional;
+
+import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.object.util.Snowflake;
 import lombok.Data;
+import lombok.NonNull;
 
 /**
  * Role assignment reaction POJO.
@@ -42,23 +47,91 @@ import lombok.Data;
 @Data
 public class RoleReaction {
     /**
+     * Is the role add verified.
+     *
+     * <p>
+     *     If this is true, the bot will periodically check all users who have reacted with this
+     *     reaction and assign them the role if they don't have it.
+     * </p>
+     */
+    private final boolean addVerified;
+    /**
      * Channel ID containing the message.
      */
-    private final long channelId;
+    @NonNull
+    private final Snowflake channelID;
     /**
      * Guild ID containing the channel.
      */
-    private final long guildId;
+    @NonNull
+    private final Snowflake guildID;
     /**
      * Message ID containing the reaction.
      */
-    private final long messageId;
+    @NonNull
+    private final Snowflake messageID;
     /**
-     * Reaction ID.
+     * Reaction emoji name/raw.
      */
-    private final long reactionId;
+    @NonNull
+    private final ReactionEmoji reactionEmoji;
+    /**
+     * Is the role remove verified.
+     *
+     * <p>
+     *     If this is true, the bot will periodically check all users and remove the role from
+     *     all users in the guild who haven't reacted with this reaction.
+     * </p>
+     */
+    private final boolean removeVerified;
     /**
      * Role ID to (un)assign.
      */
-    private final long roleId;
+    @NonNull
+    private final Snowflake roleID;
+
+    /**
+     * Get boxed reaction emoji ID.
+     *
+     * @return reaction emoji ID if reaction emoji is a custom emoji, otherwise null.
+     */
+    public Long getBoxedReactionEmojiID() {
+        final Optional<ReactionEmoji.Custom> optionalCustom = reactionEmoji.asCustomEmoji();
+
+        if (optionalCustom.isPresent()) {
+            return optionalCustom.get().getId().asLong();
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the name (unicode raw or custom name) of the reaction emoji.
+     *
+     * @return name of the reaction emoji.
+     */
+    public String getReactionEmojiName() {
+        final Optional<ReactionEmoji.Custom> optionalCustom = reactionEmoji.asCustomEmoji();
+        final Optional<ReactionEmoji.Unicode> optionalUnicode = reactionEmoji.asUnicodeEmoji();
+
+        if (optionalCustom.isPresent()) {
+            return optionalCustom.get().getName();
+        } else if (optionalUnicode.isPresent()) {
+            return optionalUnicode.get().getRaw();
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * Is the role add or remove verified.
+     *
+     * @return {@code true} if either addVerified or removeVerified is {@code true},
+     *                      otherwise {@code false}.
+     * @see RoleReaction#addVerified
+     * @see RoleReaction#removeVerified
+     */
+    public boolean isVerified() {
+        return addVerified || removeVerified;
+    }
 }

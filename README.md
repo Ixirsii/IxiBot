@@ -18,4 +18,4 @@ IxiBot is a self-hosted bot, meaning that you have to download and run the bot o
 
 IxiBot requires the following software to be installed:
 
-* [Java 11](https://www.oracle.com/technetwork/java/javase/downloads/index.html)
+* [Java 8](https://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html)

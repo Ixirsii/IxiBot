@@ -35,17 +35,22 @@ package com.ixibot.api;
 import com.ixibot.data.RoleReaction;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.event.domain.message.ReactionAddEvent;
-import discord4j.core.event.domain.message.ReactionRemoveAllEvent;
 import discord4j.core.event.domain.message.ReactionRemoveEvent;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.object.util.Snowflake;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
@@ -84,24 +89,6 @@ public class DiscordAPI {
     }
 
     /**
-     * Add a role assignment reaction.
-     *
-     * @param roleReaction Role assignment reaction.
-     */
-    public void addRoleReaction(@NonNull final RoleReaction roleReaction) {
-        roleReactions.add(roleReaction);
-    }
-
-    /**
-     * Get role assignment reactions.
-     *
-     * @return role assignment reactions.
-     */
-    public List<RoleReaction> getRoleReactions() {
-        return this.roleReactions;
-    }
-
-    /**
      * Stop the bot and clean up resources.
      */
     public void logout() {
@@ -125,35 +112,114 @@ public class DiscordAPI {
     }
 
     /**
+     * Check all role assignment reactions and update roles for all members accordingly.
+     */
+    public void updateAllRoles() {
+        final Map<Snowflake, List<RoleReaction>> verifiedReactionsMap = roleReactions.stream()
+                .filter(RoleReaction::isVerified)
+                .collect(Collectors.groupingBy(RoleReaction::getGuildID));
+
+        verifiedReactionsMap.forEach(
+                (guildID, verifiedReactions) -> discordClient.getGuildById(guildID)
+                        .subscribe(guild -> updateGuildRoles(guild, verifiedReactions)));
+    }
+
+    /**
+     * Verify all role assignments for a guild.
+     *
+     * @param guild Guild to verify roles in.
+     * @param verifiedReactions List of verified reactions for the guild.
+     */
+    private void updateGuildRoles(@NonNull final Guild guild,
+                                  @NonNull final List<RoleReaction> verifiedReactions) {
+        final List<Member> members = guild.getMembers().collectList().block();
+
+        for (final RoleReaction reaction : verifiedReactions) {
+            discordClient.getMessageById(reaction.getChannelID(), reaction.getMessageID())
+                    .subscribe(message -> updateReactionRoles(guild, members, message, reaction));
+        }
+    }
+
+    /**
+     * Verify all role assignments for a message reaction.
+     *
+     * @param guild Guild containing message.
+     * @param members Members in the guild.
+     * @param message Message containing reaction.
+     * @param verifiedReaction Role assignment reaction.
+     */
+    private void updateReactionRoles(@NonNull final Guild guild,
+                                     @NonNull final List<Member> members,
+                                     @NonNull final Message message,
+                                     @NonNull final RoleReaction verifiedReaction) {
+        final List<User> reactors = message.getReactors(verifiedReaction.getReactionEmoji())
+                .collectList()
+                .block();
+
+        if (reactors == null) {
+            log.error("Unable to get list of reactors for message {}", message.getId());
+            return;
+        }
+
+        if (verifiedReaction.isAddVerified()) {
+            verifyAddRoles(guild, reactors, message, verifiedReaction);
+        }
+
+        if (verifiedReaction.isRemoveVerified()) {
+            verifyRemoveRoles(members, reactors, message, verifiedReaction);
+        }
+    }
+
+    /**
      * ReactionAddEvent listener.
      *
      * @param event Event to handle.
      */
     private void reactionAddListener(@NonNull final ReactionAddEvent event) {
-        final long channelId = event.getChannelId().asLong();
-        final long messageId = event.getMessageId().asLong();
-        final long userId = event.getUserId().asLong();
-        final ReactionEmoji reactionEmoji = event.getEmoji();
-        final Optional<ReactionEmoji.Custom> optionalCustom =
-                reactionEmoji.asCustomEmoji();
-        final Optional<ReactionEmoji.Unicode> optionalUnicode =
-                reactionEmoji.asUnicodeEmoji();
+        final Optional<ReactionEmoji.Custom> optionalCustom = event.getEmoji().asCustomEmoji();
+        final Optional<ReactionEmoji.Unicode> optionalUnicode = event.getEmoji().asUnicodeEmoji();
+        final Predicate<RoleReaction> filter;
 
         if (optionalCustom.isPresent()) {
             final ReactionEmoji.Custom custom = optionalCustom.get();
-            log.info("User {} is adding {} ({}) reaction to #{}: {}",
-                    userId,
-                    custom.getName(),
-                    custom.getId(),
-                    channelId,
-                    messageId);
+
+            filter = reaction -> ((reaction.getMessageID().equals(event.getMessageId()))
+                    && (reaction.getChannelID().equals(event.getChannelId()))
+                    && (reaction.getReactionEmojiName().equals(custom.getName())));
         } else if (optionalUnicode.isPresent()) {
             final ReactionEmoji.Unicode unicode = optionalUnicode.get();
-            log.info("User {} is adding {} reacting to #{}: {}",
-                    userId,
-                    unicode.getRaw(),
-                    channelId,
-                    messageId);
+
+            filter = reaction -> ((reaction.getMessageID().equals(event.getMessageId()))
+                    && (reaction.getChannelID().equals(event.getChannelId()))
+                    && (reaction.getReactionEmojiName().equals(unicode.getRaw())));
+        } else {
+            log.error("Failed to get reaction that user added to message."
+                            + "\nUser: {}\nMessage: {}\nEmoji: {}",
+                    event.getUserId(),
+                    event.getMessageId(),
+                    event.getEmoji());
+            return;
+        }
+
+        final Optional<RoleReaction> optionalRoleReaction = roleReactions.stream()
+                .filter(filter)
+                .findFirst();
+
+        if (optionalRoleReaction.isPresent()) {
+            final RoleReaction roleReaction = optionalRoleReaction.get();
+
+            event.getMessage().subscribe(message ->
+                    message.getAuthorAsMember().subscribe(member -> {
+                        final String reason = String.format(
+                                "User %s reacted to message %d with %s to get role %s.",
+                                member.getDisplayName(),
+                                message.getId().asLong(),
+                                roleReaction.getReactionEmoji(),
+                                roleReaction.getRoleID());
+
+                        log.info(reason);
+                        member.addRole(roleReaction.getRoleID(), reason);
+                    }));
         }
     }
 
@@ -162,42 +228,51 @@ public class DiscordAPI {
      *
      * @param event Event to handle.
      */
-    private void reactionRemoveAllListener(@NonNull final ReactionRemoveAllEvent event) {
-        log.info("Removing all reactions on post #{}: {}",
-                event.getChannel(),
-                event.getMessageId());
-    }
-
-    /**
-     * ReactionRemoveEvent listener.
-     *
-     * @param event Event to handle.
-     */
     private void reactionRemoveListener(@NonNull final ReactionRemoveEvent event) {
-        final long channelId = event.getChannelId().asLong();
-        final long messageId = event.getMessageId().asLong();
-        final long userId = event.getUserId().asLong();
-        final ReactionEmoji reactionEmoji = event.getEmoji();
-        final Optional<ReactionEmoji.Custom> optionalCustom =
-                reactionEmoji.asCustomEmoji();
-        final Optional<ReactionEmoji.Unicode> optionalUnicode =
-                reactionEmoji.asUnicodeEmoji();
+        final Optional<ReactionEmoji.Custom> optionalCustom = event.getEmoji().asCustomEmoji();
+        final Optional<ReactionEmoji.Unicode> optionalUnicode = event.getEmoji().asUnicodeEmoji();
+        final Predicate<RoleReaction> filter;
 
         if (optionalCustom.isPresent()) {
             final ReactionEmoji.Custom custom = optionalCustom.get();
-            log.info("User {} is removing {} ({}) reaction to #{}: {}",
-                    userId,
-                    custom.getName(),
-                    custom.getId(),
-                    channelId,
-                    messageId);
+
+            filter = reaction -> ((reaction.getMessageID().equals(event.getMessageId()))
+                    && (reaction.getChannelID().equals(event.getChannelId()))
+                    && (reaction.getReactionEmojiName().equals(custom.getName())));
         } else if (optionalUnicode.isPresent()) {
             final ReactionEmoji.Unicode unicode = optionalUnicode.get();
-            log.info("User {} is removing {} reacting to #{}: {}",
-                    userId,
-                    unicode.getRaw(),
-                    channelId,
-                    messageId);
+
+            filter = reaction -> ((reaction.getMessageID().equals(event.getMessageId()))
+                    && (reaction.getChannelID().equals(event.getChannelId()))
+                    && (reaction.getReactionEmojiName().equals(unicode.getRaw())));
+        } else {
+            log.error("Failed to get reaction that user removed from message."
+                        + "\nUser: {}\nMessage: {}\nEmoji: {}",
+                    event.getUserId(),
+                    event.getMessageId(),
+                    event.getEmoji());
+            return;
+        }
+
+        final Optional<RoleReaction> optionalRoleReaction = roleReactions.stream()
+                .filter(filter)
+                .findFirst();
+
+        if (optionalRoleReaction.isPresent()) {
+            final RoleReaction roleReaction = optionalRoleReaction.get();
+
+            event.getMessage().subscribe(message ->
+                    message.getAuthorAsMember().subscribe(member -> {
+                        final String reason = String.format(
+                                "User %s reacted to message %d with %s to remove role %s.",
+                                member.getDisplayName(),
+                                message.getId().asLong(),
+                                roleReaction.getReactionEmoji(),
+                                roleReaction.getRoleID());
+
+                        log.info(reason);
+                        member.removeRole(roleReaction.getRoleID(), reason);
+                    }));
         }
     }
 
@@ -209,9 +284,67 @@ public class DiscordAPI {
                 .subscribe(this::messageCreateListener);
         discordClient.getEventDispatcher().on(ReactionAddEvent.class)
                 .subscribe(this::reactionAddListener);
-        discordClient.getEventDispatcher().on(ReactionRemoveAllEvent.class)
-                .subscribe(this::reactionRemoveAllListener);
         discordClient.getEventDispatcher().on(ReactionRemoveEvent.class)
                 .subscribe(this::reactionRemoveListener);
+    }
+
+    /**
+     * Verify that users who have added a role reaction have the role added.
+     *
+     * @param guild Guild containing message.
+     * @param reactors Users who have reacted with the reaction to the message.
+     * @param message Message containing reaction.
+     * @param verifiedReaction Role assignment reaction.
+     */
+    private void verifyAddRoles(@NonNull final Guild guild,
+                                @NonNull final List<User> reactors,
+                                @NonNull final Message message,
+                                @NonNull final RoleReaction verifiedReaction) {
+        for (final User reactor : reactors) {
+            reactor.asMember(guild.getId()).subscribe(member -> {
+                if (!member.getRoleIds().contains(verifiedReaction.getRoleID())) {
+                    final String addRoleReason = String.format(
+                            "User %s reacted to message %d with reaction %s but did not have role.",
+                            member.getDisplayName(),
+                            message.getId().asLong(),
+                            verifiedReaction.getReactionEmoji());
+
+                    log.info(addRoleReason);
+                    member.addRole(verifiedReaction.getRoleID(), addRoleReason).subscribe();
+                }
+            });
+        }
+    }
+
+    /**
+     * Verify that users who have not added a role reaction don't have the role.
+     *
+     * @param members Members in the guild.
+     * @param reactors Users who have reacted with the reaction to the message.
+     * @param message Message containing reaction.
+     * @param verifiedReaction Role assignment reaction.
+     */
+    private void verifyRemoveRoles(@NonNull final List<Member> members,
+                                   @NonNull final List<User> reactors,
+                                   @NonNull final Message message,
+                                   @NonNull final RoleReaction verifiedReaction) {
+        for (final Member member : members) {
+            if (member.getRoleIds().contains(verifiedReaction.getRoleID())) {
+                final Optional<User> optionalReactor = reactors.stream()
+                        .filter(user -> user.getId().equals(member.getId()))
+                        .findAny();
+
+                if (optionalReactor.isEmpty()) {
+                    final String removeRoleReason = String.format(
+                            "User %s had not reacted to message %d with reaction %s but had role.",
+                            member.getDisplayName(),
+                            message.getId().asLong(),
+                            verifiedReaction.getReactionEmoji());
+
+                    log.info(removeRoleReason);
+                    member.removeRole(verifiedReaction.getRoleID(), removeRoleReason).subscribe();
+                }
+            }
+        }
     }
 }

@@ -46,15 +46,12 @@ public class BotConfiguration {
     /**
      * Discord bot token.
      */
+    @JsonProperty("discordToken")
     @NonNull
     private final String discordToken;
-
     /**
-     * Constructor.
-     *
-     * @param discordToken Discord bot token.
+     * Interval (in minutes) between Discord role verification checks.
      */
-    public BotConfiguration(@JsonProperty("discordToken") @NonNull final String discordToken) {
-        this.discordToken = discordToken;
-    }
+    @JsonProperty("roleVerificationInterval")
+    private final long roleVerificationInterval;
 }
