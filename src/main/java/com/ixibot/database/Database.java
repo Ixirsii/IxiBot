@@ -58,7 +58,7 @@ public class Database {
     /**
      * URL/path to SQLite database file.
      */
-    private static final String DATABASE_FILE_PATH = "jdbc:sqlite:sqlite.db";
+    private static final String CONNECTION_URL = "jdbc:sqlite:sqlite.db";
     /**
      * Database version number.
      */
@@ -79,20 +79,21 @@ public class Database {
     public Database() throws ClassNotFoundException, SQLException {
         Class.forName("org.sqlite.JDBC");
 
-        this.connection = DriverManager.getConnection(DATABASE_FILE_PATH);
+        this.connection = DriverManager.getConnection(CONNECTION_URL);
 
-        final Statement statement = connection.createStatement();
-        final ResultSet versionResult = statement.executeQuery("PRAGMA schema.user_version");
-        final long databaseVersion;
+        try (Statement statement = connection.createStatement();
+                ResultSet versionResult = statement.executeQuery("PRAGMA schema.user_version")) {
+            final long databaseVersion;
 
-        if (versionResult.next()) {
-            databaseVersion = versionResult.getLong(1);
-        } else {
-            databaseVersion = 0;
-        }
+            if (versionResult.next()) {
+                databaseVersion = versionResult.getLong(1);
+            } else {
+                databaseVersion = 0;
+            }
 
-        if (databaseVersion < DATABASE_VERSION) {
-            updateDatabase();
+            if (databaseVersion < DATABASE_VERSION) {
+                updateDatabase();
+            }
         }
     }
 
@@ -102,39 +103,34 @@ public class Database {
      * @param roleReaction Role assignment reaction to persist to the database.
      * @return {@code true} if the first result is a {@code ResultSet} object;
      *      {@code false} if the first result is an update count or there is no result.
+     * @throws SQLException if a database access error occurs.
      */
-    public boolean addRoleReaction(@NonNull final RoleReaction roleReaction) {
+    public boolean addRoleReaction(@NonNull final RoleReaction roleReaction) throws SQLException {
         log.trace("Adding role reaction to database: {}", roleReaction);
 
-        try {
-            final PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO "
-                    + RoleReactionContract.TABLE_NAME
-                    /* Columns */
-                    + "(" + RoleReactionContract.ADD_VERIFIED + ", "
-                    + RoleReactionContract.CHANNEL_ID + ", "
-                    + RoleReactionContract.GUILD_ID + ", "
-                    + RoleReactionContract.MESSAGE_ID + ", "
-                    + RoleReactionContract.REACTION_ID + ", "
-                    + RoleReactionContract.REACTION_NAME + ", "
-                    + RoleReactionContract.REMOVE_VERIFIED + ", "
-                    + RoleReactionContract.ROLE_ID
-                    + ") VALUES ("
-                    + roleReaction.isAddVerified() + ", "
-                    + roleReaction.getChannelID() + ", "
-                    + roleReaction.getGuildID() + ", "
-                    + roleReaction.getMessageID() + ", "
-                    + roleReaction.getBoxedReactionEmojiID() + ", "
-                    + roleReaction.getReactionEmojiName() + ", "
-                    + roleReaction.isRemoveVerified() + ", "
-                    + roleReaction.getRoleID()
-                    + ")");
+        final String insertStatement = String.format(
+                "INSERT INTO %s(%s, %s, %s, %s, %s, %s, %s, %s)"
+                        + " VALUES (%s, %s, %s, %s, %d, %s, %s, %s)",
+                RoleReactionContract.TABLE_NAME,
+                RoleReactionContract.ADD_VERIFIED,
+                RoleReactionContract.CHANNEL_ID,
+                RoleReactionContract.GUILD_ID,
+                RoleReactionContract.MESSAGE_ID,
+                RoleReactionContract.REACTION_ID,
+                RoleReactionContract.REACTION_NAME,
+                RoleReactionContract.REMOVE_VERIFIED,
+                RoleReactionContract.ROLE_ID,
+                roleReaction.isAddVerified(),
+                roleReaction.getChannelID(),
+                roleReaction.getGuildID(),
+                roleReaction.getMessageID(),
+                roleReaction.getBoxedReactionEmojiID(),
+                roleReaction.getReactionEmojiName(),
+                roleReaction.isRemoveVerified(),
+                roleReaction.getRoleID());
 
-            return insertStatement.execute();
-        } catch (final SQLException sqle) {
-            log.error("Caught exception trying to insert reaction {} into database",
-                    roleReaction,
-                    sqle);
-            return false;
+        try (PreparedStatement statement = connection.prepareStatement(insertStatement)) {
+            return statement.execute();
         }
     }
 
@@ -157,41 +153,32 @@ public class Database {
     private void createTable() throws SQLException {
         log.trace("Creating role assignment reactions table");
 
-        final PreparedStatement createStatement = connection.prepareStatement(
-                RoleReactionContract.CREATE_TABLE_STATEMENT);
-
-        createStatement.execute();
+        try (PreparedStatement createStatement = connection.prepareStatement(
+                RoleReactionContract.CREATE_TABLE)) {
+            createStatement.execute();
+        }
     }
 
     /**
      * Delete a role assignment reaction from the database.
      *
-     * @param roleReaction Role assignment reaction to delete from the database.
+     * @param reaction Role assignment reaction to delete from the database.
      * @return {@code true} if the first result is a {@code ResultSet} object;
      *      {@code false} if the first result is an update count or there is no result.
+     * @throws SQLException if a database access error occurs.
      */
-    public boolean deleteRoleReaction(@NonNull final RoleReaction roleReaction) {
-        log.trace("Deleting role reaction from database: {}", roleReaction);
+    public boolean deleteRoleReaction(@NonNull final RoleReaction reaction) throws SQLException {
+        log.trace("Deleting role reaction from database: {}", reaction);
 
-        try {
-            final PreparedStatement deleteStatement = connection.prepareStatement("DELETE FROM "
-                    + RoleReactionContract.TABLE_NAME
-                    + " WHERE "
-                    + RoleReactionContract.MESSAGE_ID
-                    + " = "
-                    + roleReaction.getMessageID().asLong()
-                    + " AND "
-                    + RoleReactionContract.REACTION_NAME
-                    + " = "
-                    + roleReaction.getReactionEmojiName()
-                    + ")");
+        final String deleteStatement = String.format("DELETE FROM %s WHERE %s = %d AND %s = %s",
+                RoleReactionContract.TABLE_NAME,
+                RoleReactionContract.MESSAGE_ID,
+                reaction.getMessageID().asLong(),
+                RoleReactionContract.REACTION_NAME,
+                reaction.getReactionEmojiName());
 
-            return deleteStatement.execute();
-        } catch (final SQLException sqle) {
-            log.error("Caught exception trying to delete reaction {} from database",
-                    roleReaction,
-                    sqle);
-            return false;
+        try (PreparedStatement statement = connection.prepareStatement(deleteStatement)) {
+            return statement.execute();
         }
     }
 
@@ -203,10 +190,12 @@ public class Database {
     private void dropTable() throws SQLException {
         log.trace("Dropping role assignment reactions table");
 
-        final PreparedStatement dropStatement = connection.prepareStatement(
-                "DROP TABLE IF EXISTS " + RoleReactionContract.TABLE_NAME);
+        final String dropStatement = String.format("DROP TABLE IF EXISTS %s",
+                RoleReactionContract.TABLE_NAME);
 
-        dropStatement.execute();
+        try (PreparedStatement statement = connection.prepareStatement(dropStatement)) {
+            statement.execute();
+        }
     }
 
     /**
@@ -219,28 +208,31 @@ public class Database {
         log.trace("Getting all role assignment reactions");
 
         final List<RoleReaction> roleReactions = new ArrayList<>();
-        final PreparedStatement selectStatement = connection.prepareStatement(
-                "SELECT * FROM " + RoleReactionContract.TABLE_NAME);
+        final String selectStatement = String.format("SELECT * FROM %s",
+                RoleReactionContract.TABLE_NAME);
 
-        final ResultSet resultSet = selectStatement.executeQuery();
-        while (resultSet.next()) {
-            final boolean animated = resultSet.getBoolean(RoleReactionContract.ANIMATED);
-            final long reactionId = resultSet.getLong(RoleReactionContract.REACTION_ID);
-            final String reactionName = resultSet.getString(RoleReactionContract.REACTION_NAME);
-            final ReactionEmoji reactionEmoji = ReactionEmoji.of(
-                    reactionId,
-                    reactionName,
-                    animated);
+        try (PreparedStatement statement = connection.prepareStatement(selectStatement);
+                ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                final boolean animated = resultSet.getBoolean(RoleReactionContract.ANIMATED);
+                final long reactionId = resultSet.getLong(RoleReactionContract.REACTION_ID);
+                final String reactionName = resultSet.getString(RoleReactionContract.REACTION_NAME);
+                final ReactionEmoji reactionEmoji = ReactionEmoji.of(
+                        reactionId,
+                        reactionName,
+                        animated);
+                @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+                final RoleReaction roleReaction = new RoleReaction(
+                        resultSet.getBoolean(RoleReactionContract.ADD_VERIFIED),
+                        Snowflake.of(resultSet.getLong(RoleReactionContract.CHANNEL_ID)),
+                        Snowflake.of(resultSet.getLong(RoleReactionContract.GUILD_ID)),
+                        Snowflake.of(resultSet.getLong(RoleReactionContract.MESSAGE_ID)),
+                        reactionEmoji,
+                        resultSet.getBoolean(RoleReactionContract.REMOVE_VERIFIED),
+                        Snowflake.of(resultSet.getLong(RoleReactionContract.ROLE_ID)));
 
-            final RoleReaction roleReaction = new RoleReaction(
-                    resultSet.getBoolean(RoleReactionContract.ADD_VERIFIED),
-                    Snowflake.of(resultSet.getLong(RoleReactionContract.CHANNEL_ID)),
-                    Snowflake.of(resultSet.getLong(RoleReactionContract.GUILD_ID)),
-                    Snowflake.of(resultSet.getLong(RoleReactionContract.MESSAGE_ID)),
-                    reactionEmoji,
-                    resultSet.getBoolean(RoleReactionContract.REMOVE_VERIFIED),
-                    Snowflake.of(resultSet.getLong(RoleReactionContract.ROLE_ID)));
-            roleReactions.add(roleReaction);
+                roleReactions.add(roleReaction);
+            }
         }
 
         return roleReactions;

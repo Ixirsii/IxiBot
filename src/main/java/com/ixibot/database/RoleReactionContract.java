@@ -37,52 +37,53 @@ package com.ixibot.database;
  *
  * @author Ryan Porterfield
  */
+@SuppressWarnings("PMD.DefaultPackage")
 final class RoleReactionContract {
     /**
      * Add verified key.
      */
-    static final String ADD_VERIFIED = "add_verified";
+    /* default */ static final String ADD_VERIFIED = "add_verified";
     /**
      * Reaction emoji is animated key.
      */
-    static final String ANIMATED = "animated";
+    /* default */ static final String ANIMATED = "animated";
     /**
      * Channel ID key.
      */
-    static final String CHANNEL_ID = "channel_id";
+    /* default */ static final String CHANNEL_ID = "channel_id";
     /**
      * Guild ID key.
      */
-    static final String GUILD_ID = "guild_id";
+    /* default */ static final String GUILD_ID = "guild_id";
     /**
      * Message ID key.
      */
-    static final String MESSAGE_ID = "message_id";
+    /* default */ static final String MESSAGE_ID = "message_id";
     /**
      * Reaction emoji ID key.
      */
-    static final String REACTION_ID = "reaction_id";
+    /* default */ static final String REACTION_ID = "reaction_id";
     /**
      * Reaction emoji name key.
      */
-    static final String REACTION_NAME = "reaction_name";
+    /* default */ static final String REACTION_NAME = "reaction_name";
     /**
      * Remove verified key.
      */
-    static final String REMOVE_VERIFIED = "remove_verified";
+    /* default */ static final String REMOVE_VERIFIED = "remove_verified";
     /**
      * Guild role ID key.
      */
-    static final String ROLE_ID = "role_id";
+    /* default */ static final String ROLE_ID = "role_id";
     /**
      * Table name.
      */
-    static final String TABLE_NAME = "role_reactions";
+    /* default */ static final String TABLE_NAME = "role_reactions";
 
     /**
      * SQL statement for creating the table.
      */
-    static final String CREATE_TABLE_STATEMENT = String.format(
+    /* default */ static final String CREATE_TABLE = String.format(
             "CREATE TABLE IF NOT EXISTS %s (%s INTEGER NOT NULL, %s INTEGER NOT NULL,"
                     + " %s INTEGER NOT NULL, %s INTEGER, %s INTEGER NOT NULL, %s INTEGER NOT NULL,"
                     + " %s TEXT NOT NULL, %s INTEGER NOT NULL, %s INTEGER NOT NULL, "

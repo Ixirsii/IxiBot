@@ -115,11 +115,11 @@ public class DiscordAPI {
      * Check all role assignment reactions and update roles for all members accordingly.
      */
     public void updateAllRoles() {
-        final Map<Snowflake, List<RoleReaction>> verifiedReactionsMap = roleReactions.stream()
+        final Map<Snowflake, List<RoleReaction>> reactionsMap = roleReactions.stream()
                 .filter(RoleReaction::isVerified)
                 .collect(Collectors.groupingBy(RoleReaction::getGuildID));
 
-        verifiedReactionsMap.forEach(
+        reactionsMap.forEach(
                 (guildID, verifiedReactions) -> discordClient.getGuildById(guildID)
                         .subscribe(guild -> updateGuildRoles(guild, verifiedReactions)));
     }
@@ -201,12 +201,12 @@ public class DiscordAPI {
             return;
         }
 
-        final Optional<RoleReaction> optionalRoleReaction = roleReactions.stream()
+        final Optional<RoleReaction> reactionOptional = roleReactions.stream()
                 .filter(filter)
                 .findFirst();
 
-        if (optionalRoleReaction.isPresent()) {
-            final RoleReaction roleReaction = optionalRoleReaction.get();
+        if (reactionOptional.isPresent()) {
+            final RoleReaction roleReaction = reactionOptional.get();
 
             event.getMessage().subscribe(message ->
                     message.getAuthorAsMember().subscribe(member -> {
@@ -254,12 +254,12 @@ public class DiscordAPI {
             return;
         }
 
-        final Optional<RoleReaction> optionalRoleReaction = roleReactions.stream()
+        final Optional<RoleReaction> reactionOptional = roleReactions.stream()
                 .filter(filter)
                 .findFirst();
 
-        if (optionalRoleReaction.isPresent()) {
-            final RoleReaction roleReaction = optionalRoleReaction.get();
+        if (reactionOptional.isPresent()) {
+            final RoleReaction roleReaction = reactionOptional.get();
 
             event.getMessage().subscribe(message ->
                     message.getAuthorAsMember().subscribe(member -> {
@@ -334,7 +334,7 @@ public class DiscordAPI {
                         .filter(user -> user.getId().equals(member.getId()))
                         .findAny();
 
-                if (optionalReactor.isEmpty()) {
+                if (!optionalReactor.isPresent()) {
                     final String removeRoleReason = String.format(
                             "User %s had not reacted to message %d with reaction %s but had role.",
                             member.getDisplayName(),

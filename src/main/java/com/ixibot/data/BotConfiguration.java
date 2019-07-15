@@ -52,6 +52,6 @@ public class BotConfiguration {
     /**
      * Interval (in minutes) between Discord role verification checks.
      */
-    @JsonProperty("roleVerificationInterval")
-    private final long roleVerificationInterval;
+    @JsonProperty("roleVerifyDelay")
+    private final long roleVerifyDelay;
 }

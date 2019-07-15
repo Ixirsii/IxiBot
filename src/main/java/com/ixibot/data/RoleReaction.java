@@ -97,12 +97,15 @@ public class RoleReaction {
      */
     public Long getBoxedReactionEmojiID() {
         final Optional<ReactionEmoji.Custom> optionalCustom = reactionEmoji.asCustomEmoji();
+        final Long reactionEmojiID;
 
         if (optionalCustom.isPresent()) {
-            return optionalCustom.get().getId().asLong();
+            reactionEmojiID = optionalCustom.get().getId().asLong();
+        } else {
+            reactionEmojiID = null;
         }
 
-        return null;
+        return reactionEmojiID;
     }
 
     /**
@@ -113,14 +116,17 @@ public class RoleReaction {
     public String getReactionEmojiName() {
         final Optional<ReactionEmoji.Custom> optionalCustom = reactionEmoji.asCustomEmoji();
         final Optional<ReactionEmoji.Unicode> optionalUnicode = reactionEmoji.asUnicodeEmoji();
+        final String reactionName;
 
         if (optionalCustom.isPresent()) {
-            return optionalCustom.get().getName();
+            reactionName = optionalCustom.get().getName();
         } else if (optionalUnicode.isPresent()) {
-            return optionalUnicode.get().getRaw();
+            reactionName = optionalUnicode.get().getRaw();
         } else {
-            return "";
+            reactionName = "";
         }
+
+        return reactionName;
     }
 
     /**

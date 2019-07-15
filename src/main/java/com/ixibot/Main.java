@@ -63,14 +63,6 @@ public final class Main {
      * Command to stop execution.
      */
     private static final String QUIT_COMMAND = "quit";
-    /**
-     * Exit code for configuration errors.
-     */
-    private static final int STATUS_CODE_CONFIGURATION_ERROR = 1;
-    /**
-     * Exit code for database errors.
-     */
-    private static final int STATUS_CODE_DATABASE_ERROR = 2;
 
     /**
      * Program loop control.
@@ -91,7 +83,7 @@ public final class Main {
     public static void main(@NonNull final String[] args) {
         final BotConfiguration botConfiguration;
 
-        try (final InputStream configResource = Main.class.getResourceAsStream(CONFIG_RESOURCE)) {
+        try (InputStream configResource = Main.class.getResourceAsStream(CONFIG_RESOURCE)) {
             final ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory())
                     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                     .registerModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
@@ -99,29 +91,27 @@ public final class Main {
             botConfiguration = objectMapper.readValue(configResource, BotConfiguration.class);
         } catch (final IOException ioe) {
             log.error("Caught IOException trying to read bot configuration, exiting", ioe);
-            System.exit(STATUS_CODE_CONFIGURATION_ERROR);
+
             return;
         }
 
-        try (final IxiBot ixiBot = new IxiBot(botConfiguration)) {
+        try (IxiBot ixiBot = new IxiBot(botConfiguration)) {
             ixiBot.run();
             final Scanner scanner = new Scanner(System.in);
 
             do {
                 log.info("Type \"quit\" to exit");
-                final String s = scanner.nextLine();
-                log.info("Got user input: {}", s);
+                final String input = scanner.nextLine();
+                log.info("Got user input: {}", input);
 
-                if (QUIT_COMMAND.equals(s)) {
+                if (QUIT_COMMAND.equals(input)) {
                     isRunning = false;
                 }
             } while (isRunning);
         } catch (final ClassNotFoundException cnfe) {
             log.error("Caught ClassNotFoundException, exiting", cnfe);
-            System.exit(STATUS_CODE_DATABASE_ERROR);
         } catch (final SQLException sqle) {
             log.error("Caught SQLException, exiting", sqle);
-            System.exit(STATUS_CODE_DATABASE_ERROR);
         }
     }
 }

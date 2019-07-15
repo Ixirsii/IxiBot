@@ -54,6 +54,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class IxiBot implements AutoCloseable, Runnable {
     /**
+     * Minimum thread pool size.
+     */
+    private static final int THREAD_POOL_SIZE = 1;
+
+    /**
      * Bot configuration.
      */
     @NonNull
@@ -72,23 +77,23 @@ public class IxiBot implements AutoCloseable, Runnable {
      * Thread pool executor for scheduled async actions.
      */
     @NonNull
-    private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
+    private final ScheduledThreadPoolExecutor scheduler;
 
     /**
      * Constructor.
      *
      * @param botConfiguration Bot configuration parsed from user config file.
      * @throws ClassNotFoundException on failure to load JDBC driver.
-     * @throws SQLException if a database access error occurs.
+     * @throws SQLException           if a database access error occurs.
      */
-    IxiBot(@NonNull final BotConfiguration botConfiguration)
+    /* default */ IxiBot(@NonNull final BotConfiguration botConfiguration)
             throws ClassNotFoundException, SQLException {
         this.botConfiguration = botConfiguration;
         this.database = new Database();
         this.discordAPI = new DiscordAPI(botConfiguration.getDiscordToken(),
                 database.getAllRoleReactions());
-        this.scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(
-                1, Executors.defaultThreadFactory());
+        this.scheduler = new ScheduledThreadPoolExecutor(
+                THREAD_POOL_SIZE, Executors.defaultThreadFactory());
     }
 
     /**
@@ -98,7 +103,7 @@ public class IxiBot implements AutoCloseable, Runnable {
     public void close() {
         log.trace("Shutting down bot");
 
-        scheduledThreadPoolExecutor.shutdown();
+        scheduler.shutdown();
 
         try {
             database.close();
@@ -113,10 +118,10 @@ public class IxiBot implements AutoCloseable, Runnable {
      * Initialize bot before running.
      */
     private void init() {
-        scheduledThreadPoolExecutor.scheduleAtFixedRate(
+        scheduler.scheduleAtFixedRate(
                 discordAPI::updateAllRoles,
                 0,
-                botConfiguration.getRoleVerificationInterval(),
+                botConfiguration.getRoleVerifyDelay(),
                 TimeUnit.MINUTES);
     }
 
