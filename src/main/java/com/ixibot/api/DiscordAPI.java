@@ -41,7 +41,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.DiscordClientBuilder;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.event.domain.message.ReactionAddEvent;
 import discord4j.core.event.domain.message.ReactionRemoveEvent;
@@ -75,13 +74,12 @@ public class DiscordAPI {
     /**
      * Constructor.
      *
-     * @param discordToken Discord bot token.
+     * @param discordClient Discord4J client.
      * @param roleReactions Role assignment reactions.
      */
-    public DiscordAPI(@NonNull final String discordToken,
+    public DiscordAPI(@NonNull final DiscordClient discordClient,
                       @NonNull final List<RoleReaction> roleReactions) {
-        this.discordClient = new DiscordClientBuilder(discordToken)
-                .build();
+        this.discordClient = discordClient;
         this.roleReactions = roleReactions;
 
         registerDiscordListeners();

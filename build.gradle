@@ -26,12 +26,48 @@ dependencies {
     implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.9.9'
     implementation 'com.discord4j:discord4j-core:3.0.7'
     implementation 'org.xerial:sqlite-jdbc:3.7.2'
-    testImplementation('org.junit.jupiter:junit-jupiter:5.5.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.5.0'
+    testImplementation 'org.mockito:mockito-core:3.0.0'
 }
 
 checkstyle {
     toolVersion '8.8'
     ignoreFailures = false
+    sourceSets = [project.sourceSets.main]
+}
+
+jacoco {
+    toolVersion = "0.8.4"
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.5
+            }
+        }
+
+        rule {
+            enabled = false
+            element = 'CLASS'
+            includes = ['org.gradle.*']
+
+            limit {
+                counter = 'LINE'
+                value = 'TOTALCOUNT'
+                maximum = 0.3
+            }
+        }
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.enabled true
+    }
 }
 
 pmd {
@@ -39,10 +75,19 @@ pmd {
     ignoreFailures = false
     ruleSetFiles = files("config/pmd/ruleset.xml")
     ruleSets = []
+    sourceSets = [project.sourceSets.main]
 }
 
 spotbugs {
     toolVersion = '3.1.12'
+    sourceSets = [project.sourceSets.main]
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
 }
 
 tasks.withType(JavaCompile) {

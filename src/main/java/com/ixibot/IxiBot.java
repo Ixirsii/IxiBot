@@ -43,6 +43,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import discord4j.core.DiscordClient;
+import discord4j.core.DiscordClientBuilder;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
@@ -88,10 +90,12 @@ public class IxiBot implements AutoCloseable, Runnable {
      */
     /* default */ IxiBot(@NonNull final BotConfiguration botConfiguration)
             throws ClassNotFoundException, SQLException {
+        final DiscordClient discordClient = new DiscordClientBuilder(
+                botConfiguration.getDiscordToken())
+                .build();
         this.botConfiguration = botConfiguration;
         this.database = new Database();
-        this.discordAPI = new DiscordAPI(botConfiguration.getDiscordToken(),
-                database.getAllRoleReactions());
+        this.discordAPI = new DiscordAPI(discordClient, database.getAllRoleReactions());
         this.scheduler = new ScheduledThreadPoolExecutor(
                 THREAD_POOL_SIZE, Executors.defaultThreadFactory());
     }
