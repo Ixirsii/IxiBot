@@ -97,7 +97,7 @@ public final class Main {
 
         try (IxiBot ixiBot = new IxiBot(botConfiguration)) {
             ixiBot.run();
-            final Scanner scanner = new Scanner(System.in);
+            final Scanner scanner = new Scanner(System.in, "UTF-8");
 
             do {
                 log.info("Type \"quit\" to exit");
