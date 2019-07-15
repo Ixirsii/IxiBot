@@ -8,5 +8,7 @@ pipelines:
   default:
     - step:
         name: Build
+        caches:
+          - gradle
         script:
           - bash ./gradlew build
