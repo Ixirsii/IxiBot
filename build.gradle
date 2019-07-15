@@ -1,5 +1,6 @@
 plugins {
     id 'checkstyle'
+    id 'de.aaschmid.cpd' version '2.0'
     id 'idea'
     id 'jacoco'
     id 'java'
@@ -28,12 +29,49 @@ dependencies {
     testImplementation('org.junit.jupiter:junit-jupiter:5.5.0')
 }
 
+checkstyle {
+    toolVersion '8.8'
+    ignoreFailures = false
+}
+
+cpd {
+    language = 'java'
+    toolVersion = '6.0.0'
+    minimumTokenCount = 100 // approximately 5-10 lines
+}
+
+cpdCheck {
+    reports {
+        text.enabled = false
+        xml.enabled = true
+    }
+    ignoreAnnotations = true
+    source = sourceSets.main.allJava
+}
+
+pmd {
+    toolVersion = '6.7.0'
+    ignoreFailures = false
+    ruleSetFiles = files("config/pmd/ruleset.xml")
+    ruleSets = []
+}
+
 tasks.withType(JavaCompile) {
     options.compilerArgs += ['-parameters']
     options.encoding = 'UTF-8'
     options.fork = true
 }
 
-checkstyle {
-    toolVersion '8.8'
+tasks.withType(Checkstyle) {
+    reports {
+        xml.enabled false
+        html.enabled true
+    }
+}
+
+tasks.withType(Pmd) {
+    reports {
+        xml.enabled false
+        html.enabled true
+    }
 }
