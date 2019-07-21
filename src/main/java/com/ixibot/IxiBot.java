@@ -33,19 +33,17 @@
 package com.ixibot;
 
 import com.ixibot.api.DiscordAPI;
-import com.ixibot.data.BotConfiguration;
 import com.ixibot.data.RoleReaction;
 import com.ixibot.database.Database;
+import com.ixibot.event.RoleReactionEvent;
 
 import java.sql.SQLException;
-import java.util.List;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import discord4j.core.DiscordClient;
-import discord4j.core.DiscordClientBuilder;
+import com.google.common.eventbus.Subscribe;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -53,52 +51,28 @@ import lombok.extern.slf4j.Slf4j;
  *
  * @author Ryan Porterfield
  */
+@RequiredArgsConstructor
 @Slf4j
 public class IxiBot implements AutoCloseable, Runnable {
-    /**
-     * Minimum thread pool size.
-     */
-    private static final int THREAD_POOL_SIZE = 1;
-
-    /**
-     * Bot configuration.
-     */
-    @NonNull
-    private final BotConfiguration botConfiguration;
-    /**
-     * Discord API interface.
-     */
-    @NonNull
-    private final DiscordAPI discordAPI;
     /**
      * Database interface.
      */
     @NonNull
     private final Database database;
     /**
+     * Discord API interface.
+     */
+    @NonNull
+    private final DiscordAPI discordAPI;
+    /**
+     * Interval (in minutes) between Discord role verification checks.
+     */
+    private final long roleVerifyDelay;
+    /**
      * Thread pool executor for scheduled async actions.
      */
     @NonNull
     private final ScheduledThreadPoolExecutor scheduler;
-
-    /**
-     * Constructor.
-     *
-     * @param botConfiguration Bot configuration parsed from user config file.
-     * @throws ClassNotFoundException on failure to load JDBC driver.
-     * @throws SQLException           if a database access error occurs.
-     */
-    /* default */ IxiBot(@NonNull final BotConfiguration botConfiguration)
-            throws ClassNotFoundException, SQLException {
-        final DiscordClient discordClient = new DiscordClientBuilder(
-                botConfiguration.getDiscordToken())
-                .build();
-        this.botConfiguration = botConfiguration;
-        this.database = new Database();
-        this.discordAPI = new DiscordAPI(discordClient, database.getAllRoleReactions());
-        this.scheduler = new ScheduledThreadPoolExecutor(
-                THREAD_POOL_SIZE, Executors.defaultThreadFactory());
-    }
 
     /**
      * {@inheritDoc}
@@ -119,14 +93,25 @@ public class IxiBot implements AutoCloseable, Runnable {
     }
 
     /**
-     * Initialize bot before running.
+     * RoleReactionEvent subscriber.
+     *
+     * @param event Event published to event bus.
      */
-    private void init() {
-        scheduler.scheduleAtFixedRate(
-                discordAPI::updateAllRoles,
-                0,
-                botConfiguration.getRoleVerifyDelay(),
-                TimeUnit.MINUTES);
+    @Subscribe
+    public void onRoleReactionEvent(@NonNull final RoleReactionEvent event) {
+        final RoleReaction roleReaction = event.getRoleReaction();
+
+        try {
+            if (event.isCreate()) {
+                database.addRoleReaction(roleReaction);
+                discordAPI.addRoleReaction(roleReaction);
+            } else {
+                database.deleteRoleReaction(roleReaction);
+                discordAPI.removeRoleReaction(roleReaction);
+            }
+        } catch (final SQLException sqle) {
+            log.error("Failed to process role reaction event {}", event, sqle);
+        }
     }
 
     /**
@@ -134,13 +119,10 @@ public class IxiBot implements AutoCloseable, Runnable {
      */
     @Override
     public void run() {
-        init();
-
-        try {
-            final List<RoleReaction> roleReactions = database.getAllRoleReactions();
-            log.info("Got role reactions from database {}", roleReactions);
-        } catch (final SQLException sqle) {
-            log.error("Caught SQLException attempting to get roll reactions from database", sqle);
-        }
+        scheduler.scheduleAtFixedRate(
+                discordAPI::updateAllRoles,
+                0,
+                roleVerifyDelay,
+                TimeUnit.MINUTES);
     }
 }

@@ -53,6 +53,10 @@ import discord4j.core.object.util.Snowflake;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
+/*
+ * TODO: Refactor this to only wrap DiscordClient and move listeners into a new Listener class.
+ */
+
 /**
  * Discord4J wrapper.
  *
@@ -87,6 +91,15 @@ public class DiscordAPI {
     }
 
     /**
+     * Add a role assignment reaction to the list of reactions we listen for.
+     *
+     * @param roleReaction New role assignment reaction to listen for.
+     */
+    public void addRoleReaction(@NonNull final RoleReaction roleReaction) {
+        roleReactions.add(roleReaction);
+    }
+
+    /**
      * Stop the bot and clean up resources.
      */
     public void logout() {
@@ -107,6 +120,15 @@ public class DiscordAPI {
                 message.getChannelId().asLong(),
                 optionalMember.map(Member::getDisplayName).orElse(""),
                 message.getContent().orElse(""));
+    }
+
+    /**
+     * Remove a role assignment reaction from the list of reactions we listen for.
+     *
+     * @param roleReaction Role assignment reaction to no longer listen for.
+     */
+    public void removeRoleReaction(@NonNull final RoleReaction roleReaction) {
+        roleReactions.remove(roleReaction);
     }
 
     /**
