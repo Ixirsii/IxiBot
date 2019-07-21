@@ -4,7 +4,7 @@ plugins {
     id 'jacoco'
     id 'java'
     id 'pmd'
-    id "com.github.spotbugs" version "2.0.0"
+    id 'com.github.spotbugs' version '2.0.0'
 }
 
 group 'com.ixibot'
@@ -37,7 +37,7 @@ checkstyle {
 }
 
 jacoco {
-    toolVersion = "0.8.4"
+    toolVersion = '0.8.4'
 }
 
 jacocoTestCoverageVerification {
@@ -63,17 +63,24 @@ jacocoTestCoverageVerification {
 }
 
 jacocoTestReport {
+    afterEvaluate {
+        getClassDirectories().setFrom(
+                files(classDirectories.files.collect {
+                    fileTree(dir: it, exclude: 'com/ixibot/api/**')
+                })
+        )
+    }
     reports {
         xml.enabled false
         csv.enabled false
-        html.enabled true
+        html.destination file("${buildDir}/jacoco")
     }
 }
 
 pmd {
     toolVersion = '6.7.0'
     ignoreFailures = false
-    ruleSetFiles = files("config/pmd/ruleset.xml")
+    ruleSetFiles = files('config/pmd/ruleset.xml')
     ruleSets = []
     sourceSets = [project.sourceSets.main]
 }
@@ -84,9 +91,12 @@ spotbugs {
 }
 
 test {
+    jacoco {
+        enabled = true
+    }
     useJUnitPlatform()
     testLogging {
-        events "passed", "skipped", "failed"
+        events 'passed', 'skipped', 'failed'
     }
 }
 
