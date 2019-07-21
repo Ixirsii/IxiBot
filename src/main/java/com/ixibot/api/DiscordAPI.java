@@ -33,13 +33,13 @@
 package com.ixibot.api;
 
 import com.ixibot.data.RoleReaction;
+import com.ixibot.event.DiscordReactionEvent;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
+import com.google.common.eventbus.EventBus;
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.event.domain.message.ReactionAddEvent;
@@ -48,7 +48,6 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -70,33 +69,24 @@ public class DiscordAPI {
     @NonNull
     private final DiscordClient discordClient;
     /**
-     * Role assignment reactions.
+     * Event bus to publish events to.
      */
     @NonNull
-    private final List<RoleReaction> roleReactions;
+    private final EventBus eventBus;
 
     /**
      * Constructor.
      *
      * @param discordClient Discord4J client.
-     * @param roleReactions Role assignment reactions.
+     * @param eventBus Event bus to publish events to.
      */
     public DiscordAPI(@NonNull final DiscordClient discordClient,
-                      @NonNull final List<RoleReaction> roleReactions) {
+                      @NonNull final EventBus eventBus) {
         this.discordClient = discordClient;
-        this.roleReactions = roleReactions;
+        this.eventBus = eventBus;
 
         registerDiscordListeners();
         discordClient.login().subscribe();
-    }
-
-    /**
-     * Add a role assignment reaction to the list of reactions we listen for.
-     *
-     * @param roleReaction New role assignment reaction to listen for.
-     */
-    public void addRoleReaction(@NonNull final RoleReaction roleReaction) {
-        roleReactions.add(roleReaction);
     }
 
     /**
@@ -123,41 +113,72 @@ public class DiscordAPI {
     }
 
     /**
-     * Remove a role assignment reaction from the list of reactions we listen for.
+     * ReactionAddEvent listener.
      *
-     * @param roleReaction Role assignment reaction to no longer listen for.
+     * @param event Event to handle.
      */
-    public void removeRoleReaction(@NonNull final RoleReaction roleReaction) {
-        roleReactions.remove(roleReaction);
+    private void reactionAddListener(@NonNull final ReactionAddEvent event) {
+        final DiscordReactionEvent discordReactionEvent = new DiscordReactionEvent(
+                true,
+                event.getChannelId(),
+                event.getMessage(),
+                event.getMessageId(),
+                event.getEmoji(),
+                event.getUserId());
+
+        eventBus.post(discordReactionEvent);
+    }
+
+    /**
+     * ReactionRemoveEvent listener.
+     *
+     * @param event Event to handle.
+     */
+    private void reactionRemoveListener(@NonNull final ReactionRemoveEvent event) {
+        final DiscordReactionEvent discordReactionEvent = new DiscordReactionEvent(
+                false,
+                event.getChannelId(),
+                event.getMessage(),
+                event.getMessageId(),
+                event.getEmoji(),
+                event.getUserId());
+
+        eventBus.post(discordReactionEvent);
+    }
+
+    /**
+     * Register Discord event listeners.
+     */
+    private void registerDiscordListeners() {
+        discordClient.getEventDispatcher().on(MessageCreateEvent.class)
+                .subscribe(this::messageCreateListener);
+        discordClient.getEventDispatcher().on(ReactionAddEvent.class)
+                .subscribe(this::reactionAddListener);
+        discordClient.getEventDispatcher().on(ReactionRemoveEvent.class)
+                .subscribe(this::reactionRemoveListener);
     }
 
     /**
      * Check all role assignment reactions and update roles for all members accordingly.
-     */
-    public void updateAllRoles() {
-        final Map<Snowflake, List<RoleReaction>> reactionsMap = roleReactions.stream()
-                .filter(RoleReaction::isVerified)
-                .collect(Collectors.groupingBy(RoleReaction::getGuildID));
-
-        reactionsMap.forEach(
-                (guildID, verifiedReactions) -> discordClient.getGuildById(guildID)
-                        .subscribe(guild -> updateGuildRoles(guild, verifiedReactions)));
-    }
-
-    /**
-     * Verify all role assignments for a guild.
      *
-     * @param guild Guild to verify roles in.
-     * @param verifiedReactions List of verified reactions for the guild.
+     * @param reactionsMap Map of guild ID to list of role reactions in that guild.
      */
-    private void updateGuildRoles(@NonNull final Guild guild,
-                                  @NonNull final List<RoleReaction> verifiedReactions) {
-        final List<Member> members = guild.getMembers().collectList().block();
+    public void updateAllRoles(@NonNull final Map<Snowflake, List<RoleReaction>> reactionsMap) {
+        reactionsMap.forEach((guildID, verifiedReactions) -> discordClient.getGuildById(guildID)
+                .subscribe(guild -> {
+                    final List<Member> members = guild.getMembers().collectList().block();
 
-        for (final RoleReaction reaction : verifiedReactions) {
-            discordClient.getMessageById(reaction.getChannelID(), reaction.getMessageID())
-                    .subscribe(message -> updateReactionRoles(guild, members, message, reaction));
-        }
+                    for (final RoleReaction reaction : verifiedReactions) {
+                        discordClient.getMessageById(
+                                reaction.getChannelID(),
+                                reaction.getMessageID())
+                                .subscribe(message -> updateReactionRoles(
+                                        guild,
+                                        members,
+                                        message,
+                                        reaction));
+                    }
+                }));
     }
 
     /**
@@ -188,124 +209,6 @@ public class DiscordAPI {
         if (verifiedReaction.isRemoveVerified()) {
             verifyRemoveRoles(members, reactors, message, verifiedReaction);
         }
-    }
-
-    /**
-     * ReactionAddEvent listener.
-     *
-     * @param event Event to handle.
-     */
-    private void reactionAddListener(@NonNull final ReactionAddEvent event) {
-        final Optional<ReactionEmoji.Custom> optionalCustom = event.getEmoji().asCustomEmoji();
-        final Optional<ReactionEmoji.Unicode> optionalUnicode = event.getEmoji().asUnicodeEmoji();
-        final Predicate<RoleReaction> filter;
-
-        if (optionalCustom.isPresent()) {
-            final ReactionEmoji.Custom custom = optionalCustom.get();
-
-            filter = reaction -> ((reaction.getMessageID().equals(event.getMessageId()))
-                    && (reaction.getChannelID().equals(event.getChannelId()))
-                    && (reaction.getReactionEmojiName().equals(custom.getName())));
-        } else if (optionalUnicode.isPresent()) {
-            final ReactionEmoji.Unicode unicode = optionalUnicode.get();
-
-            filter = reaction -> ((reaction.getMessageID().equals(event.getMessageId()))
-                    && (reaction.getChannelID().equals(event.getChannelId()))
-                    && (reaction.getReactionEmojiName().equals(unicode.getRaw())));
-        } else {
-            log.error("Failed to get reaction that user added to message."
-                            + "\nUser: {}\nMessage: {}\nEmoji: {}",
-                    event.getUserId(),
-                    event.getMessageId(),
-                    event.getEmoji());
-            return;
-        }
-
-        final Optional<RoleReaction> reactionOptional = roleReactions.stream()
-                .filter(filter)
-                .findFirst();
-
-        if (reactionOptional.isPresent()) {
-            final RoleReaction roleReaction = reactionOptional.get();
-
-            event.getMessage().subscribe(message ->
-                    message.getAuthorAsMember().subscribe(member -> {
-                        final String reason = String.format(
-                                "User %s reacted to message %d with %s to get role %s.",
-                                member.getDisplayName(),
-                                message.getId().asLong(),
-                                roleReaction.getReactionEmoji(),
-                                roleReaction.getRoleID());
-
-                        log.info(reason);
-                        member.addRole(roleReaction.getRoleID(), reason);
-                    }));
-        }
-    }
-
-    /**
-     * ReactionRemoveEvent listener.
-     *
-     * @param event Event to handle.
-     */
-    private void reactionRemoveListener(@NonNull final ReactionRemoveEvent event) {
-        final Optional<ReactionEmoji.Custom> optionalCustom = event.getEmoji().asCustomEmoji();
-        final Optional<ReactionEmoji.Unicode> optionalUnicode = event.getEmoji().asUnicodeEmoji();
-        final Predicate<RoleReaction> filter;
-
-        if (optionalCustom.isPresent()) {
-            final ReactionEmoji.Custom custom = optionalCustom.get();
-
-            filter = reaction -> ((reaction.getMessageID().equals(event.getMessageId()))
-                    && (reaction.getChannelID().equals(event.getChannelId()))
-                    && (reaction.getReactionEmojiName().equals(custom.getName())));
-        } else if (optionalUnicode.isPresent()) {
-            final ReactionEmoji.Unicode unicode = optionalUnicode.get();
-
-            filter = reaction -> ((reaction.getMessageID().equals(event.getMessageId()))
-                    && (reaction.getChannelID().equals(event.getChannelId()))
-                    && (reaction.getReactionEmojiName().equals(unicode.getRaw())));
-        } else {
-            log.error("Failed to get reaction that user removed from message."
-                        + "\nUser: {}\nMessage: {}\nEmoji: {}",
-                    event.getUserId(),
-                    event.getMessageId(),
-                    event.getEmoji());
-            return;
-        }
-
-        final Optional<RoleReaction> reactionOptional = roleReactions.stream()
-                .filter(filter)
-                .findFirst();
-
-        if (reactionOptional.isPresent()) {
-            final RoleReaction roleReaction = reactionOptional.get();
-
-            event.getMessage().subscribe(message ->
-                    message.getAuthorAsMember().subscribe(member -> {
-                        final String reason = String.format(
-                                "User %s reacted to message %d with %s to remove role %s.",
-                                member.getDisplayName(),
-                                message.getId().asLong(),
-                                roleReaction.getReactionEmoji(),
-                                roleReaction.getRoleID());
-
-                        log.info(reason);
-                        member.removeRole(roleReaction.getRoleID(), reason);
-                    }));
-        }
-    }
-
-    /**
-     * Register Discord event listeners.
-     */
-    private void registerDiscordListeners() {
-        discordClient.getEventDispatcher().on(MessageCreateEvent.class)
-                .subscribe(this::messageCreateListener);
-        discordClient.getEventDispatcher().on(ReactionAddEvent.class)
-                .subscribe(this::reactionAddListener);
-        discordClient.getEventDispatcher().on(ReactionRemoveEvent.class)
-                .subscribe(this::reactionRemoveListener);
     }
 
     /**

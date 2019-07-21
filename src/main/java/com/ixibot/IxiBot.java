@@ -35,13 +35,19 @@ package com.ixibot;
 import com.ixibot.api.DiscordAPI;
 import com.ixibot.data.RoleReaction;
 import com.ixibot.database.Database;
+import com.ixibot.event.DiscordReactionEvent;
 import com.ixibot.event.RoleReactionEvent;
 
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import com.google.common.eventbus.Subscribe;
+import discord4j.core.object.reaction.ReactionEmoji;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,6 +70,11 @@ public class IxiBot implements AutoCloseable, Runnable {
      */
     @NonNull
     private final DiscordAPI discordAPI;
+    /**
+     * Role assignment reactions.
+     */
+    @NonNull
+    private final List<RoleReaction> roleReactions;
     /**
      * Interval (in minutes) between Discord role verification checks.
      */
@@ -93,6 +104,71 @@ public class IxiBot implements AutoCloseable, Runnable {
     }
 
     /**
+     * DiscordReactionEvent subscriber.
+     *
+     * @param event Event published to the event bus.
+     */
+    @Subscribe
+    public void onDiscordReactionEvent(@NonNull final DiscordReactionEvent event) {
+        final Predicate<RoleReaction> filter;
+        final Optional<ReactionEmoji.Custom> optionalCustom = event.getReactionEmoji()
+                .asCustomEmoji();
+        final Optional<ReactionEmoji.Unicode> optionalUnicode = event.getReactionEmoji()
+                .asUnicodeEmoji();
+        final String reasonFormat = (event.isAdd())
+                ? "User %s reacted to message %d with %s to get role %s."
+                : "User %s reacted to message %d with %s to remove role %s.";
+
+        if (optionalCustom.isPresent()) {
+            final ReactionEmoji.Custom custom = optionalCustom.get();
+
+            filter = reaction -> ((reaction.getMessageID().equals(event.getMessageID()))
+                    && (reaction.getChannelID().equals(event.getChannelID()))
+                    && (reaction.getReactionEmojiName().equals(custom.getName()))
+                    && (reaction.getBoxedReactionEmojiID().equals(custom.getId().asLong())));
+        } else if (optionalUnicode.isPresent()) {
+            final ReactionEmoji.Unicode unicode = optionalUnicode.get();
+
+            filter = reaction -> ((reaction.getMessageID().equals(event.getMessageID()))
+                    && (reaction.getChannelID().equals(event.getChannelID()))
+                    && (reaction.getReactionEmojiName().equals(unicode.getRaw())));
+        } else {
+            log.error("Failed to get reaction that user added to message."
+                            + "\nUser: {}\nMessage: {}\nEmoji: {}",
+                    event.getUserID(),
+                    event.getMessageID(),
+                    event.getReactionEmoji());
+            return;
+        }
+
+        final Optional<RoleReaction> reactionOptional = roleReactions.stream()
+                .filter(filter)
+                .findFirst();
+
+        if (reactionOptional.isPresent()) {
+            final RoleReaction roleReaction = reactionOptional.get();
+
+            event.getMessageMono().subscribe(message ->
+                    message.getAuthorAsMember().subscribe(member -> {
+                        final String reason = String.format(
+                                reasonFormat,
+                                member.getDisplayName(),
+                                message.getId().asLong(),
+                                roleReaction.getReactionEmoji(),
+                                roleReaction.getRoleID());
+
+                        log.info(reason);
+
+                        if (event.isAdd()) {
+                            member.addRole(roleReaction.getRoleID(), reason);
+                        } else {
+                            member.removeRole(roleReaction.getRoleID(), reason);
+                        }
+                    }));
+        }
+    }
+
+    /**
      * RoleReactionEvent subscriber.
      *
      * @param event Event published to event bus.
@@ -104,10 +180,10 @@ public class IxiBot implements AutoCloseable, Runnable {
         try {
             if (event.isCreate()) {
                 database.addRoleReaction(roleReaction);
-                discordAPI.addRoleReaction(roleReaction);
+                roleReactions.add(roleReaction);
             } else {
                 database.deleteRoleReaction(roleReaction);
-                discordAPI.removeRoleReaction(roleReaction);
+                roleReactions.remove(roleReaction);
             }
         } catch (final SQLException sqle) {
             log.error("Failed to process role reaction event {}", event, sqle);
@@ -120,7 +196,9 @@ public class IxiBot implements AutoCloseable, Runnable {
     @Override
     public void run() {
         scheduler.scheduleAtFixedRate(
-                discordAPI::updateAllRoles,
+                () -> discordAPI.updateAllRoles(roleReactions.stream()
+                        .filter(RoleReaction::isVerified)
+                        .collect(Collectors.groupingBy(RoleReaction::getGuildID))),
                 0,
                 roleVerifyDelay,
                 TimeUnit.MINUTES);

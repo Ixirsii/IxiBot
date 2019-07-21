@@ -116,17 +116,9 @@ public class RoleReaction {
     public String getReactionEmojiName() {
         final Optional<ReactionEmoji.Custom> optionalCustom = reactionEmoji.asCustomEmoji();
         final Optional<ReactionEmoji.Unicode> optionalUnicode = reactionEmoji.asUnicodeEmoji();
-        final String reactionName;
 
-        if (optionalCustom.isPresent()) {
-            reactionName = optionalCustom.get().getName();
-        } else if (optionalUnicode.isPresent()) {
-            reactionName = optionalUnicode.get().getRaw();
-        } else {
-            reactionName = "";
-        }
-
-        return reactionName;
+        return optionalCustom.map(ReactionEmoji.Custom::getName)
+                .orElseGet(() -> optionalUnicode.map(ReactionEmoji.Unicode::getRaw).orElse(""));
     }
 
     /**
