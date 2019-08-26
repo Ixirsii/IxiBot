@@ -85,7 +85,7 @@ class PresenceOption extends Option<Boolean> {
      */
     @Override
     public String toString() {
-        final String option = getShortOptionText() + " " + getLongOptionText();
+        final String option = getShortOptionText() + ", " + getLongOptionText();
         final String optionSpace = getSpace(option.length());
 
         return option + optionSpace + getAboutText() + ".";
