@@ -1,3 +1,35 @@
+/*
+ * Copyright (c) 2019, Ryan Porterfield
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ *     1. Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *
+ *     2. Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ *
+ *     3. Neither the name of the copyright holder nor the names of its
+ *     contributors may be used to endorse or promote products derived from
+ *     this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+ * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package com.ixibot.data;
 
 import java.io.IOException;
@@ -9,7 +41,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,49 +55,45 @@ class BotConfigurationTest {
      */
     private static final String CONFIG_RESOURCE = "/config.yaml";
 
-    /**
-     * YAML object mapper.
-     */
-    private final ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory())
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .registerModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
-            .registerModule(new Jdk8Module());
+    private BotConfiguration underTest;
 
-    private BotConfiguration botConfiguration;
-
-    @BeforeEach
-    public void init() throws IOException {
+    BotConfigurationTest() throws IOException {
         try (InputStream configResource = getClass().getResourceAsStream(CONFIG_RESOURCE)) {
-            botConfiguration = objectMapper.readValue(
+            final ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory())
+                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                    .registerModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
+                    .registerModule(new Jdk8Module());
+
+            underTest = objectMapper.readValue(
                     configResource,
                     BotConfiguration.class);
         }
     }
 
     @Test
-    public void loadConfig() {
-        assertNotNull(botConfiguration, "Mapped object should not be null");
+    void loadConfig() {
+        assertNotNull(underTest, "Mapped object should not be null");
     }
 
     @Test
-    public void commandPrefix() {
+    void commandPrefix() {
         assertEquals(
                 "./",
-                botConfiguration.getCommandPrefix(),
+                underTest.getCommandPrefix(),
                 "Command prefix should equal expected");
     }
 
     @Test
-    public void discordToken() {
+    void discordToken() {
         assertEquals("NTkxNDMzMTk0NTIwNDQ0OTQ5.XSHDdA.yiwJMNmYPmI6jx00wcs0dsyChqc",
-                botConfiguration.getDiscordToken(),
+                underTest.getDiscordToken(),
                 "Discord token should equal expected");
     }
 
     @Test
-    public void roleVerifyDelay() {
+    void roleVerifyDelay() {
         assertEquals(10L,
-                botConfiguration.getRoleVerifyDelay(),
+                underTest.getRoleVerifyDelay(),
                 "Role verification delay should equal expected");
     }
 }
