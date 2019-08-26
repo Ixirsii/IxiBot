@@ -36,15 +36,15 @@ import java.util.Optional;
 
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
-import lombok.Data;
 import lombok.NonNull;
+import lombok.Value;
 
 /**
  * Role assignment reaction POJO.
  *
  * @author Ryan Porterfield
  */
-@Data
+@Value
 public class RoleReaction {
     /**
      * Is the role add verified.

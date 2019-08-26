@@ -35,7 +35,7 @@ package com.ixibot.event;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
-import lombok.Data;
+import lombok.Value;
 import reactor.core.publisher.Mono;
 
 /**
@@ -43,7 +43,7 @@ import reactor.core.publisher.Mono;
  *
  * @author Ryan Porterfield
  */
-@Data
+@Value
 public class DiscordReactionEvent {
     /**
      * {@code true} if this is a reaction add event, otherwise this is a reaction remove event.

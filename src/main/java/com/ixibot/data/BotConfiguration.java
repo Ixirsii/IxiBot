@@ -33,15 +33,15 @@
 package com.ixibot.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
 import lombok.NonNull;
+import lombok.Value;
 
 /**
  * Bot configuration & user settings POJO.
  *
  * @author Ryan Porterfield
  */
-@Data
+@Value
 public class BotConfiguration {
     /**
      * If a message starts with this prefix the bot will attempt to parse a command from it.

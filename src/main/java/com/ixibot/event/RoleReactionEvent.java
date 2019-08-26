@@ -34,15 +34,15 @@ package com.ixibot.event;
 
 import com.ixibot.data.RoleReaction;
 
-import lombok.Data;
 import lombok.NonNull;
+import lombok.Value;
 
 /**
  * Create role reaction pub/sub event.
  *
  * @author Ryan Porterfield
  */
-@Data
+@Value
 public class RoleReactionEvent {
     /**
      * {@code true} if this is a create event, otherwise this is a delete event.
