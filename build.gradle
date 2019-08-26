@@ -81,6 +81,7 @@ jacocoTestReport {
 pmd {
     toolVersion = '6.7.0'
     ignoreFailures = false
+    incrementalAnalysis = true
     ruleSetFiles = files('config/pmd/ruleset.xml')
     ruleSets = []
     sourceSets = [project.sourceSets.main]
