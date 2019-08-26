@@ -49,6 +49,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import com.google.common.eventbus.EventBus;
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
 import lombok.NonNull;
@@ -100,14 +101,16 @@ public final class Main {
                 botConfiguration.getDiscordToken())
                 .build();
         final Database database = new Database();
-        final DiscordAPI discordAPI = new DiscordAPI(discordClient, database.getAllRoleReactions());
+        final EventBus eventBus = new EventBus();
         final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(
                 THREAD_POOL_SIZE,
                 Executors.defaultThreadFactory());
+        final DiscordAPI discordAPI = new DiscordAPI(discordClient, eventBus);
 
         return new IxiBot(
                 database,
                 discordAPI,
+                database.getAllRoleReactions(),
                 botConfiguration.getRoleVerifyDelay(),
                 scheduler);
     }

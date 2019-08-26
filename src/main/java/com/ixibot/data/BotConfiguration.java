@@ -44,6 +44,12 @@ import lombok.NonNull;
 @Data
 public class BotConfiguration {
     /**
+     * If a message starts with this prefix the bot will attempt to parse a command from it.
+     */
+    @JsonProperty("commandPrefix")
+    @NonNull
+    private final String commandPrefix;
+    /**
      * Discord bot token.
      */
     @JsonProperty("discordToken")

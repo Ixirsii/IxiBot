@@ -49,8 +49,16 @@ class BotConfigurationTest {
     }
 
     @Test
+    public void commandPrefix() {
+        assertEquals(
+                "./",
+                botConfiguration.getCommandPrefix(),
+                "Command prefix should equal expected");
+    }
+
+    @Test
     public void discordToken() {
-        assertEquals("my.discord.token",
+        assertEquals("NTkxNDMzMTk0NTIwNDQ0OTQ5.XSHDdA.yiwJMNmYPmI6jx00wcs0dsyChqc",
                 botConfiguration.getDiscordToken(),
                 "Discord token should equal expected");
     }

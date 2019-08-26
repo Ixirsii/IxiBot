@@ -115,9 +115,6 @@ public class IxiBot implements AutoCloseable, Runnable {
                 .asCustomEmoji();
         final Optional<ReactionEmoji.Unicode> optionalUnicode = event.getReactionEmoji()
                 .asUnicodeEmoji();
-        final String reasonFormat = (event.isAdd())
-                ? "User %s reacted to message %d with %s to get role %s."
-                : "User %s reacted to message %d with %s to remove role %s.";
 
         if (optionalCustom.isPresent()) {
             final ReactionEmoji.Custom custom = optionalCustom.get();
@@ -146,6 +143,9 @@ public class IxiBot implements AutoCloseable, Runnable {
                 .findFirst();
 
         if (reactionOptional.isPresent()) {
+            final String reasonFormat = (event.isAdd())
+                    ? "User %s reacted to message %d with %s to get role %s."
+                    : "User %s reacted to message %d with %s to remove role %s.";
             final RoleReaction roleReaction = reactionOptional.get();
 
             event.getMessageMono().subscribe(message ->

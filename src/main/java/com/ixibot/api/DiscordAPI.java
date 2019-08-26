@@ -118,7 +118,7 @@ public class DiscordAPI {
      * @param event Event to handle.
      */
     private void reactionAddListener(@NonNull final ReactionAddEvent event) {
-        final DiscordReactionEvent discordReactionEvent = new DiscordReactionEvent(
+        final DiscordReactionEvent internalEvent = new DiscordReactionEvent(
                 true,
                 event.getChannelId(),
                 event.getMessage(),
@@ -126,7 +126,7 @@ public class DiscordAPI {
                 event.getEmoji(),
                 event.getUserId());
 
-        eventBus.post(discordReactionEvent);
+        eventBus.post(internalEvent);
     }
 
     /**
@@ -135,7 +135,7 @@ public class DiscordAPI {
      * @param event Event to handle.
      */
     private void reactionRemoveListener(@NonNull final ReactionRemoveEvent event) {
-        final DiscordReactionEvent discordReactionEvent = new DiscordReactionEvent(
+        final DiscordReactionEvent internalEvent = new DiscordReactionEvent(
                 false,
                 event.getChannelId(),
                 event.getMessage(),
@@ -143,7 +143,7 @@ public class DiscordAPI {
                 event.getEmoji(),
                 event.getUserId());
 
-        eventBus.post(discordReactionEvent);
+        eventBus.post(internalEvent);
     }
 
     /**
