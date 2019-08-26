@@ -17,6 +17,7 @@
 
     <rule ref="category/java/codestyle.xml">
         <exclude name="AvoidFinalLocalVariable"/>
+        <exclude name="DefaultPackage"/>
         <exclude name="ClassNamingConventions"/>
         <exclude name="ShortClassName"/>
         <exclude name="UselessParentheses"/>
