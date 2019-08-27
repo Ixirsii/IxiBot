@@ -74,7 +74,8 @@ jacocoTestReport {
         )
     }
     reports {
-        xml.enabled false
+        xml.enabled true
+        xml.destination file("${buildDir}/reports/jacoco/jacocoTestReport.xml")
         csv.enabled false
         html.destination file("${buildDir}/reports/jacoco")
     }
@@ -136,3 +137,5 @@ tasks.withType(com.github.spotbugs.SpotBugsTask) {
         html.enabled true
     }
 }
+
+logger.lifecycle("{}", file("${buildDir}/reports/jacoco/jacocoTestReport.xml"))
