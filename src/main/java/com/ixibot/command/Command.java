@@ -32,6 +32,7 @@
 
 package com.ixibot.command;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.collect.Lists;
@@ -88,6 +89,46 @@ public abstract class Command {
     }
 
     /**
+     * Tokenize command options and arguments.
+     *
+     * @param argumentString Options and arguments string.
+     * @return array of separated options and arguments.
+     * @throws IllegalArgumentException on incorrectly formatted arguments.
+     */
+    /* default */ String[] argumentTokenizer(@NonNull final String argumentString)
+            throws IllegalArgumentException {
+        final List<String> argumentList = new ArrayList<>();
+
+        for (int i = 0; i < argumentString.length();) {
+            final String substring = argumentString.substring(i);
+
+            if (substring.startsWith("\"")) {
+                final int index = substring.indexOf('"', 1);
+
+                if (index == -1) {
+                    throw new IllegalArgumentException(String.format(
+                            "Unterminated quote found in %s",
+                            substring));
+                }
+
+                final String token = substring.substring(1, index);
+
+                argumentList.add(token);
+                i += (index + 2);
+            } else {
+                final int spaceIndex = substring.indexOf(' ');
+                final int index = (spaceIndex == -1) ? substring.length() : spaceIndex;
+                final String token = substring.substring(0, index);
+
+                argumentList.add(token);
+                i += (index + 1);
+            }
+        }
+
+        return argumentList.toArray(new String[0]);
+    }
+
+    /**
      * Get help text.
      *
      * @return help text.
@@ -101,7 +142,7 @@ public abstract class Command {
                 OPTIONS_HEADER));
 
         for (final Option<?> option : options) {
-            stringBuilder.append(option.toString()).append('\n');
+            stringBuilder.append(option.toString()).append(System.getProperty("line.separator"));
         }
 
         return stringBuilder.toString();
