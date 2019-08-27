@@ -78,6 +78,10 @@ jacocoTestReport {
     }
 }
 
+javadoc {
+    source = sourceSets.main.allJava
+}
+
 pmd {
     toolVersion = '6.7.0'
     ignoreFailures = false

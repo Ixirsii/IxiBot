@@ -58,7 +58,7 @@ public class AddRole extends Command<RoleReactionEvent> {
     private static final String USAGE = String.format(
             "%s [options] <channel> <message id> <emoji> <role>",
             COMMAND);
-    /** Verify (both verifyAdd & verifyRemove) option. */
+    /** Verify (both verifyAdd and verifyRemove) option. */
     private static final PresenceOption VERIFY = new PresenceOption(
             "verify",
             'V',

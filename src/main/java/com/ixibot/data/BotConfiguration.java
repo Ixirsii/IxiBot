@@ -37,7 +37,7 @@ import lombok.NonNull;
 import lombok.Value;
 
 /**
- * Bot configuration & user settings POJO.
+ * Bot configuration and user settings POJO.
  *
  * @author Ryan Porterfield
  */
