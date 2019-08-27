@@ -137,5 +137,3 @@ tasks.withType(com.github.spotbugs.SpotBugsTask) {
         html.enabled true
     }
 }
-
-logger.lifecycle("{}", file("${buildDir}/reports/jacoco/jacocoTestReport.xml"))
