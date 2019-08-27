@@ -45,18 +45,10 @@ class PresenceOptionTest {
     private PresenceOption underTest = new PresenceOption(LONG_OPTION, SHORT_OPTION, ABOUT_OPTION);
 
     @Test
-    void getLongOptionText() {
-        assertEquals(
-                "--" + LONG_OPTION,
-                underTest.getLongOptionText(),
-                "Long option text should equal expected");
-    }
-
-    @Test
     void getShortOptionText() {
         assertEquals(
                 "-" + SHORT_OPTION,
-                underTest.getShortOptionText(),
+                underTest.getShortOption(),
                 "Short option text should equal expected");
     }
 
@@ -87,65 +79,65 @@ class PresenceOptionTest {
     @Test
     void matchWhenLongOptionDoesNotMatch() {
         assertEquals(
-                -1,
+                0,
                 underTest.match("--not-an-option"),
-                "match should return -1 when long option does not match");
+                "match should return 0 when long option does not match");
     }
 
     @Test
     void matchWhenLongOptionMatches() {
         assertEquals(
-                0,
+                1,
                 underTest.match("--" + LONG_OPTION),
-                "match should return 0 when long option matches");
+                "match should return 1 when long option matches");
     }
 
     @Test
     void matchWhenShortOptionDoesNotMatch() {
         assertEquals(
-                -1,
+                0,
                 underTest.match("-a"),
-                "match should return -1 when long option does not match");
+                "match should return 0 when long option does not match");
     }
 
     @Test
     void matchWhenShortOptionDoesNotContainMatch() {
         assertEquals(
-                -1,
+                0,
                 underTest.match("-abcde"),
-                "match should return -1 when long option does not match");
+                "match should return 0 when long option does not match");
     }
 
     @Test
     void matchWhenShortOptionMatches() {
         assertEquals(
-                0,
+                1,
                 underTest.match("-" + SHORT_OPTION),
-                "match should return 0 when long option matches");
+                "match should return 1 when long option matches");
     }
 
     @Test
     void matchWhenShortOptionContainsMatch() {
         assertEquals(
-                0,
+                1,
                 underTest.match("-abcde" + SHORT_OPTION),
-                "match should return 0 when long option contains match");
+                "match should return 1 when long option contains match");
     }
 
     @Test
     void matchWhenPositionalOptionDoesNotMatch() {
         assertEquals(
-                -1,
+                0,
                 underTest.match("not-an-option"),
-                "match should return -1 when positional option does not match");
+                "match should return 0 when positional option does not match");
     }
 
     @Test
     void matchWhenPositionalOptionMatches() {
         assertEquals(
-                0,
-                underTest.match(LONG_OPTION),
-                "match should return 0 when positional option matches");
+                1,
+                underTest.match("--" + LONG_OPTION),
+                "match should return 1 when positional option matches");
     }
 
     @Test
@@ -160,7 +152,7 @@ class PresenceOptionTest {
         final String parameter = "parameter";
         final String errorMessage = String.format("Incorrect number of arguments passed to option"
                     + " \"%s\". Expected %d but was %d, [%s]",
-                LONG_OPTION,
+                "--" + LONG_OPTION,
                 0,
                 1,
                 parameter);

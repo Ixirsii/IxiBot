@@ -33,17 +33,21 @@
 package com.ixibot.command;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.common.collect.Lists;
 import lombok.NonNull;
+import lombok.Value;
 
 /**
  * Command base class.
  *
+ * @param <E> Type of event emitted by this command.
  * @author Ryan Porterfield
  */
-public abstract class Command {
+public abstract class Command<E> {
     /** Help option about text. */
     private static final String ABOUT_HELP = "Show this help message";
     /** Help parameter supported by every command. */
@@ -129,6 +133,35 @@ public abstract class Command {
     }
 
     /**
+     * Get map of Options to index that consume them.
+     *
+     * @param arguments Tokenized array of arguments.
+     * @return map of arguments to Options that consume them.
+     */
+    /* default */ Map<String, ArgumentIndex> getArgumentMap(@NonNull final String[] arguments) {
+        final Map<String, ArgumentIndex> argumentMap = new HashMap<>();
+
+        for (int i = 0; i < arguments.length; ++i) {
+            final String argument = arguments[i];
+            final Option<?> option = options.stream()
+                    .filter(opt -> opt.match(argument) > 0)
+                    .findAny()
+                    .orElse(null);
+
+            if (option == null) {
+                continue;
+            }
+
+            final int consumeCount = option.match(argument);
+
+            argumentMap.put(option.getLongOption(), new ArgumentIndex(i, consumeCount));
+            i += consumeCount;
+        }
+
+        return argumentMap;
+    }
+
+    /**
      * Get help text.
      *
      * @return help text.
@@ -162,9 +195,20 @@ public abstract class Command {
      * Parse parameters to a matched option.
      *
      * @param parameters List of parameters to the option.
-     * @throws IllegalArgumentException if length of parameters is different from {@link
-     *                                  Option#parameterCount}
+     * @return Event which can be published to the event bus.
+     * @throws IllegalArgumentException if length of parameters is different from expected value.
      */
-    /* default */ abstract void parse(@NonNull final String... parameters)
+    /* default */ abstract E parse(@NonNull final String... parameters)
             throws IllegalArgumentException;
+
+    /**
+     * Pair of start index and count of arguments consumed by an option.
+     */
+    @Value
+    /* default */ static class ArgumentIndex {
+        /** Start index of arguments in tokenized array. */
+        private final int startIndex;
+        /** Number of arguments consumed by option. */
+        private final int argumentCount;
+    }
 }

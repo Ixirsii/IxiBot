@@ -32,6 +32,8 @@
 
 package com.ixibot.command;
 
+import com.ixibot.event.RoleReactionEvent;
+
 import lombok.NonNull;
 
 /**
@@ -39,7 +41,7 @@ import lombok.NonNull;
  *
  * @author Ryan Porterfield
  */
-public class AddRole extends Command {
+public class AddRole extends Command<RoleReactionEvent> {
     /** Verify option about text. */
     private static final String ABOUT_VERIFY = "Run both add and remove verify checks on this "
             + "role reaction";
@@ -99,7 +101,9 @@ public class AddRole extends Command {
     }
 
     @Override
-    /* default */ void parse(@NonNull final String... parameters) throws IllegalArgumentException {
+    /* default */ RoleReactionEvent parse(@NonNull final String... parameters)
+            throws IllegalArgumentException {
         // TODO: Implement this later
+        return null;
     }
 }

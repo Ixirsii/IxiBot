@@ -32,6 +32,7 @@
 
 package com.ixibot.command;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -41,19 +42,22 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AddRoleTest {
+    private static final String ARGUMENTS = "--verify #channel 1234567890 \"EZ Clap\" @Member";
+    private static final String[] ARGUMENT_TOKENS = new String[] {
+            "--verify",
+            "#channel",
+            "1234567890",
+            "EZ Clap",
+            "@Member",
+    };
+
     private AddRole underTest = new AddRole();
 
     @Test
     void argumentTokenizer() {
         assertArrayEquals(
-                new String[] {
-                        "--verify",
-                        "#channel",
-                        "1234567890",
-                        "EZ Clap",
-                        "@Member",
-                },
-                underTest.argumentTokenizer("--verify #channel 1234567890 \"EZ Clap\" @Member"),
+                ARGUMENT_TOKENS,
+                underTest.argumentTokenizer(ARGUMENTS),
                 "Arguments should get tokenized correctly");
     }
 
@@ -63,6 +67,14 @@ class AddRoleTest {
                 IllegalArgumentException.class,
                 () -> underTest.argumentTokenizer("--verify #channel 1234567890 \"EZ Clap @Member"),
                 "Arguments should get tokenized correctly");
+    }
+
+    @Test
+    void getArgumentMap() {
+        assertEquals(
+                ImmutableMap.of("--verify", new Command.ArgumentIndex(0, 1)),
+                underTest.getArgumentMap(ARGUMENT_TOKENS),
+                "argument map should equal expected");
     }
 
     @Test

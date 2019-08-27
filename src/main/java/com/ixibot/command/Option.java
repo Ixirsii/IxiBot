@@ -35,7 +35,6 @@ package com.ixibot.command;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 /**
  * Command option base class.
@@ -43,38 +42,42 @@ import lombok.RequiredArgsConstructor;
  * @param <T> Type of value parsed by this option.
  * @author Ryan Porterfield
  */
-@RequiredArgsConstructor
 @Getter(AccessLevel.PACKAGE)
 abstract class Option<T> {
     /** Length of columns in help message. */
     private static final int COLUMN_LENGTH = 24;
     /** GNU long option prefix. */
     private static final String GNU_PREFIX = "--";
-    /**
-     * Value returned by {@link Option#match(String)} if argument is not a match.
-     */
-    private static final int NON_MATCH = -1;
     /** POSIX short option prefix. */
     private static final String POSIX_PREFIX = "-";
 
-    /** POSIX long option and option name. */
-    @NonNull
-    private final String longOption;
-    /** GNU short option. */
-    private final char shortOption;
-    /** Number of parameters consumed by this option. */
-    private final int parameterCount;
     /** Option about message for help text. */
     @NonNull
     private final String aboutText;
+    /** POSIX long option and option name. */
+    @NonNull
+    private final String longOption;
+    /** Number of parameters consumed by this option. */
+    private final int parameterCount;
+    /** GNU short option. */
+    private final char shortOption;
 
     /**
-     * Get GNU style long option.
+     * Default constructor.
      *
-     * @return GNU style long option
+     * @param longOption {@link Option#longOption}
+     * @param shortOption {@link Option#shortOption}
+     * @param parameterCount {@link Option#parameterCount}
+     * @param aboutText {@link Option#aboutText}
      */
-    /* default */ String getLongOptionText() {
-        return GNU_PREFIX + longOption;
+    /* default */ Option(@NonNull final String longOption,
+                         final char shortOption,
+                         final int parameterCount,
+                         @NonNull final String aboutText) {
+        this.aboutText = aboutText;
+        this.longOption = GNU_PREFIX + longOption;
+        this.parameterCount = parameterCount;
+        this.shortOption = shortOption;
     }
 
     /**
@@ -82,7 +85,7 @@ abstract class Option<T> {
      *
      * @return POSIX style short option
      */
-    /* default */ String getShortOptionText() {
+    /* default */ String getShortOption() {
         return POSIX_PREFIX + shortOption;
     }
 
@@ -108,65 +111,60 @@ abstract class Option<T> {
      * @param argument Argument passed to command.
      * @return number of parameters consumed by this option if argument matches, otherwise
      *         NON_MATCH.
-     * @see Option#NON_MATCH
      */
     /* default */ int match(@NonNull final String argument) {
-        final int matchResult;
+        final boolean match;
 
         if (argument.startsWith(GNU_PREFIX)) {
-            final String strippedArgument = argument.substring(GNU_PREFIX.length());
-
-            matchResult = matchLongOption(strippedArgument);
+            match = matchLongOption(argument);
         } else if (argument.startsWith(POSIX_PREFIX)) {
             // This if block has to go after the long option if block because "--" will be matched
             // by this check.
             final String strippedArgument = argument.substring(POSIX_PREFIX.length());
 
-            matchResult = matchShortOption(strippedArgument);
+            match = matchShortOption(strippedArgument);
         } else {
-            matchResult = matchLongOption(argument);
+            match = false;
         }
 
-        return matchResult;
+        return match ? 1 + parameterCount : 0;
     }
 
     /**
      * Check if argument matches the GNU long form of this option.
      *
      * @param argument Stripped argument passed to command.
-     * @return number of parameters consumed by this option if argument matches, otherwise
-     *         NON_MATCH.
-     * @see Option#NON_MATCH
+     * @return {@code true} if argument matches the short form of this option, otherwise
+     *         {@code false}
      */
-    private int matchLongOption(@NonNull final String argument) {
-        return (argument.equals(longOption)) ? parameterCount : NON_MATCH;
+    private boolean matchLongOption(@NonNull final String argument) {
+        return argument.equals(longOption);
     }
 
     /**
      * Check if argument matches the POSIX short form of this option.
      *
      * @param argument Stripped argument passed to command.
-     * @return number of parameters consumed by this option if argument matches, otherwise
-     *         NON_MATCH.
-     * @see Option#NON_MATCH
+     * @return {@code true} if argument matches the short form of this option, otherwise
+     *         {@code false}
      */
     @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
-    private int matchShortOption(@NonNull final String argument) {
-        final int matchResult;
+    private boolean matchShortOption(@NonNull final String argument) {
+        final boolean match;
 
         if (argument.length() == 1) {
             // If length is 1, we can either match or not match
-            matchResult = (argument.charAt(0) == shortOption) ? parameterCount : NON_MATCH;
+            match = argument.charAt(0) == shortOption;
         } else {
             /*
-             * If length is < 1 this check fails and returns NON_MATCH.
+             * If length is < 1 this check fails and returns 0.
              * If length is > 1 multiple short options were passed together, (IE. ps -aux) and we
              *  check if one of those arguments matches this option.
              */
-            matchResult = (argument.indexOf(shortOption) > -1) ? parameterCount : NON_MATCH;
+            match = argument.indexOf(shortOption) > -1;
         }
 
-        return matchResult;
+        return match;
     }
 
     /**
@@ -174,8 +172,8 @@ abstract class Option<T> {
      *
      * @param parameters List of parameters to the option.
      * @return parsed value.
-     * @throws IllegalArgumentException if length of parameters is different from {@link
-     *                                  Option#parameterCount}
+     * @throws IllegalArgumentException if length of parameters is different from
+     *                                  {@link Option#parameterCount}
      */
     /* default */ abstract T parse(@NonNull final String... parameters)
             throws IllegalArgumentException;
