@@ -33,9 +33,9 @@
 package com.ixibot.command;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.common.collect.Lists;
 import lombok.NonNull;
@@ -138,8 +138,9 @@ public abstract class Command<E> {
      * @param arguments Tokenized array of arguments.
      * @return map of arguments to Options that consume them.
      */
-    /* default */ Map<String, ArgumentIndex> getArgumentMap(@NonNull final String[] arguments) {
-        final Map<String, ArgumentIndex> argumentMap = new HashMap<>();
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+    /* default */ Map<String, ArgumentIndex> getArgumentMap(@NonNull final String... arguments) {
+        final Map<String, ArgumentIndex> argumentMap = new ConcurrentHashMap<>();
 
         for (int i = 0; i < arguments.length; ++i) {
             final String argument = arguments[i];
