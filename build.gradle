@@ -31,6 +31,8 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:3.0.0'
 }
 
+//check.dependsOn(jacocoTestCoverageVerification)
+
 checkstyle {
     toolVersion '8.8'
     ignoreFailures = false
@@ -74,7 +76,7 @@ jacocoTestReport {
     reports {
         xml.enabled false
         csv.enabled false
-        html.destination file("${buildDir}/jacoco")
+        html.destination file("${buildDir}/reports/jacoco")
     }
 }
 
@@ -105,6 +107,8 @@ test {
         events 'passed', 'skipped', 'failed'
     }
 }
+
+test.finalizedBy(project.tasks.jacocoTestReport)
 
 tasks.withType(JavaCompile) {
     options.compilerArgs += ['-parameters']
