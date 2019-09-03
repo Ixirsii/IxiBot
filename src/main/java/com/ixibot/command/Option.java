@@ -44,8 +44,6 @@ import lombok.NonNull;
  */
 @Getter(AccessLevel.PACKAGE)
 abstract class Option<T> {
-    /** Length of columns in help message. */
-    private static final int COLUMN_LENGTH = 24;
     /** GNU long option prefix. */
     private static final String GNU_PREFIX = "--";
     /** POSIX short option prefix. */
@@ -63,7 +61,7 @@ abstract class Option<T> {
     private final char shortOption;
 
     /**
-     * Default constructor.
+     * Required args constructor.
      *
      * @param longOption {@link Option#longOption}
      * @param shortOption {@link Option#shortOption}
@@ -87,22 +85,6 @@ abstract class Option<T> {
      */
     /* default */ String getShortOption() {
         return POSIX_PREFIX + shortOption;
-    }
-
-    /**
-     * Get space between option and help text.
-     *
-     * @param optionLength How long the option text is
-     * @return space between option and help text
-     */
-    /* default */ String getSpace(final int optionLength) {
-        final StringBuilder stringBuilder = new StringBuilder(" ");
-
-        for (int i = 0; i < COLUMN_LENGTH - (optionLength + 1); ++i) {
-            stringBuilder.append(' ');
-        }
-
-        return stringBuilder.toString();
     }
 
     /**
@@ -177,4 +159,15 @@ abstract class Option<T> {
      */
     /* default */ abstract T parse(@NonNull final String... parameters)
             throws IllegalArgumentException;
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        final String option = getShortOption() + ", " + longOption;
+        final String optionSpace = Command.getSpace(option.length());
+
+        return option + optionSpace + aboutText + ".";
+    }
 }

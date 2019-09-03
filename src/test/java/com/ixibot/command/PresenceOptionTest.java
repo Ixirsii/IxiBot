@@ -53,30 +53,6 @@ class PresenceOptionTest {
     }
 
     @Test
-    void getEmptySpaceWhenLengthEqualsColumnLength() {
-        assertEquals(
-                " ",
-                underTest.getSpace(24),
-                "Space should equal expected");
-    }
-
-    @Test
-    void getEmptySpaceWhenLengthGreaterThanColumnLength() {
-        assertEquals(
-                " ",
-                underTest.getSpace(25),
-                "Space should equal expected");
-    }
-
-    @Test
-    void getSpace() {
-        assertEquals(
-                "              ",
-                underTest.getSpace(10),
-                "Space should equal expected");
-    }
-
-    @Test
     void matchWhenLongOptionDoesNotMatch() {
         assertEquals(
                 0,

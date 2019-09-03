@@ -32,51 +32,46 @@
 
 package com.ixibot.command;
 
-import java.util.Arrays;
-
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 
 /**
- * Command option which is true if present.
+ * Positional argument base class.
  *
+ * @param <T> Type of argument.
  * @author Ryan Porterfield
  */
-@Slf4j
-class PresenceOption extends Option<Boolean> {
+/* default */ abstract class Argument<T> {
+    /** About message for help text. */
+    @NonNull
+    private final String aboutText;
+    /** Argument name. */
+    @NonNull
+    private final String name;
 
     /**
-     * Default constructor.
+     * Required args constructor.
      *
-     * @param longOption  {@link Option#longOption}
-     * @param shortOption {@link Option#shortOption}
-     * @param aboutText   {@link Option#aboutText}
+     * @param name {@link Argument#name}
+     * @param aboutText {@link Argument#aboutText}
      */
-    /* default */ PresenceOption(final String longOption,
-                                 final char shortOption,
-                                 final String aboutText) {
-        super(longOption, shortOption, 0, aboutText);
+    /* default */ Argument(@NonNull final String name, @NonNull final String aboutText) {
+        this.aboutText = aboutText;
+        this.name = name;
     }
+
+    /**
+     * Parse value from argument string.
+     *
+     * @param argument Argument string.
+     * @return value parsed from argument string.
+     */
+    /* default */ abstract T parse(@NonNull final String argument);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    /* default */ Boolean parse(@NonNull final String... parameters)
-            throws IllegalArgumentException {
-        if (parameters.length != getParameterCount()) {
-            final String errorMessage = String.format(
-                    "Incorrect number of arguments passed to option \"%s\". "
-                            + "Expected %d but was %d, %s",
-                    getLongOption(),
-                    getParameterCount(),
-                    parameters.length,
-                    Arrays.toString(parameters));
-
-            log.debug(errorMessage);
-            throw new IllegalArgumentException(errorMessage);
-        }
-
-        return true;
+    public String toString() {
+        return name + Command.getSpace(name.length()) + aboutText + ".";
     }
 }

@@ -32,51 +32,39 @@
 
 package com.ixibot.command;
 
-import java.util.Arrays;
-
+import discord4j.core.object.util.Snowflake;
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 
 /**
- * Command option which is true if present.
+ * Command argument which takes a Snowflake.
  *
  * @author Ryan Porterfield
  */
-@Slf4j
-class PresenceOption extends Option<Boolean> {
-
+public class SnowflakeArgument extends Argument<Snowflake> {
     /**
-     * Default constructor.
+     * Required args constructor.
      *
-     * @param longOption  {@link Option#longOption}
-     * @param shortOption {@link Option#shortOption}
-     * @param aboutText   {@link Option#aboutText}
+     * @param name      {@link Argument#name}
+     * @param aboutText {@link Argument#aboutText}
      */
-    /* default */ PresenceOption(final String longOption,
-                                 final char shortOption,
-                                 final String aboutText) {
-        super(longOption, shortOption, 0, aboutText);
+    /* default */ SnowflakeArgument(final String name, final String aboutText) {
+        super(name, aboutText);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    /* default */ Boolean parse(@NonNull final String... parameters)
-            throws IllegalArgumentException {
-        if (parameters.length != getParameterCount()) {
-            final String errorMessage = String.format(
-                    "Incorrect number of arguments passed to option \"%s\". "
-                            + "Expected %d but was %d, %s",
-                    getLongOption(),
-                    getParameterCount(),
-                    parameters.length,
-                    Arrays.toString(parameters));
+    /* default */ Snowflake parse(final @NonNull String argument) {
+        Snowflake snowflake;
 
-            log.debug(errorMessage);
-            throw new IllegalArgumentException(errorMessage);
+        try {
+            final long longId = Long.parseLong(argument);
+            snowflake = Snowflake.of(longId);
+        } catch (final NumberFormatException nfe) {
+            snowflake = Snowflake.of(argument);
         }
 
-        return true;
+        return snowflake;
     }
 }

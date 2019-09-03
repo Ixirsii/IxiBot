@@ -50,6 +50,8 @@ import lombok.Value;
 public abstract class Command<E> {
     /** Help option about text. */
     private static final String ABOUT_HELP = "Show this help message";
+    /** Length of columns in help message. */
+    private static final int COLUMN_LENGTH = 24;
     /** Help parameter supported by every command. */
     private static final PresenceOption HELP = new PresenceOption(
             "help",
@@ -72,6 +74,22 @@ public abstract class Command<E> {
     /** Command format message for help text. */
     @NonNull
     private final String usageText;
+
+    /**
+     * Get space between option and help text.
+     *
+     * @param optionLength How long the option text is
+     * @return space between option and help text
+     */
+    /* default */ static String getSpace(final int optionLength) {
+        final StringBuilder stringBuilder = new StringBuilder(" ");
+
+        for (int i = 0; i < Command.COLUMN_LENGTH - (optionLength + 1); ++i) {
+            stringBuilder.append(' ');
+        }
+
+        return stringBuilder.toString();
+    }
 
     /**
      * Default constructor.
