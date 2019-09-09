@@ -32,26 +32,12 @@
 
 package com.ixibot;
 
-import com.ixibot.api.DiscordAPI;
-import com.ixibot.data.BotConfiguration;
-import com.ixibot.database.Database;
+import com.ixibot.module.IxiBotModule;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.SQLException;
 import java.util.Scanner;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import com.google.common.eventbus.EventBus;
-import discord4j.core.DiscordClient;
-import discord4j.core.DiscordClientBuilder;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
@@ -63,17 +49,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public final class Main {
     /**
-     * File path to bot configuration resource.
-     */
-    private static final String CONFIG_RESOURCE = "/config.yaml";
-    /**
      * Command to stop execution.
      */
     private static final String QUIT_COMMAND = "quit";
-    /**
-     * Minimum thread pool size.
-     */
-    private static final int THREAD_POOL_SIZE = 1;
 
     /**
      * Program loop control.
@@ -87,77 +65,25 @@ public final class Main {
     }
 
     /**
-     * Get an IxiBot instance.
-     *
-     * @return new IxiBot instance.
-     * @throws ClassNotFoundException on failure to load JDBC driver.
-     * @throws IOException            on error reading from config file.
-     * @throws SQLException           if a database access error occurs.
-     */
-    private static IxiBot getBotInstance()
-            throws ClassNotFoundException, IOException, SQLException {
-        final BotConfiguration botConfiguration = readBotConfiguration();
-        final DiscordClient discordClient = new DiscordClientBuilder(
-                botConfiguration.getDiscordToken())
-                .build();
-        final Database database = new Database();
-        final EventBus eventBus = new EventBus();
-        final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(
-                THREAD_POOL_SIZE,
-                Executors.defaultThreadFactory());
-        final DiscordAPI discordAPI = new DiscordAPI(discordClient, eventBus);
-
-        return new IxiBot(
-                database,
-                discordAPI,
-                database.getAllRoleReactions(),
-                botConfiguration.getRoleVerifyDelay(),
-                scheduler);
-    }
-
-    /**
      * Main method.
      *
      * @param args Execution arguments.
      */
     public static void main(@NonNull final String[] args) {
-        try {
-            final IxiBot ixiBot = getBotInstance();
-            final Scanner scanner = new Scanner(System.in, "UTF-8");
+        final Injector injector = Guice.createInjector(new IxiBotModule());
+        final IxiBot ixiBot = injector.getInstance(IxiBot.class);
+        final Scanner scanner = new Scanner(System.in, "UTF-8");
 
-            ixiBot.run();
+        ixiBot.run();
 
-            do {
-                log.info("Type \"quit\" to exit");
-                final String input = scanner.nextLine();
-                log.info("Got user input: {}", input);
+        do {
+            log.info("Type \"quit\" to exit");
+            final String input = scanner.nextLine();
+            log.info("Got user input: {}", input);
 
-                if (QUIT_COMMAND.equals(input)) {
-                    isRunning = false;
-                }
-            } while (isRunning);
-        } catch (final ClassNotFoundException cnfe) {
-            log.error("Caught ClassNotFoundException, exiting", cnfe);
-        } catch (final IOException ioe) {
-            log.error("Caught IOException trying to read bot configuration, exiting", ioe);
-        } catch (final SQLException sqle) {
-            log.error("Caught SQLException, exiting", sqle);
-        }
-    }
-
-    /**
-     * Read bot configuration from config file.
-     *
-     * @return bot configuration.
-     * @throws IOException on error reading from config file.
-     */
-    private static BotConfiguration readBotConfiguration() throws IOException {
-        try (InputStream configResource = Main.class.getResourceAsStream(CONFIG_RESOURCE)) {
-            final ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory())
-                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                    .registerModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
-                    .registerModule(new Jdk8Module());
-            return objectMapper.readValue(configResource, BotConfiguration.class);
-        }
+            if (QUIT_COMMAND.equals(input)) {
+                isRunning = false;
+            }
+        } while (isRunning);
     }
 }
