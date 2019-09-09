@@ -35,7 +35,6 @@ package com.ixibot.database;
 import com.ixibot.data.RoleReaction;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -43,9 +42,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.inject.Inject;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -53,12 +54,9 @@ import lombok.extern.slf4j.Slf4j;
  *
  * @author Ryan Porterfield
  */
+@RequiredArgsConstructor(onConstructor = @__({ @Inject}))
 @Slf4j
 public class Database {
-    /**
-     * URL/path to SQLite database file.
-     */
-    private static final String CONNECTION_URL = "jdbc:sqlite:sqlite.db";
     /**
      * Database version number.
      */
@@ -69,33 +67,6 @@ public class Database {
      */
     @NonNull
     private final Connection connection;
-
-    /**
-     * Constructor.
-     *
-     * @throws ClassNotFoundException on failure to load JDBC driver.
-     * @throws SQLException           if a database access error occurs.
-     */
-    public Database() throws ClassNotFoundException, SQLException {
-        Class.forName("org.sqlite.JDBC");
-
-        this.connection = DriverManager.getConnection(CONNECTION_URL);
-
-        try (Statement statement = connection.createStatement();
-                ResultSet versionResult = statement.executeQuery("PRAGMA schema.user_version")) {
-            final long databaseVersion;
-
-            if (versionResult.next()) {
-                databaseVersion = versionResult.getLong(1);
-            } else {
-                databaseVersion = 0;
-            }
-
-            if (databaseVersion < DATABASE_VERSION) {
-                updateDatabase();
-            }
-        }
-    }
 
     /**
      * Insert a role assignment reaction into the database.
@@ -236,6 +207,28 @@ public class Database {
         }
 
         return roleReactions;
+    }
+
+    /**
+     * Update the database if the existing database version is out of date.
+     *
+     * @throws SQLException if a database access error occurs.
+     */
+    public void init() throws SQLException {
+        try (Statement statement = connection.createStatement();
+                ResultSet versionResult = statement.executeQuery("PRAGMA schema.user_version")) {
+            final long databaseVersion;
+
+            if (versionResult.next()) {
+                databaseVersion = versionResult.getLong(1);
+            } else {
+                databaseVersion = 0;
+            }
+
+            if (databaseVersion < DATABASE_VERSION) {
+                updateDatabase();
+            }
+        }
     }
 
     /**

@@ -32,15 +32,11 @@
 
 package com.ixibot.module;
 
-import com.ixibot.IxiBot;
-import com.ixibot.Main;
-import com.ixibot.api.DiscordAPI;
 import com.ixibot.data.BotConfiguration;
-import com.ixibot.database.Database;
+import com.ixibot.provider.BotConfigurationProvider;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.SQLException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
@@ -50,20 +46,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import com.google.common.eventbus.EventBus;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.google.inject.throwingproviders.CheckedProvides;
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
+import lombok.NoArgsConstructor;
 
 /**
  * Basic Guice module.
  *
  * @author Ryan Porterfield
  */
+@NoArgsConstructor
 public class IxiBotModule extends AbstractModule {
     /**
      * File path to bot configuration resource.
@@ -81,38 +79,23 @@ public class IxiBotModule extends AbstractModule {
      * @return bot configuration.
      * @throws IOException on error reading from config file.
      */
+    @CheckedProvides(BotConfigurationProvider.class)
     @Inject
     @Provides
+    @Singleton
     public BotConfiguration botConfiguration(
             @Named("yamlMapper") final ObjectMapper objectMapper) throws IOException {
-        try (InputStream configResource = Main.class.getResourceAsStream(CONFIG_RESOURCE)) {
+        try (InputStream configResource = getClass().getResourceAsStream(CONFIG_RESOURCE)) {
             return objectMapper.readValue(configResource, BotConfiguration.class);
         }
     }
 
     /**
-     * Database interface provider.
-     *
-     * @return database interface.
-     * @throws ClassNotFoundException on failure to load JDBC driver.
-     * @throws SQLException           if a database access error occurs.
+     * Configure module.
      */
-    @Provides
-    public Database database() throws ClassNotFoundException, SQLException {
-        return new Database();
-    }
-
-    /**
-     * Discord API wrapper provider.
-     *
-     * @param discordClient Discord4J client.
-     * @param eventBus      Event bus.
-     * @return Discord API wrapper.
-     */
-    @Inject
-    @Provides
-    public DiscordAPI discordAPI(final DiscordClient discordClient, final EventBus eventBus) {
-        return new DiscordAPI(discordClient, eventBus);
+    @Override
+    protected void configure() {
+        install(new DatabaseModule());
     }
 
     /**
@@ -127,42 +110,6 @@ public class IxiBotModule extends AbstractModule {
         return new DiscordClientBuilder(
                 botConfiguration.getDiscordToken())
                 .build();
-    }
-
-    /**
-     * Event bus provider.
-     *
-     * @return event bus singleton.
-     */
-    @Provides
-    @Singleton
-    public EventBus eventBus() {
-        return new EventBus();
-    }
-
-    /**
-     * IxiBot provider.
-     *
-     * @param botConfiguration Bot configuration.
-     * @param database         Database interface.
-     * @param discordAPI       Discord API wrapper.
-     * @param scheduler        Thread pool executor.
-     * @return IxiBot instance.
-     * @throws SQLException if a database access error occurs.
-     */
-    @Inject
-    @Provides
-    public IxiBot ixiBot(
-            final BotConfiguration botConfiguration,
-            final Database database,
-            final DiscordAPI discordAPI,
-            final ScheduledThreadPoolExecutor scheduler) throws SQLException {
-        return new IxiBot(
-                database,
-                discordAPI,
-                database.getAllRoleReactions(),
-                botConfiguration.getRoleVerifyDelay(),
-                scheduler);
     }
 
     /**

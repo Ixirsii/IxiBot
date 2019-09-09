@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.google.common.eventbus.EventBus;
+import com.google.inject.Inject;
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.event.domain.message.ReactionAddEvent;
@@ -80,6 +81,7 @@ public class DiscordAPI {
      * @param discordClient Discord4J client.
      * @param eventBus Event bus to publish events to.
      */
+    @Inject
     public DiscordAPI(@NonNull final DiscordClient discordClient,
                       @NonNull final EventBus eventBus) {
         this.discordClient = discordClient;
