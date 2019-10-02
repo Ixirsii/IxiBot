@@ -72,7 +72,9 @@ jacocoTestReport {
     afterEvaluate {
         getClassDirectories().setFrom(
                 files(classDirectories.files.collect {
-                    fileTree(dir: it, exclude: 'com/ixibot/api/**')
+                    fileTree(dir: it,
+                            exclude: ['com/ixibot/api/**', 'com/ixibot/module/**']
+                    )
                 })
         )
     }

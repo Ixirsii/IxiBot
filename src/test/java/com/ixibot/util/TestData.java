@@ -45,30 +45,33 @@ public class TestData {
     public static final char SHORT_OPTION = 's';
     public static final ReactionEmoji.Unicode UNICODE_EMOJI = ReactionEmoji.unicode("ixiNose");
 
-    public static final RoleReaction ROLE_REACTION_1 = new RoleReaction(
-            true,
-            Snowflake.of(1L),
-            Snowflake.of(1L),
-            Snowflake.of(1L),
-            CUSTOM_EMOJI,
-            false,
-            Snowflake.of(1L));
-    public static final RoleReaction ROLE_REACTION_2 = new RoleReaction(
-            false,
-            Snowflake.of(2L),
-            Snowflake.of(2L),
-            Snowflake.of(2L),
-            UNICODE_EMOJI,
-            true,
-            Snowflake.of(2L));
-    public static final RoleReaction ROLE_REACTION_3 = new RoleReaction(
-            false,
-            Snowflake.of(3L),
-            Snowflake.of(3L),
-            Snowflake.of(3L),
-            CUSTOM_EMOJI,
-            false,
-            Snowflake.of(3L));
+    public static final RoleReaction ROLE_REACTION_1 = RoleReaction.builder()
+            .addVerified(true)
+            .channelID(Snowflake.of(1L))
+            .guildID(Snowflake.of(1L))
+            .messageID(Snowflake.of(1L))
+            .reactionEmoji(CUSTOM_EMOJI)
+            .removeVerified(false)
+            .roleID(Snowflake.of(1L))
+            .build();
+    public static final RoleReaction ROLE_REACTION_2 = RoleReaction.builder()
+            .addVerified(false)
+            .channelID(Snowflake.of(2L))
+            .guildID(Snowflake.of(2L))
+            .messageID(Snowflake.of(2L))
+            .reactionEmoji(UNICODE_EMOJI)
+            .removeVerified(true)
+            .roleID(Snowflake.of(2L))
+            .build();
+    public static final RoleReaction ROLE_REACTION_3 = RoleReaction.builder()
+            .addVerified(false)
+            .channelID(Snowflake.of(3L))
+            .guildID(Snowflake.of(3L))
+            .messageID(Snowflake.of(3L))
+            .reactionEmoji(CUSTOM_EMOJI)
+            .removeVerified(false)
+            .roleID(Snowflake.of(3L))
+            .build();
 
     /**
      * Hide utility class constructor.

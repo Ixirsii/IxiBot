@@ -34,9 +34,13 @@ package com.ixibot.module;
 
 import com.ixibot.data.BotConfiguration;
 import com.ixibot.provider.BotConfigurationProvider;
+import com.ixibot.provider.ConnectionProvider;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
@@ -52,6 +56,7 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.google.inject.throwingproviders.CheckedProvides;
+import com.google.inject.throwingproviders.ThrowingProviderBinder;
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
 import lombok.NoArgsConstructor;
@@ -67,6 +72,10 @@ public class IxiBotModule extends AbstractModule {
      * File path to bot configuration resource.
      */
     private static final String CONFIG_RESOURCE = "/config.yaml";
+    /**
+     * URL/path to SQLite database file.
+     */
+    private static final String CONNECTION_URL = "jdbc:sqlite:sqlite.db";
     /**
      * Minimum thread pool size.
      */
@@ -95,7 +104,22 @@ public class IxiBotModule extends AbstractModule {
      */
     @Override
     protected void configure() {
-        install(new DatabaseModule());
+        install(ThrowingProviderBinder.forModule(this));
+    }
+
+    /**
+     * JDBC connection provider.
+     *
+     * @return JDBC connection.
+     * @throws ClassNotFoundException on failure to load JDBC driver.
+     * @throws SQLException           if a database access error occurs.
+     */
+    @CheckedProvides(ConnectionProvider.class)
+    @Provides
+    public Connection connection() throws ClassNotFoundException, SQLException {
+        Class.forName("org.sqlite.JDBC");
+
+        return DriverManager.getConnection(CONNECTION_URL);
     }
 
     /**

@@ -193,14 +193,15 @@ public class Database {
                         reactionName,
                         animated);
                 @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
-                final RoleReaction roleReaction = new RoleReaction(
-                        resultSet.getBoolean(RoleReactionContract.ADD_VERIFIED),
-                        Snowflake.of(resultSet.getLong(RoleReactionContract.CHANNEL_ID)),
-                        Snowflake.of(resultSet.getLong(RoleReactionContract.GUILD_ID)),
-                        Snowflake.of(resultSet.getLong(RoleReactionContract.MESSAGE_ID)),
-                        reactionEmoji,
-                        resultSet.getBoolean(RoleReactionContract.REMOVE_VERIFIED),
-                        Snowflake.of(resultSet.getLong(RoleReactionContract.ROLE_ID)));
+                final RoleReaction roleReaction = RoleReaction.builder()
+                        .addVerified(resultSet.getBoolean(RoleReactionContract.ADD_VERIFIED))
+                        .channelID(Snowflake.of(resultSet.getLong(RoleReactionContract.CHANNEL_ID)))
+                        .guildID(Snowflake.of(resultSet.getLong(RoleReactionContract.GUILD_ID)))
+                        .messageID(Snowflake.of(resultSet.getLong(RoleReactionContract.MESSAGE_ID)))
+                        .reactionEmoji(reactionEmoji)
+                        .removeVerified(resultSet.getBoolean(RoleReactionContract.REMOVE_VERIFIED))
+                        .roleID(Snowflake.of(resultSet.getLong(RoleReactionContract.ROLE_ID)))
+                        .build();
 
                 roleReactions.add(roleReaction);
             }

@@ -36,6 +36,7 @@ import java.util.Optional;
 
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
+import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
@@ -44,6 +45,7 @@ import lombok.Value;
  *
  * @author Ryan Porterfield
  */
+@Builder(toBuilder = true)
 @Value
 public class RoleReaction {
     /**
