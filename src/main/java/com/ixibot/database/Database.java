@@ -42,7 +42,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.inject.Inject;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
 import lombok.NonNull;
@@ -54,13 +53,13 @@ import lombok.extern.slf4j.Slf4j;
  *
  * @author Ryan Porterfield
  */
-@RequiredArgsConstructor(onConstructor = @__({ @Inject}))
+@RequiredArgsConstructor
 @Slf4j
 public class Database {
     /**
      * Database version number.
      */
-    private static final long DATABASE_VERSION = 1;
+    public static final long DATABASE_VERSION = 1;
 
     /**
      * Connection to SQLite database.
@@ -127,6 +126,11 @@ public class Database {
         try (PreparedStatement createStatement = connection.prepareStatement(
                 RoleReactionContract.CREATE_TABLE)) {
             createStatement.execute();
+        }
+
+        try (PreparedStatement versionStatement = connection.prepareStatement(
+                String.format("PRAGMA user_version = %d", DATABASE_VERSION))) {
+            versionStatement.execute();
         }
     }
 
@@ -216,19 +220,22 @@ public class Database {
      * @throws SQLException if a database access error occurs.
      */
     public void init() throws SQLException {
+        createTable();
+
+        log.trace("Getting database version");
+        final long databaseVersion;
         try (Statement statement = connection.createStatement();
-                ResultSet versionResult = statement.executeQuery("PRAGMA schema.user_version")) {
-            final long databaseVersion;
+                ResultSet versionResult = statement.executeQuery("PRAGMA user_version")) {
 
             if (versionResult.next()) {
                 databaseVersion = versionResult.getLong(1);
             } else {
                 databaseVersion = 0;
             }
+        }
 
-            if (databaseVersion < DATABASE_VERSION) {
-                updateDatabase();
-            }
+        if (databaseVersion < DATABASE_VERSION) {
+            updateDatabase();
         }
     }
 

@@ -32,9 +32,14 @@
 
 package com.ixibot.module;
 
+import com.ixibot.IxiBot;
+import com.ixibot.api.DiscordAPI;
 import com.ixibot.data.BotConfiguration;
+import com.ixibot.database.Database;
 import com.ixibot.provider.BotConfigurationProvider;
 import com.ixibot.provider.ConnectionProvider;
+import com.ixibot.provider.DatabaseProvider;
+import com.ixibot.provider.IxiBotProvider;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -123,6 +128,24 @@ public class IxiBotModule extends AbstractModule {
     }
 
     /**
+     * Database interface provider.
+     *
+     * @param connection JDBC connection.
+     * @return Database interface.
+     * @throws SQLException on error reading from database.
+     */
+    @CheckedProvides(DatabaseProvider.class)
+    @Inject
+    @Provides
+    public Database database(final Connection connection) throws SQLException {
+        final Database database = new Database(connection);
+
+        database.init();
+
+        return database;
+    }
+
+    /**
      * Discord4J client provider.
      *
      * @param botConfiguration Bot configuration.
@@ -134,6 +157,32 @@ public class IxiBotModule extends AbstractModule {
         return new DiscordClientBuilder(
                 botConfiguration.getDiscordToken())
                 .build();
+    }
+
+    /**
+     * IxiBot provider.
+     *
+     * @param database Database interface.
+     * @param discordAPI Discord4J wrapper.
+     * @param botConfiguration Bot configuration.
+     * @param scheduler Thread pool scheduler.
+     * @return IxiBot instance.
+     * @throws SQLException on error reading from database.
+     */
+    @CheckedProvides(IxiBotProvider.class)
+    @Inject
+    @Provides
+    public IxiBot ixiBot(
+            final Database database,
+            final DiscordAPI discordAPI,
+            final BotConfiguration botConfiguration,
+            final ScheduledThreadPoolExecutor scheduler) throws SQLException {
+        return new IxiBot(
+                database,
+                discordAPI,
+                database.getAllRoleReactions(),
+                botConfiguration.getRoleVerifyDelay(),
+                scheduler);
     }
 
     /**

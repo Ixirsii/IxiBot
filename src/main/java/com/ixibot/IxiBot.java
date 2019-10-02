@@ -47,7 +47,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.google.common.eventbus.Subscribe;
-import com.google.inject.Inject;
 import discord4j.core.object.reaction.ReactionEmoji;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +57,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  * @author Ryan Porterfield
  */
-@RequiredArgsConstructor(onConstructor = @__({ @Inject }))
+@RequiredArgsConstructor
 @Slf4j
 public class IxiBot implements AutoCloseable, Runnable {
     /**

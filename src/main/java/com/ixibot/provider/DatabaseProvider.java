@@ -30,62 +30,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.ixibot;
+package com.ixibot.provider;
 
-import com.ixibot.module.IxiBotModule;
+import com.ixibot.database.Database;
 
-import java.util.Scanner;
+import java.sql.SQLException;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
+import com.google.inject.throwingproviders.CheckedProvider;
 
 /**
- * Main class.
+ * Database interface provider.
  *
  * @author Ryan Porterfield
  */
-@Slf4j
-public final class Main {
+public interface DatabaseProvider extends CheckedProvider<Database> {
     /**
-     * Command to stop execution.
+     * {@inheritDoc}
      */
-    private static final String QUIT_COMMAND = "quit";
-
-    /**
-     * Program loop control.
-     */
-    private static boolean isRunning = true;
-
-    /**
-     * Hide the constructor for utility class.
-     */
-    private Main() {
-    }
-
-    /**
-     * Main method.
-     *
-     * @param args Execution arguments.
-     */
-    public static void main(@NonNull final String[] args) {
-        final Injector injector = Guice.createInjector(new IxiBotModule());
-        final IxiBot ixiBot = injector.getInstance(IxiBot.class);
-        final Scanner scanner = new Scanner(System.in, "UTF-8");
-
-        ixiBot.run();
-
-        do {
-            log.info("Type \"quit\" to exit");
-            final String input = scanner.nextLine();
-            log.info("Got user input: {}", input);
-
-            if (QUIT_COMMAND.equals(input)) {
-                isRunning = false;
-            }
-        } while (isRunning);
-
-        ixiBot.close();
-    }
+    @Override
+    Database get() throws SQLException;
 }
