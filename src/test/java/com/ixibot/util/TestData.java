@@ -34,10 +34,22 @@ package com.ixibot.util;
 
 import com.ixibot.data.RoleReaction;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
 
 public class TestData {
+    public static final String CONFIG_RESOURCE = "/config.yaml";
+    public static final ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory())
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .registerModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
+            .registerModule(new Jdk8Module());
+
     public static final String ABOUT_OPTION = "This is an option used for testing";
     public static final ReactionEmoji.Custom CUSTOM_EMOJI = ReactionEmoji.custom(
             Snowflake.of(1L), "ixiEyes", false);

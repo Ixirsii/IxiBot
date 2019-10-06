@@ -32,8 +32,10 @@
 
 package com.ixibot.data;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
 /**
@@ -41,23 +43,24 @@ import lombok.Value;
  *
  * @author Ryan Porterfield
  */
+@RequiredArgsConstructor(onConstructor = @__(@JsonCreator))
 @Value
 public class BotConfiguration {
     /**
      * If a message starts with this prefix the bot will attempt to parse a command from it.
      */
-    @JsonProperty("commandPrefix")
+    @JsonProperty(value = "commandPrefix", required = true)
     @NonNull
     private final String commandPrefix;
     /**
      * Discord bot token.
      */
-    @JsonProperty("discordToken")
+    @JsonProperty(value = "discordToken", required = true)
     @NonNull
     private final String discordToken;
     /**
      * Interval (in minutes) between Discord role verification checks.
      */
-    @JsonProperty("roleVerifyDelay")
+    @JsonProperty(value = "roleVerifyDelay", required = true)
     private final long roleVerifyDelay;
 }

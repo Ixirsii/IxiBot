@@ -36,15 +36,8 @@ import com.ixibot.IxiBot;
 import com.ixibot.api.DiscordAPI;
 import com.ixibot.data.BotConfiguration;
 import com.ixibot.database.Database;
-import com.ixibot.provider.BotConfigurationProvider;
-import com.ixibot.provider.ConnectionProvider;
-import com.ixibot.provider.DatabaseProvider;
 import com.ixibot.provider.IxiBotProvider;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -74,35 +67,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class IxiBotModule extends AbstractModule {
     /**
-     * File path to bot configuration resource.
+     * Bot configuration directory.
      */
-    private static final String CONFIG_RESOURCE = "/config.yaml";
-    /**
-     * URL/path to SQLite database file.
-     */
-    private static final String CONNECTION_URL = "jdbc:sqlite:sqlite.db";
+    /* default */ static final String CONFIG_DIRECTORY = "config/";
     /**
      * Minimum thread pool size.
      */
     private static final int THREAD_POOL_SIZE = 1;
-
-    /**
-     * Read bot configuration from config file.
-     *
-     * @param objectMapper YAML object mapper.
-     * @return bot configuration.
-     * @throws IOException on error reading from config file.
-     */
-    @CheckedProvides(BotConfigurationProvider.class)
-    @Inject
-    @Provides
-    @Singleton
-    public BotConfiguration botConfiguration(
-            @Named("yamlMapper") final ObjectMapper objectMapper) throws IOException {
-        try (InputStream configResource = getClass().getResourceAsStream(CONFIG_RESOURCE)) {
-            return objectMapper.readValue(configResource, BotConfiguration.class);
-        }
-    }
 
     /**
      * Configure module.
@@ -110,39 +81,8 @@ public class IxiBotModule extends AbstractModule {
     @Override
     protected void configure() {
         install(ThrowingProviderBinder.forModule(this));
-    }
-
-    /**
-     * JDBC connection provider.
-     *
-     * @return JDBC connection.
-     * @throws ClassNotFoundException on failure to load JDBC driver.
-     * @throws SQLException           if a database access error occurs.
-     */
-    @CheckedProvides(ConnectionProvider.class)
-    @Provides
-    public Connection connection() throws ClassNotFoundException, SQLException {
-        Class.forName("org.sqlite.JDBC");
-
-        return DriverManager.getConnection(CONNECTION_URL);
-    }
-
-    /**
-     * Database interface provider.
-     *
-     * @param connection JDBC connection.
-     * @return Database interface.
-     * @throws SQLException on error reading from database.
-     */
-    @CheckedProvides(DatabaseProvider.class)
-    @Inject
-    @Provides
-    public Database database(final Connection connection) throws SQLException {
-        final Database database = new Database(connection);
-
-        database.init();
-
-        return database;
+        install(new BotConfigurationModule());
+        install(new DatabaseModule());
     }
 
     /**
