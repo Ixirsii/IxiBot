@@ -72,7 +72,7 @@ class BotConfigurationTest {
 
     @Test
     void discordToken() {
-        assertEquals("NTkxNDMzMTk0NTIwNDQ0OTQ5.XSHDdA.yiwJMNmYPmI6jx00wcs0dsyChqc",
+        assertEquals("discordToken",
                 underTest.getDiscordToken(),
                 "Discord token should equal expected");
     }

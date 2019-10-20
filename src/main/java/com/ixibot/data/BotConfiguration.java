@@ -32,10 +32,10 @@
 
 package com.ixibot.data;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import lombok.Builder;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
 /**
@@ -43,24 +43,43 @@ import lombok.Value;
  *
  * @author Ryan Porterfield
  */
-@RequiredArgsConstructor(onConstructor = @__(@JsonCreator))
+@Builder(toBuilder = true)
+@JsonIgnoreProperties("defaultConfig")
 @Value
 public class BotConfiguration {
     /**
      * If a message starts with this prefix the bot will attempt to parse a command from it.
      */
-    @JsonProperty(value = "commandPrefix", required = true)
     @NonNull
     private final String commandPrefix;
     /**
+     * Is this the default bot configuration from the internal resource.
+     */
+    private final boolean defaultConfig;
+    /**
      * Discord bot token.
      */
-    @JsonProperty(value = "discordToken", required = true)
     @NonNull
     private final String discordToken;
     /**
      * Interval (in minutes) between Discord role verification checks.
      */
-    @JsonProperty(value = "roleVerifyDelay", required = true)
-    private final long roleVerifyDelay;
+    @NonNull
+    private final Long roleVerifyDelay;
+
+    /**
+     * Builder class.
+     */
+    @JsonPOJOBuilder(withPrefix = "")
+    @SuppressWarnings({
+            "PMD.UnusedPrivateField",
+            "PMD.RedundantFieldInitializer",
+            "PMD.ImmutableField"
+    })
+    public static class BotConfigurationBuilder {
+        /**
+         * Default value for {@link BotConfiguration#defaultConfig}.
+         */
+        private boolean defaultConfig = false;
+    }
 }

@@ -103,7 +103,10 @@ import lombok.extern.slf4j.Slf4j;
         } catch (final FileNotFoundException fnfe) {
             log.info("User configuration file not found, falling back to default configuration.");
 
-            botConfiguration = defaultBotConfiguration(objectMapper);
+            botConfiguration = defaultBotConfiguration(objectMapper)
+                    .toBuilder()
+                    .defaultConfig(true)
+                    .build();
         } catch (final IOException ioe) {
             final String message = "Error reading from user configuration file";
             log.error(message, ioe);

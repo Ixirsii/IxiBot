@@ -4,7 +4,6 @@ import com.ixibot.data.BotConfiguration;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.Charset;
 
 import org.apache.commons.io.FileUtils;
@@ -13,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static com.ixibot.util.TestData.CONFIG_RESOURCE;
 import static com.ixibot.util.TestData.YAML_MAPPER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -40,10 +38,11 @@ class BotConfigurationModuleTest {
     void givenValidUserConfiguration_whenBotConfiguration_thenReturnsBotConfig(
             @TempDir final File tempFile) throws Exception {
         final File tempUserConfigFile = new File(tempFile, "config.yaml");
-        final BotConfiguration expected = new BotConfiguration(
-                COMMAND_PREFIX,
-                DISCORD_TOKEN,
-                ROLE_VERIFY_DELAY);
+        final BotConfiguration expected = BotConfiguration.builder()
+                .commandPrefix(COMMAND_PREFIX)
+                .discordToken(DISCORD_TOKEN)
+                .roleVerifyDelay(ROLE_VERIFY_DELAY)
+                .build();
 
         FileUtils.write(tempUserConfigFile, VALID_CONFIGURATION, Charset.defaultCharset());
 
@@ -69,13 +68,12 @@ class BotConfigurationModuleTest {
     void givenUserConfigDoesntExist_whenBotConfiguration_thenReturnsDefaultConfig(
             @TempDir final File tempFile) throws Exception {
         final File tempUserConfigFile = new File(tempFile, "config.yaml");
-        final BotConfiguration expected;
-
-        try (InputStream configResource = getClass().getResourceAsStream(CONFIG_RESOURCE)) {
-            expected = YAML_MAPPER.readValue(
-                    configResource,
-                    BotConfiguration.class);
-        }
+        final BotConfiguration expected = BotConfiguration.builder()
+                .commandPrefix(COMMAND_PREFIX)
+                .defaultConfig(true)
+                .discordToken(DISCORD_TOKEN)
+                .roleVerifyDelay(ROLE_VERIFY_DELAY)
+                .build();
 
         final BotConfiguration actual = underTest.botConfiguration(tempUserConfigFile, YAML_MAPPER);
 
