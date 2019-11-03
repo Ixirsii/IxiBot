@@ -109,6 +109,7 @@ public final class Main {
         final IxiBot ixiBot = injector.getInstance(IxiBot.class);
         final Scanner scanner = new Scanner(System.in, "UTF-8");
 
+        ixiBot.init();
         ixiBot.run();
         log.info("Type \"quit\" to exit");
 

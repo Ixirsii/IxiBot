@@ -122,6 +122,13 @@ public class IxiBot implements AutoCloseable, Runnable {
     }
 
     /**
+     * Initialize bot instance.
+     */
+    public void init() {
+        discordAPI.init();
+    }
+
+    /**
      * DiscordReactionEvent subscriber.
      *
      * @param event Event published to the event bus.

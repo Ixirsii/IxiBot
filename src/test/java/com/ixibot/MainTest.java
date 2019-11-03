@@ -61,6 +61,7 @@ class MainTest {
         underTest.start(tempFile);
 
         verify(injectorMock).getInstance(IxiBot.class);
+        verify(ixiBotMock).init();
         verify(ixiBotMock).run();
         verify(ixiBotMock).close();
     }

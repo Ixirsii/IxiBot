@@ -86,7 +86,12 @@ public class DiscordAPI {
                       @NonNull final EventBus eventBus) {
         this.discordClient = discordClient;
         this.eventBus = eventBus;
+    }
 
+    /**
+     * Initialize Discord API.
+     */
+    public void init() {
         registerDiscordListeners();
         discordClient.login().subscribe();
     }
@@ -96,7 +101,10 @@ public class DiscordAPI {
      */
     public void logout() {
         log.debug("Logging out of Discord");
-        discordClient.logout().block();
+
+        if (discordClient.isConnected()) {
+            discordClient.logout().block();
+        }
     }
 
     /**
