@@ -1,3 +1,10 @@
+# This is the prefix that bot commands use.
+# Most Twitch bots use '!' but some use '/'.
+# Possible values: any string of length >= 1
 commandPrefix: ./
+# Your discord bot token
+# Possible values: bot token string from Discord developer application
 discordToken: discordToken
+# Delay in minutes between Discord role verification checks.
+# Possible values: any integer >= 1
 roleVerifyDelay: 10
