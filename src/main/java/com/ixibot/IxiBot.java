@@ -61,6 +61,24 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class IxiBot implements AutoCloseable, Runnable {
     /**
+     * Bot configuration file.
+     */
+    private static final String CONFIG_FILE_NAME = "config.yaml";
+
+    /**
+     * Bot configuration directory.
+     */
+    public static final String CONFIG_DIRECTORY = "config/";
+    /**
+     * File path to bot configuration resource.
+     */
+    public static final String CONFIG_RESOURCE = "/" + CONFIG_FILE_NAME;
+    /**
+     * Config file configured by the user.
+     */
+    public static final String USER_CONFIG_FILE = CONFIG_DIRECTORY + CONFIG_FILE_NAME;
+
+    /**
      * Database interface.
      */
     @NonNull

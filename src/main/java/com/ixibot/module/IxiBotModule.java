@@ -67,10 +67,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class IxiBotModule extends AbstractModule {
     /**
-     * Bot configuration directory.
-     */
-    /* default */ static final String CONFIG_DIRECTORY = "config/";
-    /**
      * Minimum thread pool size.
      */
     private static final int THREAD_POOL_SIZE = 1;

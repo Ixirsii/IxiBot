@@ -32,6 +32,7 @@
 
 package com.ixibot.module;
 
+import com.ixibot.IxiBot;
 import com.ixibot.database.Database;
 import com.ixibot.provider.ConnectionProvider;
 import com.ixibot.provider.DatabaseProvider;
@@ -58,7 +59,7 @@ import lombok.NoArgsConstructor;
      * URL/path to SQLite database file.
      */
     private static final String CONNECTION_URL =
-            "jdbc:sqlite:" + IxiBotModule.CONFIG_DIRECTORY + "sqlite.db";
+            "jdbc:sqlite:" + IxiBot.CONFIG_DIRECTORY + "sqlite.db";
 
     /**
      * Configure module.

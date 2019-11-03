@@ -32,6 +32,7 @@
 
 package com.ixibot.module;
 
+import com.ixibot.IxiBot;
 import com.ixibot.data.BotConfiguration;
 import com.ixibot.provider.BotConfigurationProvider;
 
@@ -60,18 +61,6 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor
 @Slf4j
 /* default */ class BotConfigurationModule extends AbstractModule {
-    /**
-     * Bot configuration file.
-     */
-    private static final String CONFIG_FILE_NAME = "config.yaml";
-    /**
-     * File path to bot configuration resource.
-     */
-    private static final String CONFIG_RESOURCE = "/" + CONFIG_FILE_NAME;
-    /**
-     * Config file configured by the user.
-     */
-    private static final String USER_CONFIG_FILE = IxiBotModule.CONFIG_DIRECTORY + CONFIG_FILE_NAME;
 
     /**
      * Configure module.
@@ -101,7 +90,7 @@ import lombok.extern.slf4j.Slf4j;
         try {
             botConfiguration = userBotConfiguration(userConfigFile, objectMapper);
         } catch (final FileNotFoundException fnfe) {
-            log.info("User configuration file not found, falling back to default configuration.");
+            log.debug("User configuration file not found, falling back to default configuration.");
 
             botConfiguration = defaultBotConfiguration(objectMapper)
                     .toBuilder()
@@ -126,7 +115,7 @@ import lombok.extern.slf4j.Slf4j;
      */
     private BotConfiguration defaultBotConfiguration(@NonNull final ObjectMapper objectMapper)
             throws IOException {
-        try (InputStream configResource = getClass().getResourceAsStream(CONFIG_RESOURCE)) {
+        try (InputStream configResource = getClass().getResourceAsStream(IxiBot.CONFIG_RESOURCE)) {
             return objectMapper.readValue(configResource, BotConfiguration.class);
         }
     }
@@ -171,6 +160,6 @@ import lombok.extern.slf4j.Slf4j;
     @Provides
     @Singleton
     public File userConfigFile() {
-        return new File(USER_CONFIG_FILE);
+        return new File(IxiBot.USER_CONFIG_FILE);
     }
 }

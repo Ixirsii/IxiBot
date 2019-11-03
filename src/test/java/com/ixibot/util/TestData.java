@@ -32,6 +32,7 @@
 
 package com.ixibot.util;
 
+import com.ixibot.data.BotConfiguration;
 import com.ixibot.data.RoleReaction;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -44,17 +45,38 @@ import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
 
 public class TestData {
-    public static final String CONFIG_RESOURCE = "/config.yaml";
-    public static final ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory())
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .registerModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
-            .registerModule(new Jdk8Module());
-
     public static final String ABOUT_OPTION = "This is an option used for testing";
+    public static final String CONFIG_RESOURCE = "/config.yaml";
+    public static final String COMMAND_PREFIX = "./";
+    public static final String DISCORD_TOKEN = "discordToken";
+    public static final String LONG_OPTION = "long-option";
+    public static final long ROLE_VERIFY_DELAY = 10L;
+    public static final char SHORT_OPTION = 's';
+
+    public static final String INVALID_CONFIGURATION = String.format(
+            "commandPrefix: %s%ndiscordToken: %s",
+            COMMAND_PREFIX,
+            DISCORD_TOKEN);
+    public static final String VALID_CONFIGURATION = String.format(
+            "commandPrefix: %s%ndiscordToken: %s%nroleVerifyDelay: %d",
+            COMMAND_PREFIX,
+            DISCORD_TOKEN,
+            ROLE_VERIFY_DELAY);
+
+    public static final BotConfiguration DEFAULT_CONFIG = BotConfiguration.builder()
+            .commandPrefix(COMMAND_PREFIX)
+            .defaultConfig(true)
+            .discordToken(DISCORD_TOKEN)
+            .roleVerifyDelay(ROLE_VERIFY_DELAY)
+            .build();
+    public static final BotConfiguration USER_CONFIG = BotConfiguration.builder()
+            .commandPrefix(COMMAND_PREFIX)
+            .discordToken(DISCORD_TOKEN)
+            .roleVerifyDelay(ROLE_VERIFY_DELAY)
+            .build();
+
     public static final ReactionEmoji.Custom CUSTOM_EMOJI = ReactionEmoji.custom(
             Snowflake.of(1L), "ixiEyes", false);
-    public static final String LONG_OPTION = "long-option";
-    public static final char SHORT_OPTION = 's';
     public static final ReactionEmoji.Unicode UNICODE_EMOJI = ReactionEmoji.unicode("ixiNose");
 
     public static final RoleReaction ROLE_REACTION_1 = RoleReaction.builder()
@@ -84,6 +106,11 @@ public class TestData {
             .removeVerified(false)
             .roleID(Snowflake.of(3L))
             .build();
+
+    public static final ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory())
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .registerModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
+            .registerModule(new Jdk8Module());
 
     /**
      * Hide utility class constructor.

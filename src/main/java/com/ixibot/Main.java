@@ -32,14 +32,21 @@
 
 package com.ixibot;
 
+import com.ixibot.data.BotConfiguration;
 import com.ixibot.module.IxiBotModule;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Scanner;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 
 /**
  * Main class.
@@ -47,6 +54,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Ryan Porterfield
  */
 @Slf4j
+@Data
 public final class Main {
     /**
      * Command to stop execution.
@@ -54,15 +62,14 @@ public final class Main {
     private static final String QUIT_COMMAND = "quit";
 
     /**
-     * Program loop control.
+     * Guice injector for dependency injection.
      */
-    private static boolean isRunning = true;
+    private final Injector injector;
 
     /**
-     * Hide the constructor for utility class.
+     * Program loop control.
      */
-    private Main() {
-    }
+    private boolean isRunning;
 
     /**
      * Main method.
@@ -71,15 +78,43 @@ public final class Main {
      */
     public static void main(@NonNull final String[] args) {
         final Injector injector = Guice.createInjector(new IxiBotModule());
+        final Main main = new Main(injector);
+
+        main.start(new File(IxiBot.USER_CONFIG_FILE));
+    }
+
+    /**
+     * Write default configuration file and exit.
+     *
+     * @param configFile File path to user config file.
+     */
+    private void generateUserConfig(@NonNull final File configFile) {
+        try (InputStream configResource = Main.class.getResourceAsStream(IxiBot.CONFIG_RESOURCE)) {
+            log.info(
+                    "Writing new user config file to \"{}\"",
+                    configFile.getAbsolutePath());
+            FileUtils.copyToFile(configResource, configFile);
+        } catch (final IOException ioe) {
+            log.error(
+                    "Caught IOException trying to write new user config file to \"{}\"",
+                    configFile.getAbsolutePath(),
+                    ioe);
+        }
+    }
+
+    /**
+     * Run bot.
+     */
+    private void run() {
         final IxiBot ixiBot = injector.getInstance(IxiBot.class);
         final Scanner scanner = new Scanner(System.in, "UTF-8");
 
         ixiBot.run();
+        log.info("Type \"quit\" to exit");
 
         do {
-            log.info("Type \"quit\" to exit");
             final String input = scanner.nextLine();
-            log.info("Got user input: {}", input);
+            log.debug("Got user input: {}", input);
 
             if (QUIT_COMMAND.equals(input)) {
                 isRunning = false;
@@ -87,5 +122,24 @@ public final class Main {
         } while (isRunning);
 
         ixiBot.close();
+    }
+
+    /**
+     * Start bot.
+     *
+     * @param configFile File path to user config file.
+     */
+    @VisibleForTesting
+    /* default */ void start(@NonNull final File configFile) {
+        final BotConfiguration botConfiguration = injector.getInstance(BotConfiguration.class);
+
+        if (botConfiguration.isDefaultConfig()) {
+            generateUserConfig(configFile);
+            log.info("Generated new user config file. Please customize your configuration then "
+                    + "restart the bot");
+        } else {
+            isRunning = true;
+            run();
+        }
     }
 }
