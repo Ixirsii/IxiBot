@@ -38,12 +38,12 @@ import com.ixibot.module.IxiBotModule;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ConnectException;
 import java.util.Scanner;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -54,7 +54,6 @@ import org.apache.commons.io.FileUtils;
  * @author Ryan Porterfield
  */
 @Slf4j
-@Data
 public final class Main {
     /**
      * Command to stop execution.
@@ -62,14 +61,15 @@ public final class Main {
     private static final String QUIT_COMMAND = "quit";
 
     /**
-     * Guice injector for dependency injection.
-     */
-    private final Injector injector;
-
-    /**
      * Program loop control.
      */
-    private boolean isRunning;
+    private static boolean isRunning;
+
+    /**
+     * Hide utility class constructor.
+     */
+    private Main() {
+    }
 
     /**
      * Main method.
@@ -78,9 +78,22 @@ public final class Main {
      */
     public static void main(@NonNull final String[] args) {
         final Injector injector = Guice.createInjector(new IxiBotModule());
-        final Main main = new Main(injector);
 
-        main.start(new File(IxiBot.USER_CONFIG_FILE));
+        final BotConfiguration botConfiguration = injector.getInstance(BotConfiguration.class);
+
+        if (botConfiguration.isDefaultConfig()) {
+            final File configFile = new File(IxiBot.USER_CONFIG_FILE);
+            generateUserConfig(configFile);
+            log.info("Generated new user config file at \"{}\". "
+                            + "Please customize your configuration then restart the bot",
+                    configFile.getAbsolutePath());
+        } else {
+            final IxiBot ixiBot = injector.getInstance(IxiBot.class);
+
+            if (start(ixiBot)) {
+                run(ixiBot);
+            }
+        }
     }
 
     /**
@@ -88,9 +101,9 @@ public final class Main {
      *
      * @param configFile File path to user config file.
      */
-    private void generateUserConfig(@NonNull final File configFile) {
+    private static void generateUserConfig(@NonNull final File configFile) {
         try (InputStream configResource = Main.class.getResourceAsStream(IxiBot.CONFIG_RESOURCE)) {
-            log.info(
+            log.debug(
                     "Writing new user config file to \"{}\"",
                     configFile.getAbsolutePath());
             FileUtils.copyToFile(configResource, configFile);
@@ -104,23 +117,24 @@ public final class Main {
 
     /**
      * Run bot.
+     *
+     * @param ixiBot Bot instance to run.
      */
-    private void run() {
-        final IxiBot ixiBot = injector.getInstance(IxiBot.class);
+    private static void run(@NonNull final IxiBot ixiBot) {
+        // TODO: Do nothing if !isRunning
         final Scanner scanner = new Scanner(System.in, "UTF-8");
 
-        ixiBot.init();
         ixiBot.run();
         log.info("Type \"quit\" to exit");
 
-        do {
+        while (isRunning) {
             final String input = scanner.nextLine();
             log.debug("Got user input: {}", input);
 
             if (QUIT_COMMAND.equals(input)) {
-                isRunning = false;
+                stop();
             }
-        } while (isRunning);
+        }
 
         ixiBot.close();
     }
@@ -128,19 +142,27 @@ public final class Main {
     /**
      * Start bot.
      *
-     * @param configFile File path to user config file.
+     * @param ixiBot Bot instance to run.
+     * @return {@code true} if the bot started successfully, otherwise {@code false}.
      */
     @VisibleForTesting
-    /* default */ void start(@NonNull final File configFile) {
-        final BotConfiguration botConfiguration = injector.getInstance(BotConfiguration.class);
+    /* default */ static boolean start(@NonNull final IxiBot ixiBot) {
+        boolean started = true;
 
-        if (botConfiguration.isDefaultConfig()) {
-            generateUserConfig(configFile);
-            log.info("Generated new user config file. Please customize your configuration then "
-                    + "restart the bot");
-        } else {
-            isRunning = true;
-            run();
+        try {
+            ixiBot.init();
+        } catch (final ConnectException ce) {
+            log.error("Failed to connect to a required API, exiting", ce);
+            started = false;
         }
+
+        return started;
+    }
+
+    /**
+     * Stop bot.
+     */
+    private static void stop() {
+        isRunning = false;
     }
 }

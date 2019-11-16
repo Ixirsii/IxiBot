@@ -2,6 +2,11 @@
 # Most Twitch bots use '!' but some use '/'.
 # Possible values: any string of length >= 1
 commandPrefix: ./
+# When true, if the bot fails to connect to Discord it will exit with a failure.
+# When false the bot will continue to run using only the APIs which connected
+# successfully.
+# Possible values: true, false
+discordRequired: true
 # Your discord bot token
 # Possible values: bot token string from Discord developer application
 discordToken: discordToken

@@ -38,6 +38,7 @@ import com.ixibot.database.Database;
 import com.ixibot.event.DiscordReactionEvent;
 import com.ixibot.event.RoleReactionEvent;
 
+import java.net.ConnectException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
@@ -123,8 +124,10 @@ public class IxiBot implements AutoCloseable, Runnable {
 
     /**
      * Initialize bot instance.
+     *
+     * @throws ConnectException on failure to connect to API.
      */
-    public void init() {
+    public void init() throws ConnectException {
         discordAPI.init();
     }
 

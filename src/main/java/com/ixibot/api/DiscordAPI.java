@@ -35,6 +35,7 @@ package com.ixibot.api;
 import com.ixibot.data.RoleReaction;
 import com.ixibot.event.DiscordReactionEvent;
 
+import java.net.ConnectException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -51,6 +52,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /*
@@ -62,6 +64,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  * @author Ryan Porterfield
  */
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 @Slf4j
 public class DiscordAPI {
     /**
@@ -74,26 +77,23 @@ public class DiscordAPI {
      */
     @NonNull
     private final EventBus eventBus;
-
     /**
-     * Constructor.
-     *
-     * @param discordClient Discord4J client.
-     * @param eventBus Event bus to publish events to.
+     * If {@code true} this API wrapper will throw an exception on failure to connect.
      */
-    @Inject
-    public DiscordAPI(@NonNull final DiscordClient discordClient,
-                      @NonNull final EventBus eventBus) {
-        this.discordClient = discordClient;
-        this.eventBus = eventBus;
-    }
+    private final boolean isDiscordRequired;
 
     /**
      * Initialize Discord API.
+     *
+     * @throws ConnectException on failure to connect to API.
      */
-    public void init() {
+    public void init() throws ConnectException {
         registerDiscordListeners();
-        discordClient.login().subscribe();
+        discordClient.login().block();
+
+        if (isDiscordRequired && !discordClient.isConnected()) {
+            throw new ConnectException("Failed to connect to Discord API");
+        }
     }
 
     /**

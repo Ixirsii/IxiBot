@@ -58,19 +58,22 @@ public class TestData {
             COMMAND_PREFIX,
             DISCORD_TOKEN);
     public static final String VALID_CONFIGURATION = String.format(
-            "commandPrefix: %s%ndiscordToken: %s%nroleVerifyDelay: %d",
+            "commandPrefix: %s%ndiscordRequired: %b%ndiscordToken: %s%nroleVerifyDelay: %d",
             COMMAND_PREFIX,
+            true,
             DISCORD_TOKEN,
             ROLE_VERIFY_DELAY);
 
     public static final BotConfiguration DEFAULT_CONFIG = BotConfiguration.builder()
             .commandPrefix(COMMAND_PREFIX)
             .defaultConfig(true)
+            .discordRequired(true)
             .discordToken(DISCORD_TOKEN)
             .roleVerifyDelay(ROLE_VERIFY_DELAY)
             .build();
     public static final BotConfiguration USER_CONFIG = BotConfiguration.builder()
             .commandPrefix(COMMAND_PREFIX)
+            .discordRequired(true)
             .discordToken(DISCORD_TOKEN)
             .roleVerifyDelay(ROLE_VERIFY_DELAY)
             .build();

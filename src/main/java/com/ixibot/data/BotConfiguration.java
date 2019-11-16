@@ -57,6 +57,10 @@ public class BotConfiguration {
      */
     private final boolean defaultConfig;
     /**
+     * Should the bot exit on failure to connect to Discord.
+     */
+    private final boolean discordRequired;
+    /**
      * Discord bot token.
      */
     @NonNull
