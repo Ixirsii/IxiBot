@@ -156,7 +156,6 @@ public abstract class Command<E> {
      * @param arguments Tokenized array of arguments.
      * @return map of arguments to Options that consume them.
      */
-    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     /* default */ Map<String, ArgumentIndex> getArgumentMap(@NonNull final String... arguments) {
         final Map<String, ArgumentIndex> argumentMap = new ConcurrentHashMap<>();
 

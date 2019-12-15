@@ -196,7 +196,6 @@ public class Database {
                         reactionId,
                         reactionName,
                         animated);
-                @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
                 final RoleReaction roleReaction = RoleReaction.builder()
                         .addVerified(resultSet.getBoolean(RoleReactionContract.ADD_VERIFIED))
                         .channelID(Snowflake.of(resultSet.getLong(RoleReactionContract.CHANNEL_ID)))

@@ -39,12 +39,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ConnectException;
-import java.util.Scanner;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
@@ -53,23 +53,13 @@ import org.apache.commons.io.FileUtils;
  *
  * @author Ryan Porterfield
  */
+@RequiredArgsConstructor
 @Slf4j
 public final class Main {
     /**
-     * Command to stop execution.
+     * Guava injector.
      */
-    private static final String QUIT_COMMAND = "quit";
-
-    /**
-     * Program loop control.
-     */
-    private static boolean isRunning;
-
-    /**
-     * Hide utility class constructor.
-     */
-    private Main() {
-    }
+    private final Injector injector;
 
     /**
      * Main method.
@@ -83,16 +73,22 @@ public final class Main {
 
         if (botConfiguration.isDefaultConfig()) {
             final File configFile = new File(IxiBot.USER_CONFIG_FILE);
-            generateUserConfig(configFile);
-            log.info("Generated new user config file at \"{}\". "
-                            + "Please customize your configuration then restart the bot",
-                    configFile.getAbsolutePath());
-        } else {
-            final IxiBot ixiBot = injector.getInstance(IxiBot.class);
 
-            if (start(ixiBot)) {
-                run(ixiBot);
+            try {
+                generateUserConfig(configFile);
+                log.info("Generated new user config file at \"{}\". "
+                                + "Please customize your configuration then restart the bot",
+                        configFile.getAbsolutePath());
+            }  catch (final IOException ioe) {
+                log.error(
+                        "Caught IOException trying to write new user config file to \"{}\"",
+                        configFile.getAbsolutePath(),
+                        ioe);
             }
+        } else {
+            final Main main = new Main(injector);
+
+            main.run();
         }
     }
 
@@ -100,69 +96,34 @@ public final class Main {
      * Write default configuration file and exit.
      *
      * @param configFile File path to user config file.
+     * @throws IOException on error writing config file.
      */
-    private static void generateUserConfig(@NonNull final File configFile) {
+    @VisibleForTesting
+    /* default */ static void generateUserConfig(@NonNull final File configFile)
+            throws IOException {
         try (InputStream configResource = Main.class.getResourceAsStream(IxiBot.CONFIG_RESOURCE)) {
             log.debug(
                     "Writing new user config file to \"{}\"",
                     configFile.getAbsolutePath());
             FileUtils.copyToFile(configResource, configFile);
-        } catch (final IOException ioe) {
-            log.error(
-                    "Caught IOException trying to write new user config file to \"{}\"",
-                    configFile.getAbsolutePath(),
-                    ioe);
         }
     }
 
     /**
      * Run bot.
-     *
-     * @param ixiBot Bot instance to run.
      */
-    private static void run(@NonNull final IxiBot ixiBot) {
-        // TODO: Do nothing if !isRunning
-        final Scanner scanner = new Scanner(System.in, "UTF-8");
+    @VisibleForTesting
+    /* default */ void run() {
+        final IxiBot ixiBot = injector.getInstance(IxiBot.class);
 
-        ixiBot.run();
-        log.info("Type \"quit\" to exit");
-
-        while (isRunning) {
-            final String input = scanner.nextLine();
-            log.debug("Got user input: {}", input);
-
-            if (QUIT_COMMAND.equals(input)) {
-                stop();
-            }
+        // TODO: Re-evaluate program flow
+        try {
+            ixiBot.init();
+            ixiBot.run();
+        } catch (final ConnectException ce) {
+            log.error("Failed to connect to a required API, exiting", ce);
         }
 
         ixiBot.close();
-    }
-
-    /**
-     * Start bot.
-     *
-     * @param ixiBot Bot instance to run.
-     * @return {@code true} if the bot started successfully, otherwise {@code false}.
-     */
-    @VisibleForTesting
-    /* default */ static boolean start(@NonNull final IxiBot ixiBot) {
-        boolean started = true;
-
-        try {
-            ixiBot.init();
-        } catch (final ConnectException ce) {
-            log.error("Failed to connect to a required API, exiting", ce);
-            started = false;
-        }
-
-        return started;
-    }
-
-    /**
-     * Stop bot.
-     */
-    private static void stop() {
-        isRunning = false;
     }
 }

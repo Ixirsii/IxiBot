@@ -1,10 +1,7 @@
 package com.ixibot;
 
-import com.ixibot.data.BotConfiguration;
-
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.InputStream;
+import java.io.IOException;
 import java.net.ConnectException;
 
 import com.google.inject.Injector;
@@ -16,9 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static com.ixibot.util.TestData.DEFAULT_CONFIG;
-import static com.ixibot.util.TestData.USER_CONFIG;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -28,36 +23,54 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class MainTest {
     @Mock
+    private Injector injectorMock;
+    @Mock
     private IxiBot ixiBotMock;
+
+    @InjectMocks
+    private Main underTest;
 
     @AfterEach
     void cleanup() {
         verifyNoMoreInteractions(ixiBotMock);
+        verifyNoMoreInteractions(injectorMock);
     }
 
     @Test
-    void GIVEN_successfulInit_WHEN_start_THEN_returnsTrue(@TempDir final File tempFile)
-            throws Exception {
-        try {
-            final boolean result = Main.start(ixiBotMock);
+    void GIVEN_successfulInit_WHEN_start_THEN_runsAndCloses() throws Exception {
+        when(injectorMock.getInstance(IxiBot.class)).thenReturn(ixiBotMock);
 
-            assertTrue(result, "Should start successfully");
+        try {
+            underTest.run();
         } finally {
+            verify(injectorMock).getInstance(IxiBot.class);
             verify(ixiBotMock).init();
+            verify(ixiBotMock).run();
+            verify(ixiBotMock).close();
         }
     }
 
     @Test
-    void GIVEN_connectException_WHEN_start_THEN_returnsFalse(@TempDir final File tempFile)
-            throws Exception {
-        doThrow(new ConnectException("Test case threw exception")).when(ixiBotMock).init();
+    void GIVEN_connectionException_WHEN_start_THEN_exits() throws Exception {
+        when(injectorMock.getInstance(IxiBot.class)).thenReturn(ixiBotMock);
+        doThrow(new ConnectException()).when(ixiBotMock).init();
 
         try {
-            final boolean result = Main.start(ixiBotMock);
-
-            assertFalse(result, "Should not start successfully");
+            underTest.run();
         } finally {
+            verify(injectorMock).getInstance(IxiBot.class);
             verify(ixiBotMock).init();
+            verify(ixiBotMock).close();
         }
+    }
+
+    @Test
+    void GIVEN_validPath_WHEN_generateUserConfig_THEN_writesConfig(@TempDir final File tempFile)
+            throws Exception {
+        final File configFile = new File(tempFile, "config.yaml");
+
+        Main.generateUserConfig(configFile);
+
+        assertTrue(configFile.exists(), "Config file should be written successfully");
     }
 }

@@ -48,6 +48,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import com.google.common.eventbus.EventBus;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
@@ -93,6 +94,17 @@ public class IxiBotModule extends AbstractModule {
         return new DiscordClientBuilder(
                 botConfiguration.getDiscordToken())
                 .build();
+    }
+
+    /**
+     * EventBus provider.
+     *
+     * @return event bus.
+     */
+    @Provides
+    @Singleton
+    public EventBus eventBus() {
+        return new EventBus();
     }
 
     /**
