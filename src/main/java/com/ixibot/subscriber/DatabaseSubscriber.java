@@ -30,74 +30,50 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.ixibot.listener;
+package com.ixibot.subscriber;
 
-import com.ixibot.event.BotStopEvent;
+import com.ixibot.data.RoleReaction;
+import com.ixibot.database.Database;
+import com.ixibot.event.RoleReactionEvent;
 
-import java.util.Scanner;
+import java.sql.SQLException;
 
-import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import com.google.inject.Inject;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Listen to console input.
+ * Subscribe to events which modify the database.
  *
  * @author Ryan Porterfield
  */
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
+@RequiredArgsConstructor
 @Slf4j
-public class ConsoleListener implements Runnable {
+public class DatabaseSubscriber {
     /**
-     * Command to stop execution.
-     */
-    private static final String QUIT_COMMAND = "quit";
-
-    /**
-     * Event bus to publish events to.
+     * Database interface.
      */
     @NonNull
-    private final EventBus eventBus;
-    /**
-     * System input.
-     */
-    private final Scanner scanner = new Scanner(System.in, "UTF-8");
+    private final Database database;
 
     /**
-     * Program loop control.
-     */
-    private boolean running;
-
-    /**
-     * BotStopEvent subscriber.
+     * RoleReactionEvent subscriber.
      *
-     * @param event Event published to the event bus.
+     * @param event Event published to event bus.
      */
     @Subscribe
-    public void onStop(@NonNull final BotStopEvent event) {
-        running = false;
-    }
+    public void onRoleReactionEvent(@NonNull final RoleReactionEvent event) {
+        final RoleReaction roleReaction = event.getRoleReaction();
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void run() {
-        log.info("Type \"quit\" to exit");
-
-        while (running) {
-            final String input = scanner.nextLine();
-            log.debug("Got user input: {}", input);
-
-            // TODO: Map of command -> dispatcher instead of if statements
-            if (QUIT_COMMAND.equals(input)) {
-                final BotStopEvent event = new BotStopEvent(true);
-
-                eventBus.post(event);
+        try {
+            if (event.isCreate()) {
+                database.addRoleReaction(roleReaction);
+            } else {
+                database.deleteRoleReaction(roleReaction);
             }
+        } catch (final SQLException sqle) {
+            log.error("Failed to process role reaction event {}", event, sqle);
         }
     }
 }

@@ -39,7 +39,7 @@ import com.ixibot.database.Database;
 import com.ixibot.provider.IxiBotProvider;
 
 import java.sql.SQLException;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -68,9 +68,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class IxiBotModule extends AbstractModule {
     /**
-     * Minimum thread pool size.
+     * Core thread pool size.
      */
-    private static final int THREAD_POOL_SIZE = 1;
+    private static final int THREAD_POOL_SIZE = 4;
 
     /**
      * Configure module.
@@ -124,7 +124,7 @@ public class IxiBotModule extends AbstractModule {
             final Database database,
             final DiscordAPI discordAPI,
             final BotConfiguration botConfiguration,
-            final ScheduledThreadPoolExecutor scheduler) throws SQLException {
+            final ScheduledExecutorService scheduler) throws SQLException {
         return new IxiBot(
                 database,
                 discordAPI,
@@ -140,10 +140,8 @@ public class IxiBotModule extends AbstractModule {
      */
     @Provides
     @Singleton
-    public ScheduledThreadPoolExecutor scheduler() {
-        return new ScheduledThreadPoolExecutor(
-                THREAD_POOL_SIZE,
-                Executors.defaultThreadFactory());
+    public ScheduledExecutorService scheduler() {
+        return new ScheduledThreadPoolExecutor(THREAD_POOL_SIZE);
     }
 
     /**

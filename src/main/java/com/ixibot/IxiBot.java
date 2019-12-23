@@ -42,7 +42,7 @@ import java.net.ConnectException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -102,7 +102,12 @@ public class IxiBot implements AutoCloseable, Runnable {
      * Thread pool executor for scheduled async actions.
      */
     @NonNull
-    private final ScheduledThreadPoolExecutor scheduler;
+    private final ScheduledExecutorService scheduler;
+
+    /**
+     * {@code true} while bot is running, {@code folse} when bot is terminating.
+     */
+    private boolean running = false;
 
     /**
      * {@inheritDoc}
@@ -111,15 +116,14 @@ public class IxiBot implements AutoCloseable, Runnable {
     public void close() {
         log.trace("Shutting down bot");
 
-        scheduler.shutdown();
+        discordAPI.logout();
+        shutdownScheduler();
 
         try {
             database.close();
         } catch (final SQLException sqle) {
             log.error("Caught SQLException while attempting to close database", sqle);
         }
-
-        discordAPI.logout();
     }
 
     /**
@@ -129,8 +133,10 @@ public class IxiBot implements AutoCloseable, Runnable {
      */
     public void init() throws ConnectException {
         discordAPI.init();
+        running = true;
     }
 
+    // TODO: Fix this
     /**
      * DiscordReactionEvent subscriber.
      *
@@ -205,16 +211,10 @@ public class IxiBot implements AutoCloseable, Runnable {
     public void onRoleReactionEvent(@NonNull final RoleReactionEvent event) {
         final RoleReaction roleReaction = event.getRoleReaction();
 
-        try {
-            if (event.isCreate()) {
-                database.addRoleReaction(roleReaction);
-                roleReactions.add(roleReaction);
-            } else {
-                database.deleteRoleReaction(roleReaction);
-                roleReactions.remove(roleReaction);
-            }
-        } catch (final SQLException sqle) {
-            log.error("Failed to process role reaction event {}", event, sqle);
+        if (event.isCreate()) {
+            roleReactions.add(roleReaction);
+        } else {
+            roleReactions.remove(roleReaction);
         }
     }
 
@@ -230,5 +230,46 @@ public class IxiBot implements AutoCloseable, Runnable {
                 0,
                 roleVerifyDelay,
                 TimeUnit.MINUTES);
+
+        try {
+            while (running) {
+                // Sleep for 1 second (1s * 1000ms/s = 1000ms)
+                Thread.sleep(1000);
+            }
+        } catch (final InterruptedException ie) {
+            log.error(
+                    "Thread \"{}\" interrupted while sleeping.",
+                    Thread.currentThread().getName(),
+                    ie);
+        }
+    }
+
+    /**
+     * Shutdown thread pool scheduler.
+     */
+    private void shutdownScheduler() {
+        scheduler.shutdown();
+
+        // Wait for the thread pool to shut down
+        try {
+            // Wait for tasks to terminate
+            if (!scheduler.awaitTermination(30, TimeUnit.SECONDS)) {
+                // (Attempt to) force stop thread pool
+                scheduler.shutdownNow();
+
+                // Wait for tasks to respond to being cancelled
+                if (!scheduler.awaitTermination(30, TimeUnit.SECONDS)) {
+                    log.error("Failed to shut down thread pool");
+                }
+            }
+        } catch (final InterruptedException ie) {
+            log.error("Thread interrupted while waiting for thread pool to shutdown", ie);
+
+            // Verify that thread pool is shutdown
+            scheduler.shutdownNow();
+
+            // Preserve interrupt status
+            Thread.currentThread().interrupt();
+        }
     }
 }

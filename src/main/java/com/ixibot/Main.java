@@ -114,16 +114,11 @@ public final class Main {
      */
     @VisibleForTesting
     /* default */ void run() {
-        final IxiBot ixiBot = injector.getInstance(IxiBot.class);
-
-        // TODO: Re-evaluate program flow
-        try {
+        try (final IxiBot ixiBot = injector.getInstance(IxiBot.class)) {
             ixiBot.init();
             ixiBot.run();
         } catch (final ConnectException ce) {
             log.error("Failed to connect to a required API, exiting", ce);
         }
-
-        ixiBot.close();
     }
 }

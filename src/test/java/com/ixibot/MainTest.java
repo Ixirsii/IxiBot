@@ -1,7 +1,6 @@
 package com.ixibot;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.ConnectException;
 
 import com.google.inject.Injector;
@@ -13,7 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
