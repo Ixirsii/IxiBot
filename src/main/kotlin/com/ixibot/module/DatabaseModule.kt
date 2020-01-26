@@ -30,43 +30,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.ixibot.module;
+package com.ixibot.module
 
-import com.ixibot.IxiBot;
-import com.ixibot.database.Database;
-import com.ixibot.provider.ConnectionProvider;
-import com.ixibot.provider.DatabaseProvider;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-
-import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Provides;
-import com.google.inject.throwingproviders.CheckedProvides;
-import com.google.inject.throwingproviders.ThrowingProviderBinder;
-import lombok.NoArgsConstructor;
+import com.google.inject.AbstractModule
+import com.google.inject.Inject
+import com.google.inject.Provides
+import com.google.inject.throwingproviders.CheckedProvides
+import com.google.inject.throwingproviders.ThrowingProviderBinder
+import com.ixibot.IxiBot
+import com.ixibot.database.Database
+import com.ixibot.provider.ConnectionProvider
+import com.ixibot.provider.DatabaseProvider
+import java.sql.Connection
+import java.sql.DriverManager
+import java.sql.SQLException
 
 /**
  * Database interface Guice module.
  *
  * @author Ryan Porterfield
  */
-@NoArgsConstructor
-/* default */ class DatabaseModule extends AbstractModule {
-    /**
-     * URL/path to SQLite database file.
-     */
-    private static final String CONNECTION_URL =
-            "jdbc:sqlite:" + IxiBot.CONFIG_DIRECTORY + "sqlite.db";
-
+internal class DatabaseModule : AbstractModule() {
     /**
      * Configure module.
      */
-    @Override
-    protected void configure() {
-        install(ThrowingProviderBinder.forModule(this));
+    override fun configure() {
+        install(ThrowingProviderBinder.forModule(this))
     }
 
     /**
@@ -76,12 +65,12 @@ import lombok.NoArgsConstructor;
      * @throws ClassNotFoundException on failure to load JDBC driver.
      * @throws SQLException           if a database access error occurs.
      */
-    @CheckedProvides(ConnectionProvider.class)
+    @CheckedProvides(ConnectionProvider::class)
     @Provides
-    public Connection connection() throws ClassNotFoundException, SQLException {
-        Class.forName("org.sqlite.JDBC");
-
-        return DriverManager.getConnection(CONNECTION_URL);
+    @Throws(ClassNotFoundException::class, SQLException::class)
+    fun connection(): Connection {
+        Class.forName("org.sqlite.JDBC")
+        return DriverManager.getConnection(CONNECTION_URL)
     }
 
     /**
@@ -91,14 +80,20 @@ import lombok.NoArgsConstructor;
      * @return Database interface.
      * @throws SQLException on error reading from database.
      */
-    @CheckedProvides(DatabaseProvider.class)
+    @CheckedProvides(DatabaseProvider::class)
     @Inject
     @Provides
-    public Database database(final Connection connection) throws SQLException {
-        final Database database = new Database(connection);
+    @Throws(SQLException::class)
+    fun database(connection: Connection?): Database {
+        val database = Database(connection!!)
+        database.init()
+        return database
+    }
 
-        database.init();
-
-        return database;
+    companion object {
+        /**
+         * URL/path to SQLite database file.
+         */
+        private const val CONNECTION_URL = "jdbc:sqlite:" + IxiBot.CONFIG_DIRECTORY + "sqlite.db"
     }
 }

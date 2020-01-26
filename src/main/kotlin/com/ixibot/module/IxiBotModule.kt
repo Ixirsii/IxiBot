@@ -30,36 +30,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.ixibot.module;
+package com.ixibot.module
 
-import com.ixibot.IxiBot;
-import com.ixibot.api.DiscordAPI;
-import com.ixibot.data.BotConfiguration;
-import com.ixibot.database.Database;
-import com.ixibot.provider.IxiBotProvider;
-
-import java.sql.SQLException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.module.kotlin.KotlinModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import com.google.common.eventbus.EventBus;
-import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import com.google.inject.throwingproviders.CheckedProvides;
-import com.google.inject.throwingproviders.ThrowingProviderBinder;
-import discord4j.core.DiscordClient;
-import discord4j.core.DiscordClientBuilder;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
+import com.google.common.eventbus.EventBus
+import com.google.inject.AbstractModule
+import com.google.inject.Inject
+import com.google.inject.Provides
+import com.google.inject.Singleton
+import com.google.inject.name.Named
+import com.google.inject.throwingproviders.CheckedProvides
+import com.google.inject.throwingproviders.ThrowingProviderBinder
+import com.ixibot.IxiBot
+import com.ixibot.api.DiscordAPI
+import com.ixibot.data.BotConfiguration
+import com.ixibot.database.Database
+import com.ixibot.provider.IxiBotProvider
+import discord4j.core.DiscordClient
+import discord4j.core.DiscordClientBuilder
+import lombok.NoArgsConstructor
+import java.sql.SQLException
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.ScheduledThreadPoolExecutor
 
 /**
  * Basic Guice module.
@@ -67,20 +65,14 @@ import lombok.NoArgsConstructor;
  * @author Ryan Porterfield
  */
 @NoArgsConstructor
-public class IxiBotModule extends AbstractModule {
-    /**
-     * Core thread pool size.
-     */
-    private static final int THREAD_POOL_SIZE = 4;
-
+class IxiBotModule : AbstractModule() {
     /**
      * Configure module.
      */
-    @Override
-    protected void configure() {
-        install(ThrowingProviderBinder.forModule(this));
-        install(new BotConfigurationModule());
-        install(new DatabaseModule());
+    override fun configure() {
+        install(ThrowingProviderBinder.forModule(this))
+        install(BotConfigurationModule())
+        install(DatabaseModule())
     }
 
     /**
@@ -91,10 +83,10 @@ public class IxiBotModule extends AbstractModule {
      */
     @Inject
     @Provides
-    public DiscordClient discordClient(final BotConfiguration botConfiguration) {
-        return new DiscordClientBuilder(
-                botConfiguration.getDiscordToken())
-                .build();
+    fun discordClient(botConfiguration: BotConfiguration): DiscordClient {
+        return DiscordClientBuilder(
+                botConfiguration.discordToken)
+                .build()
     }
 
     /**
@@ -104,8 +96,8 @@ public class IxiBotModule extends AbstractModule {
      */
     @Provides
     @Singleton
-    public EventBus eventBus() {
-        return new EventBus();
+    fun eventBus(): EventBus {
+        return EventBus()
     }
 
     /**
@@ -118,20 +110,21 @@ public class IxiBotModule extends AbstractModule {
      * @return IxiBot instance.
      * @throws SQLException on error reading from database.
      */
-    @CheckedProvides(IxiBotProvider.class)
+    @CheckedProvides(IxiBotProvider::class)
     @Inject
     @Provides
-    public IxiBot ixiBot(
-            final Database database,
-            final DiscordAPI discordAPI,
-            final BotConfiguration botConfiguration,
-            final ScheduledExecutorService scheduler) throws SQLException {
-        return new IxiBot(
+    @Throws(SQLException::class)
+    fun ixiBot(
+            database: Database,
+            discordAPI: DiscordAPI?,
+            botConfiguration: BotConfiguration,
+            scheduler: ScheduledExecutorService?): IxiBot {
+        return IxiBot(
                 database,
-                discordAPI,
-                database.getAllRoleReactions(),
-                botConfiguration.getRoleVerifyDelay(),
-                scheduler);
+                discordAPI!!,
+                database.allRoleReactions,
+                botConfiguration.roleVerifyDelay,
+                scheduler!!)
     }
 
     /**
@@ -141,8 +134,8 @@ public class IxiBotModule extends AbstractModule {
      */
     @Provides
     @Singleton
-    public ScheduledExecutorService scheduler() {
-        return new ScheduledThreadPoolExecutor(THREAD_POOL_SIZE);
+    fun scheduler(): ScheduledExecutorService {
+        return ScheduledThreadPoolExecutor(THREAD_POOL_SIZE)
     }
 
     /**
@@ -153,11 +146,18 @@ public class IxiBotModule extends AbstractModule {
     @Named("yamlMapper")
     @Provides
     @Singleton
-    public ObjectMapper yamlMapper() {
-        return new ObjectMapper(new YAMLFactory())
+    fun yamlMapper(): ObjectMapper {
+        return ObjectMapper(YAMLFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .registerModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
-                .registerModule(new Jdk8Module())
-                .registerModule(new KotlinModule());
+                .registerModule(ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
+                .registerModule(Jdk8Module())
+                .registerModule(KotlinModule())
+    }
+
+    companion object {
+        /**
+         * Core thread pool size.
+         */
+        private const val THREAD_POOL_SIZE = 4
     }
 }
