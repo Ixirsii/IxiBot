@@ -47,6 +47,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.AbstractModule;
@@ -156,6 +157,7 @@ public class IxiBotModule extends AbstractModule {
         return new ObjectMapper(new YAMLFactory())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .registerModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
-                .registerModule(new Jdk8Module());
+                .registerModule(new Jdk8Module())
+                .registerModule(new KotlinModule());
     }
 }

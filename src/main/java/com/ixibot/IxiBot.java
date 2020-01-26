@@ -105,9 +105,9 @@ public class IxiBot implements AutoCloseable, Runnable {
     private final ScheduledExecutorService scheduler;
 
     /**
-     * {@code true} while bot is running, {@code folse} when bot is terminating.
+     * {@code true} while bot is running, {@code false} when bot is terminating.
      */
-    private boolean running = false;
+    private boolean running;
 
     /**
      * {@inheritDoc}

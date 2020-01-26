@@ -92,10 +92,7 @@ import lombok.extern.slf4j.Slf4j;
         } catch (final FileNotFoundException fnfe) {
             log.debug("User configuration file not found, falling back to default configuration.");
 
-            botConfiguration = defaultBotConfiguration(objectMapper)
-                    .toBuilder()
-                    .defaultConfig(true)
-                    .build();
+            botConfiguration = defaultBotConfiguration(objectMapper);
         } catch (final IOException ioe) {
             final String message = "Error reading from user configuration file";
             log.error(message, ioe);
@@ -116,7 +113,16 @@ import lombok.extern.slf4j.Slf4j;
     private BotConfiguration defaultBotConfiguration(@NonNull final ObjectMapper objectMapper)
             throws IOException {
         try (InputStream configResource = getClass().getResourceAsStream(IxiBot.CONFIG_RESOURCE)) {
-            return objectMapper.readValue(configResource, BotConfiguration.class);
+            final BotConfiguration defaultConfig = objectMapper.readValue(
+                    configResource,
+                    BotConfiguration.class);
+
+            return new BotConfiguration(
+                    defaultConfig.getCommandPrefix(),
+                    true,
+                    defaultConfig.isDiscordRequired(),
+                    defaultConfig.getDiscordToken(),
+                    defaultConfig.getRoleVerifyDelay());
         }
     }
 

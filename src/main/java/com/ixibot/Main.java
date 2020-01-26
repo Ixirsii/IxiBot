@@ -114,7 +114,7 @@ public final class Main {
      */
     @VisibleForTesting
     /* default */ void run() {
-        try (final IxiBot ixiBot = injector.getInstance(IxiBot.class)) {
+        try (IxiBot ixiBot = injector.getInstance(IxiBot.class)) {
             ixiBot.init();
             ixiBot.run();
         } catch (final ConnectException ce) {

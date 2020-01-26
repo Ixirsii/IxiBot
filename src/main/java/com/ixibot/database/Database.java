@@ -196,15 +196,14 @@ public class Database {
                         reactionId,
                         reactionName,
                         animated);
-                final RoleReaction roleReaction = RoleReaction.builder()
-                        .addVerified(resultSet.getBoolean(RoleReactionContract.ADD_VERIFIED))
-                        .channelID(Snowflake.of(resultSet.getLong(RoleReactionContract.CHANNEL_ID)))
-                        .guildID(Snowflake.of(resultSet.getLong(RoleReactionContract.GUILD_ID)))
-                        .messageID(Snowflake.of(resultSet.getLong(RoleReactionContract.MESSAGE_ID)))
-                        .reactionEmoji(reactionEmoji)
-                        .removeVerified(resultSet.getBoolean(RoleReactionContract.REMOVE_VERIFIED))
-                        .roleID(Snowflake.of(resultSet.getLong(RoleReactionContract.ROLE_ID)))
-                        .build();
+                final RoleReaction roleReaction = new RoleReaction(
+                        Snowflake.of(resultSet.getLong(RoleReactionContract.CHANNEL_ID)),
+                        Snowflake.of(resultSet.getLong(RoleReactionContract.GUILD_ID)),
+                        resultSet.getBoolean(RoleReactionContract.ADD_VERIFIED),
+                        resultSet.getBoolean(RoleReactionContract.REMOVE_VERIFIED),
+                        Snowflake.of(resultSet.getLong(RoleReactionContract.MESSAGE_ID)),
+                        reactionEmoji,
+                        Snowflake.of(resultSet.getLong(RoleReactionContract.ROLE_ID)));
 
                 roleReactions.add(roleReaction);
             }

@@ -30,60 +30,52 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.ixibot.data;
+package com.ixibot.data
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import lombok.Builder;
-import lombok.NonNull;
-import lombok.Value;
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
  * Bot configuration and user settings POJO.
  *
  * @author Ryan Porterfield
  */
-@Builder(toBuilder = true)
-@JsonIgnoreProperties("defaultConfig")
-@Value
-public class BotConfiguration {
-    /**
-     * If a message starts with this prefix the bot will attempt to parse a command from it.
-     */
-    @NonNull
-    private final String commandPrefix;
-    /**
-     * Is this the default bot configuration from the internal resource.
-     */
-    private final boolean defaultConfig;
-    /**
-     * Should the bot exit on failure to connect to Discord.
-     */
-    private final boolean discordRequired;
-    /**
-     * Discord bot token.
-     */
-    @NonNull
-    private final String discordToken;
-    /**
-     * Interval (in minutes) between Discord role verification checks.
-     */
-    @NonNull
-    private final Long roleVerifyDelay;
-
-    /**
-     * Builder class.
-     */
-    @JsonPOJOBuilder(withPrefix = "")
-    @SuppressWarnings({
-            "PMD.UnusedPrivateField",
-            "PMD.RedundantFieldInitializer",
-            "PMD.ImmutableField"
-    })
-    public static class BotConfigurationBuilder {
+data class BotConfiguration(
         /**
-         * Default value for {@link BotConfiguration#defaultConfig}.
+         * If a message starts with this prefix the bot will attempt to parse a command from it.
          */
-        private boolean defaultConfig = false;
-    }
+        val commandPrefix: String,
+        /**
+         * Is this the default bot configuration from the internal resource.
+         */
+        val isDefaultConfig: Boolean = false,
+        /**
+         * Should the bot exit on failure to connect to Discord.
+         */
+        val isDiscordRequired: Boolean,
+        /**
+         * Discord bot token.
+         */
+        val discordToken: String,
+        /**
+         * Interval (in minutes) between Discord role verification checks.
+         */
+        val roleVerifyDelay: Long) {
+
+    @JsonCreator
+    constructor(
+            @JsonProperty(value = "commandPrefix", required = true)
+            commandPrefix: String,
+            @JsonProperty(value = "discordRequired", required = true)
+            isDiscordRequired: Boolean,
+            @JsonProperty(value = "discordToken", required = true)
+            discordToken: String,
+            @JsonProperty(value = "roleVerifyDelay", required = true)
+            roleVerifyDelay: Long
+    ) : this(
+            commandPrefix,
+            false,
+            isDiscordRequired,
+            discordToken,
+            roleVerifyDelay)
 }

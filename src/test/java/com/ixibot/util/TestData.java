@@ -32,6 +32,7 @@
 
 package com.ixibot.util;
 
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import com.ixibot.data.BotConfiguration;
 import com.ixibot.data.RoleReaction;
 
@@ -64,56 +65,53 @@ public class TestData {
             DISCORD_TOKEN,
             ROLE_VERIFY_DELAY);
 
-    public static final BotConfiguration DEFAULT_CONFIG = BotConfiguration.builder()
-            .commandPrefix(COMMAND_PREFIX)
-            .defaultConfig(true)
-            .discordRequired(true)
-            .discordToken(DISCORD_TOKEN)
-            .roleVerifyDelay(ROLE_VERIFY_DELAY)
-            .build();
-    public static final BotConfiguration USER_CONFIG = BotConfiguration.builder()
-            .commandPrefix(COMMAND_PREFIX)
-            .discordRequired(true)
-            .discordToken(DISCORD_TOKEN)
-            .roleVerifyDelay(ROLE_VERIFY_DELAY)
-            .build();
+    public static final BotConfiguration DEFAULT_CONFIG = new BotConfiguration(
+            COMMAND_PREFIX,
+            true,
+            true,
+            DISCORD_TOKEN,
+            ROLE_VERIFY_DELAY);
+    public static final BotConfiguration USER_CONFIG = new BotConfiguration(
+            COMMAND_PREFIX,
+            false,
+            true,
+            DISCORD_TOKEN,
+            ROLE_VERIFY_DELAY);
 
     public static final ReactionEmoji.Custom CUSTOM_EMOJI = ReactionEmoji.custom(
             Snowflake.of(1L), "ixiEyes", false);
     public static final ReactionEmoji.Unicode UNICODE_EMOJI = ReactionEmoji.unicode("ixiNose");
 
-    public static final RoleReaction ROLE_REACTION_1 = RoleReaction.builder()
-            .addVerified(true)
-            .channelID(Snowflake.of(1L))
-            .guildID(Snowflake.of(1L))
-            .messageID(Snowflake.of(1L))
-            .reactionEmoji(CUSTOM_EMOJI)
-            .removeVerified(false)
-            .roleID(Snowflake.of(1L))
-            .build();
-    public static final RoleReaction ROLE_REACTION_2 = RoleReaction.builder()
-            .addVerified(false)
-            .channelID(Snowflake.of(2L))
-            .guildID(Snowflake.of(2L))
-            .messageID(Snowflake.of(2L))
-            .reactionEmoji(UNICODE_EMOJI)
-            .removeVerified(true)
-            .roleID(Snowflake.of(2L))
-            .build();
-    public static final RoleReaction ROLE_REACTION_3 = RoleReaction.builder()
-            .addVerified(false)
-            .channelID(Snowflake.of(3L))
-            .guildID(Snowflake.of(3L))
-            .messageID(Snowflake.of(3L))
-            .reactionEmoji(CUSTOM_EMOJI)
-            .removeVerified(false)
-            .roleID(Snowflake.of(3L))
-            .build();
+    public static final RoleReaction ROLE_REACTION_1 = new RoleReaction(
+            Snowflake.of(1L),
+            Snowflake.of(1L),
+            true,
+            false,
+            Snowflake.of(1L),
+            CUSTOM_EMOJI,
+            Snowflake.of(1L));
+    public static final RoleReaction ROLE_REACTION_2 = new RoleReaction(
+            Snowflake.of(2L),
+            Snowflake.of(2L),
+            false,
+            true,
+            Snowflake.of(2L),
+            UNICODE_EMOJI,
+            Snowflake.of(2L));
+    public static final RoleReaction ROLE_REACTION_3 = new RoleReaction(
+            Snowflake.of(3L),
+            Snowflake.of(3L),
+            false,
+            false,
+            Snowflake.of(3L),
+            CUSTOM_EMOJI,
+            Snowflake.of(3L));
 
     public static final ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory())
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .registerModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
-            .registerModule(new Jdk8Module());
+            .registerModule(new Jdk8Module())
+            .registerModule(new KotlinModule());
 
     /**
      * Hide utility class constructor.
