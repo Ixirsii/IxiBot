@@ -30,27 +30,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.ixibot.event;
-
-import com.ixibot.data.RoleReaction;
-
-import lombok.NonNull;
-import lombok.Value;
+package com.ixibot.event
 
 /**
- * Create role reaction pub/sub event.
+ * Event to stop the bot.
  *
  * @author Ryan Porterfield
  */
-@Value
-public class RoleReactionEvent {
-    /**
-     * {@code true} if this is a create event, otherwise this is a delete event.
-     */
-    private final boolean create;
-    /**
-     * Role reaction to persist to database and listen for.
-     */
-    @NonNull
-    private final RoleReaction roleReaction;
-}
+data class BotStopEvent(
+        /**
+         * Is the stop graceful.
+         *
+         *
+         *
+         * If `true` the bot will try to gracefully disconnect from APIs and stop all threads
+         * before exiting, otherwise the bot will "crash" and stop immediately.
+         *
+         */
+        val isGraceful: Boolean
+)

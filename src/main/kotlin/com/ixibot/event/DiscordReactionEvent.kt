@@ -30,24 +30,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.ixibot.event;
+package com.ixibot.event
 
-import lombok.Value;
+import discord4j.core.`object`.entity.Message
+import discord4j.core.`object`.reaction.ReactionEmoji
+import discord4j.core.`object`.util.Snowflake
+import reactor.core.publisher.Mono
 
 /**
- * Event to stop the bot.
+ * Discord reaction event for pub/sub.
  *
  * @author Ryan Porterfield
  */
-@Value
-public class BotStopEvent {
-    /**
-     * Is the stop graceful.
-     *
-     * <p>
-     *     If {@code true} the bot will try to gracefully disconnect from APIs and stop all threads
-     *     before exiting, otherwise the bot will "crash" and stop immediately.
-     * </p>
-     */
-    private final boolean isGraceful;
-}
+data class DiscordReactionEvent(
+        /**
+         * `true` if this is a reaction add event, otherwise this is a reaction remove event.
+         */
+        val add: Boolean,
+        /**
+         * ID of the message that was reacted to.
+         */
+        val channelID: Snowflake,
+        /**
+         * Mono that can be subscribed to to get the message that was reacted to.
+         */
+        val messageMono: Mono<Message>,
+        /**
+         * ID of the message that was reacted to.
+         */
+        val messageID: Snowflake,
+        /**
+         * Emoji the user reacted with.
+         */
+        val reactionEmoji: ReactionEmoji,
+        /**
+         * ID of the user who reacted on the message.
+         */
+        val userID: Snowflake
+)

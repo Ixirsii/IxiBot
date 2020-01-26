@@ -30,43 +30,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.ixibot.event;
+package com.ixibot.event
 
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.reaction.ReactionEmoji;
-import discord4j.core.object.util.Snowflake;
-import lombok.Value;
-import reactor.core.publisher.Mono;
+import com.ixibot.data.RoleReaction
 
 /**
- * Discord reaction event for pub/sub.
+ * Create role reaction pub/sub event.
  *
  * @author Ryan Porterfield
  */
-@Value
-public class DiscordReactionEvent {
+data class RoleReactionEvent(
     /**
-     * {@code true} if this is a reaction add event, otherwise this is a reaction remove event.
+     * `true` if this is a create event, otherwise this is a delete event.
      */
-    private final boolean add;
+    val create: Boolean,
     /**
-     * ID of the message that was reacted to.
+     * Role reaction to persist to database and listen for.
      */
-    private final Snowflake channelID;
-    /**
-     * Mono that can be subscribed to to get the message that was reacted to.
-     */
-    private final Mono<Message> messageMono;
-    /**
-     * ID of the message that was reacted to.
-     */
-    private final Snowflake messageID;
-    /**
-     * Emoji the user reacted with.
-     */
-    private final ReactionEmoji reactionEmoji;
-    /**
-     * ID of the user who reacted on the message.
-     */
-    private final Snowflake userID;
-}
+    val roleReaction: RoleReaction
+)
