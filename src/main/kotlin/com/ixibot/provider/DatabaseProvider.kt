@@ -30,22 +30,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.ixibot.provider;
+package com.ixibot.provider
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import com.google.inject.throwingproviders.CheckedProvider;
+import com.google.inject.throwingproviders.CheckedProvider
+import com.ixibot.database.Database
+import java.sql.SQLException
 
 /**
- * Interface for checked Connection provider.
+ * Database interface provider.
  *
  * @author Ryan Porterfield
  */
-public interface ConnectionProvider extends CheckedProvider<Connection> {
+interface DatabaseProvider : CheckedProvider<Database?> {
     /**
      * {@inheritDoc}
      */
-    @Override
-    Connection get() throws ClassNotFoundException, SQLException;
+    @Throws(SQLException::class)
+    override fun get(): Database?
 }

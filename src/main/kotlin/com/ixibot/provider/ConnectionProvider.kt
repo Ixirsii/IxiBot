@@ -30,23 +30,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.ixibot.provider;
+package com.ixibot.provider
 
-import com.ixibot.data.BotConfiguration;
-
-import java.io.IOException;
-
-import com.google.inject.throwingproviders.CheckedProvider;
+import com.google.inject.throwingproviders.CheckedProvider
+import java.sql.Connection
+import java.sql.SQLException
 
 /**
- * Interface for checked BotConfiguration provider.
+ * Interface for checked Connection provider.
  *
  * @author Ryan Porterfield
  */
-public interface BotConfigurationProvider extends CheckedProvider<BotConfiguration> {
+interface ConnectionProvider : CheckedProvider<Connection?> {
     /**
      * {@inheritDoc}
      */
-    @Override
-    BotConfiguration get() throws IOException;
+    @Throws(ClassNotFoundException::class, SQLException::class)
+    override fun get(): Connection?
 }

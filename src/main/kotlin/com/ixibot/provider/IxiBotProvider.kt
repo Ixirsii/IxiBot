@@ -30,23 +30,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.ixibot.provider;
+package com.ixibot.provider
 
-import com.ixibot.database.Database;
-
-import java.sql.SQLException;
-
-import com.google.inject.throwingproviders.CheckedProvider;
+import com.google.inject.throwingproviders.CheckedProvider
+import com.ixibot.IxiBot
+import java.sql.SQLException
 
 /**
- * Database interface provider.
+ * IxiBot provider.
  *
  * @author Ryan Porterfield
  */
-public interface DatabaseProvider extends CheckedProvider<Database> {
+interface IxiBotProvider : CheckedProvider<IxiBot?> {
     /**
      * {@inheritDoc}
      */
-    @Override
-    Database get() throws SQLException;
+    @Throws(SQLException::class)
+    override fun get(): IxiBot?
 }
