@@ -43,7 +43,7 @@ data class RoleReactionEvent(
     /**
      * `true` if this is a create event, otherwise this is a delete event.
      */
-    val create: Boolean,
+    val isCreate: Boolean,
     /**
      * Role reaction to persist to database and listen for.
      */

@@ -55,7 +55,7 @@ class DiscordListener(
 ) {
 
     companion object {
-        val log: Logger = LoggerFactory.getLogger(DiscordListener::class.java)
+        private val log: Logger = LoggerFactory.getLogger(DiscordListener::class.java)
     }
 
     /**
@@ -79,8 +79,8 @@ class DiscordListener(
      */
     fun reactionAddListener(event: ReactionAddEvent) {
         val internalEvent = DiscordReactionEvent(
-                true,
                 event.channelId,
+                true,
                 event.message,
                 event.messageId,
                 event.emoji,
@@ -95,8 +95,8 @@ class DiscordListener(
      */
     fun reactionRemoveListener(event: ReactionRemoveEvent) {
         val internalEvent = DiscordReactionEvent(
-                false,
                 event.channelId,
+                false,
                 event.message,
                 event.messageId,
                 event.emoji,

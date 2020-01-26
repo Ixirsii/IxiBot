@@ -44,13 +44,13 @@ import reactor.core.publisher.Mono
  */
 data class DiscordReactionEvent(
         /**
-         * `true` if this is a reaction add event, otherwise this is a reaction remove event.
-         */
-        val add: Boolean,
-        /**
          * ID of the message that was reacted to.
          */
         val channelID: Snowflake,
+        /**
+         * `true` if this is a reaction add event, otherwise this is a reaction remove event.
+         */
+        val isAdd: Boolean,
         /**
          * Mono that can be subscribed to to get the message that was reacted to.
          */

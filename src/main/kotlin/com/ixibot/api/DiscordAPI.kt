@@ -69,7 +69,7 @@ class DiscordAPI @Inject constructor(
 ) {
 
     companion object {
-        val log: Logger = LoggerFactory.getLogger(DiscordListener::class.java)
+        private val log: Logger = LoggerFactory.getLogger(DiscordAPI::class.java)
     }
 
     /**

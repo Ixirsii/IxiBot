@@ -30,46 +30,39 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.ixibot.listener;
+package com.ixibot.listener
 
-import com.ixibot.event.BotStopEvent;
-
-import java.util.Scanner;
-
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
-import com.google.inject.Inject;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import com.google.common.eventbus.EventBus
+import com.google.common.eventbus.Subscribe
+import com.ixibot.event.BotStopEvent
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * Listen to console input.
  *
  * @author Ryan Porterfield
  */
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
-@Slf4j
-public class ConsoleListener implements Runnable {
-    /**
-     * Command to stop execution.
-     */
-    private static final String QUIT_COMMAND = "quit";
-
+class ConsoleListener(
     /**
      * Event bus to publish events to.
      */
-    @NonNull
-    private final EventBus eventBus;
-    /**
-     * System input.
-     */
-    private final Scanner scanner = new Scanner(System.in, "UTF-8");
+    private val eventBus: EventBus
+) : Runnable {
+
+    companion object {
+        /**
+         * Command to stop execution.
+         */
+        private const val QUIT_COMMAND = "quit"
+
+        private val log: Logger = LoggerFactory.getLogger(ConsoleListener::class.java)
+    }
 
     /**
      * Program loop control.
      */
-    private boolean running;
+    private var running: Boolean = true
 
     /**
      * BotStopEvent subscriber.
@@ -77,26 +70,22 @@ public class ConsoleListener implements Runnable {
      * @param event Event published to the event bus.
      */
     @Subscribe
-    public void onStop(@NonNull final BotStopEvent event) {
-        running = false;
+    fun onStop(event: BotStopEvent) {
+        running = false
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    public void run() {
-        log.info("Type \"quit\" to exit");
-
+    override fun run() {
+        log.info("Type \"quit\" to exit")
         while (running) {
-            final String input = scanner.nextLine();
-            log.debug("Got user input: {}", input);
-
+            val input: String? = readLine()
+            log.debug("Got user input: {}", input)
             // TODO: Map of command -> dispatcher instead of if statements
-            if (QUIT_COMMAND.equals(input)) {
-                final BotStopEvent event = new BotStopEvent(true);
-
-                eventBus.post(event);
+            if (QUIT_COMMAND == input) {
+                val event = BotStopEvent(true)
+                eventBus.post(event)
             }
         }
     }
