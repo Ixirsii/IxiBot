@@ -29,68 +29,63 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package com.ixibot.database;
+package com.ixibot.database
 
 /**
  * Database contract for role assignment reactions.
  *
  * @author Ryan Porterfield
  */
-@SuppressWarnings("PMD.DefaultPackage")
-final class RoleReactionContract {
+internal object RoleReactionContract {
     /**
      * Add verified key.
      */
-    /* default */ static final String ADD_VERIFIED = "add_verified";
+    const val ADD_VERIFIED = "add_verified"
     /**
      * Reaction emoji is animated key.
      */
-    /* default */ static final String ANIMATED = "animated";
+    const val ANIMATED = "animated"
     /**
      * Channel ID key.
      */
-    /* default */ static final String CHANNEL_ID = "channel_id";
+    const val CHANNEL_ID = "channel_id"
     /**
      * Guild ID key.
      */
-    /* default */ static final String GUILD_ID = "guild_id";
+    const val GUILD_ID = "guild_id"
     /**
      * Message ID key.
      */
-    /* default */ static final String MESSAGE_ID = "message_id";
+    const val MESSAGE_ID = "message_id"
     /**
      * Reaction emoji ID key.
      */
-    /* default */ static final String REACTION_ID = "reaction_id";
+    const val REACTION_ID = "reaction_id"
     /**
      * Reaction emoji name key.
      */
-    /* default */ static final String REACTION_NAME = "reaction_name";
+    const val REACTION_NAME = "reaction_name"
     /**
      * Remove verified key.
      */
-    /* default */ static final String REMOVE_VERIFIED = "remove_verified";
+    const val REMOVE_VERIFIED = "remove_verified"
     /**
      * Guild role ID key.
      */
-    /* default */ static final String ROLE_ID = "role_id";
+    const val ROLE_ID = "role_id"
     /**
      * Table name.
      */
-    /* default */ static final String TABLE_NAME = "role_reactions";
-
+    const val TABLE_NAME = "role_reactions"
     /**
      * SQL statement for creating the table.
      */
-    /* default */ static final String CREATE_TABLE = String.format(
+    val CREATE_TABLE = String.format(
             "CREATE TABLE IF NOT EXISTS %s (%s INTEGER NOT NULL, %s INTEGER NOT NULL,"
                     + " %s INTEGER NOT NULL, %s INTEGER, %s INTEGER NOT NULL, %s INTEGER NOT NULL,"
                     + " %s TEXT NOT NULL, %s INTEGER NOT NULL, %s INTEGER NOT NULL, "
-                    + "PRIMARY KEY(%s, %s))",
-            /* Table name */
-            TABLE_NAME,
-            /* Columns */
+                    + "PRIMARY KEY(%s, %s))",  /* Table name */
+            TABLE_NAME,  /* Columns */
             ADD_VERIFIED,
             ANIMATED,
             CHANNEL_ID,
@@ -99,15 +94,8 @@ final class RoleReactionContract {
             REACTION_ID,
             REACTION_NAME,
             REMOVE_VERIFIED,
-            ROLE_ID,
-            /* Primary key */
+            ROLE_ID,  /* Primary key */
             MESSAGE_ID,
             REACTION_NAME
-    );
-
-    /**
-     * Hide utility class constructor.
-     */
-    private RoleReactionContract() {
-    }
+    )
 }

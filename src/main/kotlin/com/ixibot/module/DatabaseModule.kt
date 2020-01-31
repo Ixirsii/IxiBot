@@ -84,8 +84,8 @@ internal class DatabaseModule : AbstractModule() {
     @Inject
     @Provides
     @Throws(SQLException::class)
-    fun database(connection: Connection?): Database {
-        val database = Database(connection!!)
+    fun database(connection: Connection): Database {
+        val database = Database(connection)
         database.init()
         return database
     }
