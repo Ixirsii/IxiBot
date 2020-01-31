@@ -30,41 +30,42 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.ixibot.command;
-
-import discord4j.core.object.util.Snowflake;
-import lombok.NonNull;
+package com.ixibot.command
 
 /**
- * Command argument which takes a Snowflake.
+ * Positional argument base class.
  *
+ * @param <T> Type of argument.
  * @author Ryan Porterfield
+</T> */
+/* default */
+abstract class Argument<T>
+/**
+ * Required args constructor.
+ *
+ * @param name [Argument.name]
+ * @param aboutText [Argument.aboutText]
  */
-public class SnowflakeArgument extends Argument<Snowflake> {
+/* default */(
+        /** Argument name.  */
+        private val name: String,
+        /** About message for help text.  */
+        private val aboutText: String) {
+
     /**
-     * Required args constructor.
+     * Parse value from argument string.
      *
-     * @param name      {@link Argument#name}
-     * @param aboutText {@link Argument#aboutText}
+     * @param argument Argument string.
+     * @return value parsed from argument string.
      */
-    /* default */ SnowflakeArgument(final String name, final String aboutText) {
-        super(name, aboutText);
-    }
+/* default */
+    abstract fun parse(argument: String): T
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    /* default */ Snowflake parse(final @NonNull String argument) {
-        Snowflake snowflake;
-
-        try {
-            final long longId = Long.parseLong(argument);
-            snowflake = Snowflake.of(longId);
-        } catch (final NumberFormatException nfe) {
-            snowflake = Snowflake.of(argument);
-        }
-
-        return snowflake;
+    override fun toString(): String {
+        return name + Command.getSpace(name.length) + aboutText + "."
     }
+
 }

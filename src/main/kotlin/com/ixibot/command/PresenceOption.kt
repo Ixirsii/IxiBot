@@ -30,48 +30,39 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.ixibot.command;
+package com.ixibot.command
 
-import lombok.NonNull;
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
- * Positional argument base class.
+ * Command option which is true if present.
  *
- * @param <T> Type of argument.
  * @author Ryan Porterfield
  */
-/* default */ abstract class Argument<T> {
-    /** About message for help text. */
-    @NonNull
-    private final String aboutText;
-    /** Argument name. */
-    @NonNull
-    private final String name;
-
-    /**
-     * Required args constructor.
-     *
-     * @param name {@link Argument#name}
-     * @param aboutText {@link Argument#aboutText}
-     */
-    /* default */ Argument(@NonNull final String name, @NonNull final String aboutText) {
-        this.aboutText = aboutText;
-        this.name = name;
-    }
-
-    /**
-     * Parse value from argument string.
-     *
-     * @param argument Argument string.
-     * @return value parsed from argument string.
-     */
-    /* default */ abstract T parse(@NonNull final String argument);
+internal class PresenceOption(
+        longOption: String,
+        shortOption: Char,
+        aboutText: String
+) : Option<Boolean>(longOption, shortOption, 0, aboutText) {
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    public String toString() {
-        return name + Command.getSpace(name.length()) + aboutText + ".";
+    @Throws(IllegalArgumentException::class)
+    override fun parse(vararg parameters: String?): Boolean {
+        if (parameters.size != parameterCount) {
+            val errorMessage = "Incorrect number of arguments passed to option \"$long\". " +
+                    "Expected $parameterCount but was $parameters.size, $parameters.contentToString()"
+
+            log.debug(errorMessage)
+            throw IllegalArgumentException(errorMessage)
+        }
+
+        return true
+    }
+
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(PresenceOption::class.java)
     }
 }

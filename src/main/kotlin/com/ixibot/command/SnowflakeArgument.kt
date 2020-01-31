@@ -30,53 +30,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.ixibot.command;
+package com.ixibot.command
 
-import java.util.Arrays;
-
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
+import discord4j.core.`object`.util.Snowflake
 
 /**
- * Command option which is true if present.
+ * Command argument which takes a Snowflake.
  *
  * @author Ryan Porterfield
  */
-@Slf4j
-class PresenceOption extends Option<Boolean> {
+class SnowflakeArgument internal constructor(
+        name: String,
+        aboutText: String
+) : Argument<Snowflake>(name, aboutText) {
 
-    /**
-     * Default constructor.
-     *
-     * @param longOption  {@link Option#longOption}
-     * @param shortOption {@link Option#shortOption}
-     * @param aboutText   {@link Option#aboutText}
-     */
-    /* default */ PresenceOption(final String longOption,
-                                 final char shortOption,
-                                 final String aboutText) {
-        super(longOption, shortOption, 0, aboutText);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    /* default */ Boolean parse(@NonNull final String... parameters)
-            throws IllegalArgumentException {
-        if (parameters.length != getParameterCount()) {
-            final String errorMessage = String.format(
-                    "Incorrect number of arguments passed to option \"%s\". "
-                            + "Expected %d but was %d, %s",
-                    getLongOption(),
-                    getParameterCount(),
-                    parameters.length,
-                    Arrays.toString(parameters));
-
-            log.debug(errorMessage);
-            throw new IllegalArgumentException(errorMessage);
+    override fun parse(argument: String): Snowflake {
+        val snowflake: Snowflake
+        snowflake = try {
+            val longId = argument.toLong()
+            Snowflake.of(longId)
+        } catch (nfe: NumberFormatException) {
+            Snowflake.of(argument)
         }
-
-        return true;
+        return snowflake
     }
 }

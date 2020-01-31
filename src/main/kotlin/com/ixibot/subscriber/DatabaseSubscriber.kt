@@ -33,7 +33,6 @@
 package com.ixibot.subscriber
 
 import com.google.common.eventbus.Subscribe
-import com.ixibot.api.DiscordAPI
 import com.ixibot.database.Database
 import com.ixibot.event.RoleReactionEvent
 import org.slf4j.Logger
@@ -52,10 +51,6 @@ class DatabaseSubscriber(
     private val database: Database
 ) {
 
-    companion object {
-        private val log: Logger = LoggerFactory.getLogger(DiscordAPI::class.java)
-    }
-
     /**
      * RoleReactionEvent subscriber.
      *
@@ -73,5 +68,9 @@ class DatabaseSubscriber(
         } catch (sqle: SQLException) {
             log.error("Failed to process role reaction event {}", event, sqle)
         }
+    }
+
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(DatabaseSubscriber::class.java)
     }
 }

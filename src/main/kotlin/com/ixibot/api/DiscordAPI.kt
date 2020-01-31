@@ -68,10 +68,6 @@ class DiscordAPI @Inject constructor(
         private val isDiscordRequired: Boolean = false
 ) {
 
-    companion object {
-        private val log: Logger = LoggerFactory.getLogger(DiscordAPI::class.java)
-    }
-
     /**
      * Initialize Discord API.
      *
@@ -219,5 +215,9 @@ class DiscordAPI @Inject constructor(
                 }
             }
         }
+    }
+
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(DiscordAPI::class.java)
     }
 }
