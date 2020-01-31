@@ -30,32 +30,31 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.ixibot.subscriber;
+package com.ixibot.subscriber
 
-import com.ixibot.data.RoleReaction;
-import com.ixibot.database.Database;
-import com.ixibot.event.RoleReactionEvent;
-
-import java.sql.SQLException;
-
-import com.google.common.eventbus.Subscribe;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import com.google.common.eventbus.Subscribe
+import com.ixibot.api.DiscordAPI
+import com.ixibot.database.Database
+import com.ixibot.event.RoleReactionEvent
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import java.sql.SQLException
 
 /**
  * Subscribe to events which modify the database.
  *
  * @author Ryan Porterfield
  */
-@RequiredArgsConstructor
-@Slf4j
-public class DatabaseSubscriber {
+class DatabaseSubscriber(
     /**
      * Database interface.
      */
-    @NonNull
-    private final Database database;
+    private val database: Database
+) {
+
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(DiscordAPI::class.java)
+    }
 
     /**
      * RoleReactionEvent subscriber.
@@ -63,17 +62,16 @@ public class DatabaseSubscriber {
      * @param event Event published to event bus.
      */
     @Subscribe
-    public void onRoleReactionEvent(@NonNull final RoleReactionEvent event) {
-        final RoleReaction roleReaction = event.getRoleReaction();
-
+    fun onRoleReactionEvent(event: RoleReactionEvent) {
+        val roleReaction = event.roleReaction
         try {
-            if (event.isCreate()) {
-                database.addRoleReaction(roleReaction);
+            if (event.isCreate) {
+                database.addRoleReaction(roleReaction)
             } else {
-                database.deleteRoleReaction(roleReaction);
+                database.deleteRoleReaction(roleReaction)
             }
-        } catch (final SQLException sqle) {
-            log.error("Failed to process role reaction event {}", event, sqle);
+        } catch (sqle: SQLException) {
+            log.error("Failed to process role reaction event {}", event, sqle)
         }
     }
 }
