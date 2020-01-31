@@ -51,7 +51,7 @@ internal abstract class Option<T>(
         protected val parameterCount: Int,
         /** About message for help text.  */
         private val aboutText: String
-) {
+) : Comparable<Option<T>> {
 
     companion object {
         /** GNU long option prefix.  */
@@ -133,6 +133,10 @@ internal abstract class Option<T>(
      */
     @Throws(IllegalArgumentException::class)
     abstract fun parse(vararg parameters: String?): T
+
+    override fun compareTo(other: Option<T>): Int {
+        return shortOption.compareTo(other.shortOption)
+    }
 
     override fun toString(): String {
         val option = "$short, $long"

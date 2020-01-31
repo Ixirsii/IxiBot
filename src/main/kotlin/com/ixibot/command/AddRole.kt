@@ -57,13 +57,11 @@ class AddRole : Command<RoleReactionEvent?>(COMMAND, OPTIONS, ABOUT, USAGE) {
         private const val ABOUT_VERIFY_RM = ("Run remove verify checks on this role "
                 + "reaction")
         /** Command name.  */
-        private const val COMMAND = "addrole"
+        private const val COMMAND = "add_role"
         /** Command help text.  */
         private const val ABOUT = "Add a role reaction listener"
         /** Command format.  */
-        private val USAGE = String.format(
-                "%s [options] <channel> <message id> <emoji> <role>",
-                COMMAND)
+        private const val USAGE = "$COMMAND [options] <channel> <message id> <emoji> <role>"
         /** Verify (both verifyAdd and verifyRemove) option.  */
         private val VERIFY = PresenceOption(
                 "verify",
@@ -71,12 +69,12 @@ class AddRole : Command<RoleReactionEvent?>(COMMAND, OPTIONS, ABOUT, USAGE) {
                 ABOUT_VERIFY)
         /** Verify add option.  */
         private val VERIFY_ADD = PresenceOption(
-                "verifyadd",
+                "verify_add",
                 'A',
                 ABOUT_VERIFY_ADD)
         /** Verify remove option.  */
         private val VERIFY_REMOVE = PresenceOption(
-                "verifyremove",
+                "verify_remove",
                 'R',
                 ABOUT_VERIFY_RM)
         /**
