@@ -32,6 +32,7 @@
 
 package com.ixibot.api
 
+import com.google.common.collect.ImmutableList
 import com.ixibot.IxiBot
 import com.ixibot.Logging
 import com.ixibot.LoggingImpl
@@ -114,7 +115,7 @@ class DiscordAPI constructor(
         reactionsMap.forEach { (guildID: Snowflake, verifiedReactions: List<RoleReaction>) ->
             discordClient.getGuildById(guildID)
                     .subscribe { guild: Guild ->
-                        val members = guild.members.collectList().block()
+                        val members: List<Member> = guild.members.collectList().block()
                         for (reaction in verifiedReactions) {
                             discordClient.getMessageById(
                                     reaction.channelID,

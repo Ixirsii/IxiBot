@@ -1,13 +1,13 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("idea")
-    id("jacoco")
     id("org.jetbrains.dokka") version "0.10.0"
     id("org.jlleitschuh.gradle.ktlint") version "9.2.1"
     id("org.jmailen.kotlinter") version "2.3.2"
 
     application
+    idea
+    jacoco
     kotlin("jvm") version("1.3.72")
 }
 
@@ -22,7 +22,7 @@ repositories {
 
 dependencies {
     implementation("org.jlleitschuh.gradle:ktlint-gradle:9.2.1")
-    implementation(kotlin("stdlib"))
+    implementation(kotlin("stdlib-jdk8"))
     implementation("commons-io:commons-io:2.6")
     implementation("com.google.guava:guava:28.0-jre")
     implementation("com.discord4j:discord4j-core:3.0.7")
@@ -53,8 +53,8 @@ tasks.dokka {
 }
 
 tasks.compileKotlin {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = "11"
+    targetCompatibility = "11"
 
     kotlinOptions {
         javaParameters = true
