@@ -32,7 +32,6 @@
 
 package com.ixibot.api
 
-import com.google.inject.Inject
 import com.ixibot.IxiBot
 import com.ixibot.Logging
 import com.ixibot.LoggingImpl
@@ -54,7 +53,7 @@ import java.net.ConnectException
  *
  * @author Ryan Porterfield
  */
-class DiscordAPI @Inject constructor(
+class DiscordAPI constructor(
         /**
          * Discord client.
          */

@@ -40,6 +40,11 @@ import com.ixibot.LoggingImpl
 import com.ixibot.event.BotStopEvent
 
 /**
+ * Command to stop execution.
+ */
+private const val QUIT_COMMAND = "quit"
+
+/**
  * Listen to console input.
  *
  * @author Ryan Porterfield
@@ -50,13 +55,6 @@ class ConsoleListener(
      */
     private val eventBus: EventBus
 ) : Logging by LoggingImpl<IxiBot>(),  Runnable {
-
-    companion object {
-        /**
-         * Command to stop execution.
-         */
-        private const val QUIT_COMMAND = "quit"
-    }
 
     /**
      * Program loop control.

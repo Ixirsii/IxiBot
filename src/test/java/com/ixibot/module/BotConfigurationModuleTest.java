@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BotConfigurationModuleTest {
-    private final BotConfigurationModule underTest = new BotConfigurationModule();
+    private final botConfigurationModule underTest = new botConfigurationModule();
 
     @Test
     void givenValidUserConfiguration_whenBotConfiguration_thenReturnsBotConfig(

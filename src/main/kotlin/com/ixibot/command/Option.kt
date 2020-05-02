@@ -32,6 +32,11 @@
 
 package com.ixibot.command
 
+/** GNU long option prefix.  */
+private const val GNU_PREFIX = "--"
+/** POSIX short option prefix.  */
+private const val POSIX_PREFIX = "-"
+
 /**
  * Command option base class.
  *
@@ -48,13 +53,6 @@ internal abstract class Option<T>(
         /** About message for help text.  */
         private val aboutText: String
 ) : Comparable<Option<T>> {
-
-    companion object {
-        /** GNU long option prefix.  */
-        private const val GNU_PREFIX = "--"
-        /** POSIX short option prefix.  */
-        private const val POSIX_PREFIX = "-"
-    }
 
     /** POSIX long option and option name.  */
     val long: String = GNU_PREFIX + longOption
@@ -136,7 +134,7 @@ internal abstract class Option<T>(
 
     override fun toString(): String {
         val option = "$short, $long"
-        val optionSpace = Command.getSpace(option.length)
+        val optionSpace = getSpace(option.length)
         return "$option$optionSpace$aboutText."
     }
 }

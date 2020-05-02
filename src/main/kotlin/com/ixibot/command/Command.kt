@@ -36,6 +36,34 @@ import com.google.common.collect.Lists
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
+/** Help option about text.  */
+private const val ABOUT_HELP = "Show this help message"
+/** Length of columns in help message.  */
+private const val COLUMN_LENGTH = 24
+/** Help parameter supported by every command.  */
+private val HELP = PresenceOption(
+        "help",
+        'h',
+        ABOUT_HELP)
+/** Options header for help text.  */
+private const val OPTIONS_HEADER = "Options:"
+/** Usage header for help text.  */
+private const val USAGE_HEADER = "Usage:"
+
+/**
+ * Get space between option and help text.
+ *
+ * @param optionLength How long the option text is
+ * @return space between option and help text
+ */
+fun getSpace(optionLength: Int): String {
+    val stringBuilder = StringBuilder(" ")
+    for (i in 0 until COLUMN_LENGTH - (optionLength + 1)) {
+        stringBuilder.append(' ')
+    }
+    return stringBuilder.toString()
+}
+
 /**
  * Command base class.
  *
@@ -171,34 +199,4 @@ abstract class Command<E> internal constructor(
         /** Number of arguments consumed by option.  */
         private val argumentCount: Int
     )
-
-    companion object {
-        /** Help option about text.  */
-        private const val ABOUT_HELP = "Show this help message"
-        /** Length of columns in help message.  */
-        private const val COLUMN_LENGTH = 24
-        /** Help parameter supported by every command.  */
-        private val HELP = PresenceOption(
-                "help",
-                'h',
-                ABOUT_HELP)
-        /** Options header for help text.  */
-        private const val OPTIONS_HEADER = "Options:"
-        /** Usage header for help text.  */
-        private const val USAGE_HEADER = "Usage:"
-
-        /**
-         * Get space between option and help text.
-         *
-         * @param optionLength How long the option text is
-         * @return space between option and help text
-         */
-        fun getSpace(optionLength: Int): String {
-            val stringBuilder = StringBuilder(" ")
-            for (i in 0 until COLUMN_LENGTH - (optionLength + 1)) {
-                stringBuilder.append(' ')
-            }
-            return stringBuilder.toString()
-        }
-    }
 }

@@ -42,6 +42,11 @@ import java.sql.Connection
 import java.sql.SQLException
 
 /**
+ * Database version number.
+ */
+private const val DATABASE_VERSION: Long = 1
+
+/**
  * SQLite database connector.
  *
  * @author Ryan Porterfield
@@ -52,13 +57,6 @@ class Database(
          */
         private val connection: Connection
 ) : Logging by LoggingImpl<IxiBot>() {
-
-    companion object {
-        /**
-         * Database version number.
-         */
-        private const val DATABASE_VERSION: Long = 1
-    }
 
     /**
      * Insert a role assignment reaction into the database.
@@ -90,6 +88,7 @@ class Database(
                 roleReaction.reactionEmojiName,
                 roleReaction.isRemoveVerified,
                 roleReaction.roleID)
+
         connection.prepareStatement(insertStatement).use { statement -> return statement.execute() }
     }
 

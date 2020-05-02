@@ -65,7 +65,7 @@ abstract class Argument<T>
      * {@inheritDoc}
      */
     override fun toString(): String {
-        return name + Command.getSpace(name.length) + aboutText + "."
+        return name + getSpace(name.length) + aboutText + "."
     }
 
 }

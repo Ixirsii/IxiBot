@@ -50,6 +50,23 @@ import java.util.function.Predicate
 import java.util.stream.Collectors
 
 /**
+ * Bot configuration file.
+ */
+private const val CONFIG_FILE_NAME = "config.yaml"
+/**
+ * Bot configuration directory.
+ */
+const val CONFIG_DIRECTORY = "config/"
+/**
+ * File path to bot configuration resource.
+ */
+const val CONFIG_RESOURCE = "/$CONFIG_FILE_NAME"
+/**
+ * Config file configured by the user.
+ */
+const val USER_CONFIG_FILE = CONFIG_DIRECTORY + CONFIG_FILE_NAME
+
+/**
  * Bot logic class once startup is complete and user configuration is loaded.
  *
  * @author Ryan Porterfield
@@ -63,10 +80,6 @@ class IxiBot(
      * Discord API interface.
      */
     private val discordAPI: DiscordAPI,
-    /**
-     * Role assignment reactions.
-     */
-    private val roleReactions: MutableList<RoleReaction>,
     /**
      * Interval (in minutes) between Discord role verification checks.
      */
@@ -147,7 +160,7 @@ class IxiBot(
                 return
             }
         }
-        val reactionOptional = roleReactions.stream()
+        val reactionOptional = database.allRoleReactions.stream()
                 .filter(filter)
                 .findFirst()
         if (reactionOptional.isPresent) {
@@ -181,9 +194,9 @@ class IxiBot(
     fun onRoleReactionEvent(event: RoleReactionEvent) {
         val roleReaction = event.roleReaction
         if (event.isCreate) {
-            roleReactions.add(roleReaction)
+            database.addRoleReaction(roleReaction);
         } else {
-            roleReactions.remove(roleReaction)
+            database.deleteRoleReaction(roleReaction);
         }
     }
 
@@ -193,6 +206,7 @@ class IxiBot(
     override fun run() {
         scheduler.scheduleAtFixedRate(
                 {
+                    val roleReactions: List<RoleReaction> = database.allRoleReactions
                     discordAPI.updateAllRoles(roleReactions.stream()
                             .filter(RoleReaction::isVerified)
                             .collect(Collectors.groupingBy(RoleReaction::guildID)))
@@ -233,24 +247,5 @@ class IxiBot(
             // Preserve interrupt status
             Thread.currentThread().interrupt()
         }
-    }
-
-    companion object {
-        /**
-         * Bot configuration file.
-         */
-        private const val CONFIG_FILE_NAME = "config.yaml"
-        /**
-         * Bot configuration directory.
-         */
-        const val CONFIG_DIRECTORY = "config/"
-        /**
-         * File path to bot configuration resource.
-         */
-        const val CONFIG_RESOURCE = "/$CONFIG_FILE_NAME"
-        /**
-         * Config file configured by the user.
-         */
-        const val USER_CONFIG_FILE = CONFIG_DIRECTORY + CONFIG_FILE_NAME
     }
 }

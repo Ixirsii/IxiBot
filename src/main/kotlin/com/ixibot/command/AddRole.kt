@@ -34,6 +34,43 @@ package com.ixibot.command
 
 import com.ixibot.event.RoleReactionEvent
 
+/** Verify option about text.  */
+private const val ABOUT_VERIFY = ("Run both add and remove verify checks on this role reaction")
+/** Add verify option about text.  */
+private const val ABOUT_VERIFY_ADD = "Run add verify checks on this role reaction"
+/** Remove verify option about text.  */
+private const val ABOUT_VERIFY_RM = ("Run remove verify checks on this role reaction")
+/** Command name.  */
+private const val COMMAND = "add_role"
+/** Command help text.  */
+private const val ABOUT = "Add a role reaction listener"
+/** Command format.  */
+private const val USAGE = "$COMMAND [options] <channel> <message id> <emoji> <role>"
+/** Verify (both verifyAdd and verifyRemove) option.  */
+private val VERIFY = PresenceOption(
+        "verify",
+        'V',
+        ABOUT_VERIFY)
+/** Verify add option.  */
+private val VERIFY_ADD = PresenceOption(
+        "verify_add",
+        'A',
+        ABOUT_VERIFY_ADD)
+/** Verify remove option.  */
+private val VERIFY_REMOVE = PresenceOption(
+        "verify_remove",
+        'R',
+        ABOUT_VERIFY_RM)
+/**
+ * List of options accepted by this command.
+ *
+ * @see Command.options
+ */
+private val OPTIONS = arrayOf<Option<out Any?>?>(
+        VERIFY,
+        VERIFY_ADD,
+        VERIFY_REMOVE)
+
 /**
  * Add a role reaction.
  *
@@ -45,46 +82,5 @@ class AddRole : Command<RoleReactionEvent?>(COMMAND, OPTIONS, ABOUT, USAGE) {
     override fun parse(vararg parameters: String): RoleReactionEvent? {
         // TODO: Implement this later
         return null
-    }
-
-    companion object {
-        /** Verify option about text.  */
-        private const val ABOUT_VERIFY = ("Run both add and remove verify checks on this "
-                + "role reaction")
-        /** Add verify option about text.  */
-        private const val ABOUT_VERIFY_ADD = "Run add verify checks on this role reaction"
-        /** Remove verify option about text.  */
-        private const val ABOUT_VERIFY_RM = ("Run remove verify checks on this role "
-                + "reaction")
-        /** Command name.  */
-        private const val COMMAND = "add_role"
-        /** Command help text.  */
-        private const val ABOUT = "Add a role reaction listener"
-        /** Command format.  */
-        private const val USAGE = "$COMMAND [options] <channel> <message id> <emoji> <role>"
-        /** Verify (both verifyAdd and verifyRemove) option.  */
-        private val VERIFY = PresenceOption(
-                "verify",
-                'V',
-                ABOUT_VERIFY)
-        /** Verify add option.  */
-        private val VERIFY_ADD = PresenceOption(
-                "verify_add",
-                'A',
-                ABOUT_VERIFY_ADD)
-        /** Verify remove option.  */
-        private val VERIFY_REMOVE = PresenceOption(
-                "verify_remove",
-                'R',
-                ABOUT_VERIFY_RM)
-        /**
-         * List of options accepted by this command.
-         *
-         * @see Command.options
-         */
-        private val OPTIONS = arrayOf<Option<out Any?>?>(
-                VERIFY,
-                VERIFY_ADD,
-                VERIFY_REMOVE)
     }
 }

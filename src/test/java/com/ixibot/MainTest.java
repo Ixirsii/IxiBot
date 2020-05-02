@@ -3,15 +3,15 @@ package com.ixibot;
 import java.io.File;
 import java.net.ConnectException;
 
-import com.google.inject.Injector;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static com.ixibot.MainKt.generateUserConfig;
+import static com.ixibot.MainKt.run;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -21,17 +21,11 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class MainTest {
     @Mock
-    private Injector injectorMock;
-    @Mock
     private IxiBot ixiBotMock;
-
-    @InjectMocks
-    private Main underTest;
 
     @AfterEach
     void cleanup() {
         verifyNoMoreInteractions(ixiBotMock);
-        verifyNoMoreInteractions(injectorMock);
     }
 
     @Test
@@ -39,7 +33,7 @@ class MainTest {
         when(injectorMock.getInstance(IxiBot.class)).thenReturn(ixiBotMock);
 
         try {
-            underTest.run();
+            run();
         } finally {
             verify(injectorMock).getInstance(IxiBot.class);
             verify(ixiBotMock).init();
@@ -54,7 +48,7 @@ class MainTest {
         doThrow(new ConnectException()).when(ixiBotMock).init();
 
         try {
-            underTest.run();
+            run();
         } finally {
             verify(injectorMock).getInstance(IxiBot.class);
             verify(ixiBotMock).init();
@@ -67,7 +61,7 @@ class MainTest {
             throws Exception {
         final File configFile = new File(tempFile, "config.yaml");
 
-        Main.generateUserConfig(configFile);
+        generateUserConfig(configFile);
 
         assertTrue(configFile.exists(), "Config file should be written successfully");
     }

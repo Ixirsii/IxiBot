@@ -32,11 +32,18 @@
 
 package com.ixibot
 
-import com.google.common.annotations.VisibleForTesting
-import com.google.inject.Guice
-import com.google.inject.Injector
+import com.ixibot.api.DiscordAPI
 import com.ixibot.data.BotConfiguration
-import com.ixibot.module.IxiBotModule
+import com.ixibot.listener.DiscordListener
+import com.ixibot.module.botConfiguration
+import com.ixibot.module.connection
+import com.ixibot.module.database
+import com.ixibot.module.discordClient
+import com.ixibot.module.eventBus
+import com.ixibot.module.ixiBot
+import com.ixibot.module.scheduler
+import com.ixibot.module.userConfigFile
+import com.ixibot.module.yamlMapper
 import org.apache.commons.io.FileUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -45,83 +52,69 @@ import java.io.IOException
 import java.net.ConnectException
 
 /**
- * Main class.
- *
- * @author Ryan Porterfield
+ * Logger.
  */
-class Main(
-    /**
-     * Guava injector.
-     */
-    private val injector: Injector
-) {
+private val log: Logger = LoggerFactory.getLogger(LoggingImpl::class.java)
 
-    /**
-     * Run bot.
-     */
-    @VisibleForTesting
-    fun  /* default */ run() {
+/**
+ * Main method.
+ */
+fun main() {
+    val botConfiguration: BotConfiguration = botConfiguration(userConfigFile(), yamlMapper())
+
+    if (botConfiguration.isDefaultConfig) {
+        val configFile = File(USER_CONFIG_FILE)
         try {
-            injector.getInstance(IxiBot::class.java).use { ixiBot ->
-                ixiBot.init()
-                ixiBot.run()
-            }
-        } catch (ce: ConnectException) {
-            log.error("Failed to connect to a required API, exiting", ce)
+            generateUserConfig(configFile)
+            log.info("Generated new user config file at \"{}\". "
+                    + "Please customize your configuration then restart the bot",
+                    configFile.absolutePath)
+        } catch (ioe: IOException) {
+            log.error(
+                    "Caught IOException trying to write new user config file to \"{}\"",
+                    configFile.absolutePath,
+                    ioe)
         }
+    } else {
+        run(botConfiguration)
     }
+}
 
-    companion object {
-        /**
-         * Logger.
-         */
-        private val log: Logger = LoggerFactory.getLogger(Main::class.java)
+/**
+ * Write default configuration file and exit.
+ *
+ * @param configFile File path to user config file.
+ * @throws IOException on error writing config file.
+ */
+@Throws(IOException::class)
+fun generateUserConfig(configFile: File) {
 
-        /**
-         * Main method.
-         *
-         * @param args Execution arguments.
-         */
-        @JvmStatic
-        fun main(args: Array<String>) {
-            val injector = Guice.createInjector(IxiBotModule())
-            val (_, isDefaultConfig) = injector.getInstance(BotConfiguration::class.java)
-            if (isDefaultConfig) {
-                val configFile = File(IxiBot.USER_CONFIG_FILE)
-                try {
-                    generateUserConfig(configFile)
-                    log.info("Generated new user config file at \"{}\". "
-                            + "Please customize your configuration then restart the bot",
-                            configFile.absolutePath)
-                } catch (ioe: IOException) {
-                    log.error(
-                            "Caught IOException trying to write new user config file to \"{}\"",
-                            configFile.absolutePath,
-                            ioe)
-                }
-            } else {
-                val main = Main(injector)
-                main.run()
-            }
+    resourceLoader.getResourceAsStream(CONFIG_RESOURCE).use { configResource ->
+        log.debug(
+                "Writing new user config file to \"{}\"",
+                configFile.absolutePath)
+        FileUtils.copyToFile(configResource, configFile)
+    }
+}
+
+/**
+ * Run bot.
+ */
+fun run(botConfiguration: BotConfiguration) {
+    try {
+        ixiBot(
+                database(connection()),
+                DiscordAPI(
+                        discordClient(botConfiguration),
+                        DiscordListener(eventBus()),
+                        botConfiguration.isDiscordRequired),
+                botConfiguration,
+                scheduler()
+        ).use { ixiBot ->
+            ixiBot.init()
+            ixiBot.run()
         }
-
-        /**
-         * Write default configuration file and exit.
-         *
-         * @param configFile File path to user config file.
-         * @throws IOException on error writing config file.
-         */
-        @JvmStatic
-        @VisibleForTesting
-        /* default */
-        @Throws(IOException::class)
-        fun generateUserConfig(configFile: File) {
-            Main::class.java.getResourceAsStream(IxiBot.CONFIG_RESOURCE).use { configResource ->
-                log.debug(
-                        "Writing new user config file to \"{}\"",
-                        configFile.absolutePath)
-                FileUtils.copyToFile(configResource, configFile)
-            }
-        }
+    } catch (ce: ConnectException) {
+        log.error("Failed to connect to a required API, exiting", ce)
     }
 }
