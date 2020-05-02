@@ -54,7 +54,7 @@ class ConsoleListener(
      * Event bus to publish events to.
      */
     private val eventBus: EventBus
-) : Logging by LoggingImpl<IxiBot>(),  Runnable {
+) : Logging by LoggingImpl<IxiBot>(), Runnable {
 
     /**
      * Program loop control.

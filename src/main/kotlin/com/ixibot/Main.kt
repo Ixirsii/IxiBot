@@ -7,15 +7,15 @@
  * are met:
  *
  *     1. Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
+ *        notice, this list of conditions and the following disclaimer.
  *
  *     2. Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
+ *        notice, this list of conditions and the following disclaimer in the
+ *        documentation and/or other materials provided with the distribution.
  *
  *     3. Neither the name of the copyright holder nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *        contributors may be used to endorse or promote products derived from
+ *        this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
  * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
@@ -32,14 +32,15 @@
 
 package com.ixibot
 
+import com.google.common.eventbus.EventBus
 import com.ixibot.api.DiscordAPI
 import com.ixibot.data.BotConfiguration
+import com.ixibot.listener.ConsoleListener
 import com.ixibot.listener.DiscordListener
 import com.ixibot.module.botConfiguration
 import com.ixibot.module.connection
 import com.ixibot.module.database
 import com.ixibot.module.discordClient
-import com.ixibot.module.eventBus
 import com.ixibot.module.ixiBot
 import com.ixibot.module.scheduler
 import com.ixibot.module.userConfigFile
@@ -88,32 +89,39 @@ fun main() {
  */
 @Throws(IOException::class)
 fun generateUserConfig(configFile: File) {
-
     resourceLoader.getResourceAsStream(CONFIG_RESOURCE).use { configResource ->
-        log.debug(
-                "Writing new user config file to \"{}\"",
-                configFile.absolutePath)
+        log.debug("Writing new user config file to \"{}\"", configFile.absolutePath)
         FileUtils.copyToFile(configResource, configFile)
     }
+}
+
+fun registerSubscribers(eventBus: EventBus, subscribers: List<Any>) {
+    subscribers.forEach(eventBus::register)
 }
 
 /**
  * Run bot.
  */
 fun run(botConfiguration: BotConfiguration) {
+    val eventBus: EventBus = EventBus()
+    // TODO: Multithreading
+    val consoleListener: ConsoleListener = ConsoleListener(eventBus)
+    val discordListener: DiscordListener = DiscordListener(eventBus)
+    val ixiBot: IxiBot = ixiBot(
+            database(connection()),
+            DiscordAPI(
+                    discordClient(botConfiguration),
+                    discordListener,
+                    botConfiguration.isDiscordRequired),
+            botConfiguration,
+            scheduler())
+
+    registerSubscribers(eventBus, listOf(consoleListener, discordListener, ixiBot))
+
     try {
-        ixiBot(
-                database(connection()),
-                DiscordAPI(
-                        discordClient(botConfiguration),
-                        DiscordListener(eventBus()),
-                        botConfiguration.isDiscordRequired),
-                botConfiguration,
-                scheduler()
-        ).use { ixiBot ->
-            ixiBot.init()
-            ixiBot.run()
-        }
+        ixiBot.init()
+        ixiBot.run()
+        ixiBot.close()
     } catch (ce: ConnectException) {
         log.error("Failed to connect to a required API, exiting", ce)
     }

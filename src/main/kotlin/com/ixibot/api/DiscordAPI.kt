@@ -32,7 +32,6 @@
 
 package com.ixibot.api
 
-import com.google.common.collect.ImmutableList
 import com.ixibot.IxiBot
 import com.ixibot.Logging
 import com.ixibot.LoggingImpl

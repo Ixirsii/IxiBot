@@ -53,14 +53,17 @@ import java.util.stream.Collectors
  * Bot configuration file.
  */
 private const val CONFIG_FILE_NAME = "config.yaml"
+
 /**
  * Bot configuration directory.
  */
 const val CONFIG_DIRECTORY = "config/"
+
 /**
  * File path to bot configuration resource.
  */
 const val CONFIG_RESOURCE = "/$CONFIG_FILE_NAME"
+
 /**
  * Config file configured by the user.
  */
@@ -72,22 +75,22 @@ const val USER_CONFIG_FILE = CONFIG_DIRECTORY + CONFIG_FILE_NAME
  * @author Ryan Porterfield
  */
 class IxiBot(
-    /**
-     * Database interface.
-     */
-    private val database: Database,
-    /**
-     * Discord API interface.
-     */
-    private val discordAPI: DiscordAPI,
-    /**
-     * Interval (in minutes) between Discord role verification checks.
-     */
-    private val roleVerifyDelay: Long,
-    /**
-     * Thread pool executor for scheduled async actions.
-     */
-    private val scheduler: ScheduledExecutorService
+        /**
+         * Database interface.
+         */
+        private val database: Database,
+        /**
+         * Discord API interface.
+         */
+        private val discordAPI: DiscordAPI,
+        /**
+         * Interval (in minutes) between Discord role verification checks.
+         */
+        private val roleVerifyDelay: Long,
+        /**
+         * Thread pool executor for scheduled async actions.
+         */
+        private val scheduler: ScheduledExecutorService
 ) : AutoCloseable, Logging by LoggingImpl<IxiBot>(), Runnable {
 
     /**

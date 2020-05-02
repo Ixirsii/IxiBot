@@ -68,15 +68,6 @@ fun discordClient(botConfiguration: BotConfiguration): DiscordClient {
 }
 
 /**
- * EventBus provider.
- *
- * @return event bus.
- */
-fun eventBus(): EventBus {
-    return EventBus()
-}
-
-/**
  * IxiBot provider.
  *
  * @param database Database interface.
