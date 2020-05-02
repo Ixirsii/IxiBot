@@ -33,14 +33,14 @@
 package com.ixibot.listener
 
 import com.google.common.eventbus.EventBus
-
+import com.ixibot.IxiBot
+import com.ixibot.Logging
+import com.ixibot.LoggingImpl
 import com.ixibot.event.DiscordReactionEvent
 import discord4j.core.`object`.entity.Member
 import discord4j.core.event.domain.message.MessageCreateEvent
 import discord4j.core.event.domain.message.ReactionAddEvent
 import discord4j.core.event.domain.message.ReactionRemoveEvent
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * Listen for events from Discord.
@@ -52,11 +52,7 @@ class DiscordListener(
          * Event bus to publish events to.
          */
         private val eventBus: EventBus
-) {
-
-    companion object {
-        private val log: Logger = LoggerFactory.getLogger(DiscordListener::class.java)
-    }
+) : Logging by LoggingImpl<IxiBot>() {
 
     /**
      * MessageCreateEvent listener.

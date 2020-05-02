@@ -32,8 +32,9 @@
 
 package com.ixibot.command
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import com.ixibot.IxiBot
+import com.ixibot.Logging
+import com.ixibot.LoggingImpl
 
 /**
  * Command option which is true if present.
@@ -44,7 +45,7 @@ internal class PresenceOption(
         longOption: String,
         shortOption: Char,
         aboutText: String
-) : Option<Boolean>(longOption, shortOption, 0, aboutText) {
+) : Option<Boolean>(longOption, shortOption, 0, aboutText), Logging by LoggingImpl<IxiBot>() {
 
     /**
      * {@inheritDoc}
@@ -60,9 +61,5 @@ internal class PresenceOption(
         }
 
         return true
-    }
-
-    companion object {
-        private val log: Logger = LoggerFactory.getLogger(PresenceOption::class.java)
     }
 }

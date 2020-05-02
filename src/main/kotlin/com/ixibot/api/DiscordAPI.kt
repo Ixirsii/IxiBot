@@ -33,6 +33,9 @@
 package com.ixibot.api
 
 import com.google.inject.Inject
+import com.ixibot.IxiBot
+import com.ixibot.Logging
+import com.ixibot.LoggingImpl
 import com.ixibot.data.RoleReaction
 import com.ixibot.listener.DiscordListener
 import discord4j.core.DiscordClient
@@ -44,8 +47,6 @@ import discord4j.core.`object`.util.Snowflake
 import discord4j.core.event.domain.message.MessageCreateEvent
 import discord4j.core.event.domain.message.ReactionAddEvent
 import discord4j.core.event.domain.message.ReactionRemoveEvent
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.net.ConnectException
 
 /**
@@ -66,7 +67,7 @@ class DiscordAPI @Inject constructor(
          * If `true` this API wrapper will throw an exception on failure to connect.
          */
         private val isDiscordRequired: Boolean = false
-) {
+) : Logging by LoggingImpl<IxiBot>() {
 
     /**
      * Initialize Discord API.
@@ -120,11 +121,7 @@ class DiscordAPI @Inject constructor(
                                     reaction.channelID,
                                     reaction.messageID)
                                     .subscribe { message: Message ->
-                                        updateReactionRoles(
-                                                guild,
-                                                members,
-                                                message,
-                                                reaction)
+                                        updateReactionRoles(guild, members, message, reaction)
                                     }
                         }
                     }
@@ -147,7 +144,7 @@ class DiscordAPI @Inject constructor(
                 .collectList()
                 .block()
         if (reactors == null) {
-            DiscordAPI.log.error("Unable to get list of reactors for message {}", message.id)
+            log.error("Unable to get list of reactors for message {}", message.id)
             return
         }
         if (verifiedReaction.isAddVerified) {
@@ -179,7 +176,7 @@ class DiscordAPI @Inject constructor(
                             member.displayName,
                             message.id.asLong(),
                             verifiedReaction.reactionEmoji)
-                    DiscordAPI.log.info(addRoleReason)
+                    log.info(addRoleReason)
                     member.addRole(verifiedReaction.roleID, addRoleReason).subscribe()
                 }
             }
@@ -210,14 +207,10 @@ class DiscordAPI @Inject constructor(
                             member.displayName,
                             message.id.asLong(),
                             verifiedReaction.reactionEmoji)
-                    DiscordAPI.log.info(removeRoleReason)
+                    log.info(removeRoleReason)
                     member.removeRole(verifiedReaction.roleID, removeRoleReason).subscribe()
                 }
             }
         }
-    }
-
-    companion object {
-        private val log: Logger = LoggerFactory.getLogger(DiscordAPI::class.java)
     }
 }

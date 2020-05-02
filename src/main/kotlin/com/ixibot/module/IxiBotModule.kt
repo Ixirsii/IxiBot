@@ -54,7 +54,6 @@ import com.ixibot.database.Database
 import com.ixibot.provider.IxiBotProvider
 import discord4j.core.DiscordClient
 import discord4j.core.DiscordClientBuilder
-import lombok.NoArgsConstructor
 import java.sql.SQLException
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledThreadPoolExecutor
@@ -64,7 +63,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor
  *
  * @author Ryan Porterfield
  */
-@NoArgsConstructor
 class IxiBotModule : AbstractModule() {
     /**
      * Configure module.
@@ -116,12 +114,12 @@ class IxiBotModule : AbstractModule() {
     @Throws(SQLException::class)
     fun ixiBot(
             database: Database,
-            discordAPI: DiscordAPI?,
+            discordAPI: DiscordAPI,
             botConfiguration: BotConfiguration,
             scheduler: ScheduledExecutorService?): IxiBot {
         return IxiBot(
                 database,
-                discordAPI!!,
+                discordAPI,
                 database.allRoleReactions,
                 botConfiguration.roleVerifyDelay,
                 scheduler!!)

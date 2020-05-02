@@ -41,10 +41,10 @@ import com.google.inject.name.Named
 import com.google.inject.throwingproviders.CheckedProvides
 import com.google.inject.throwingproviders.ThrowingProviderBinder
 import com.ixibot.IxiBot
+import com.ixibot.Logging
+import com.ixibot.LoggingImpl
 import com.ixibot.data.BotConfiguration
 import com.ixibot.provider.BotConfigurationProvider
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -54,11 +54,7 @@ import java.io.IOException
  *
  * @author Ryan Porterfield.
  */
-internal class BotConfigurationModule : AbstractModule() {
-
-    companion object {
-        private val log: Logger = LoggerFactory.getLogger(BotConfigurationModule::class.java)
-    }
+internal class BotConfigurationModule : AbstractModule(), Logging by LoggingImpl<IxiBot>() {
 
     /**
      * Configure module.
@@ -87,11 +83,11 @@ internal class BotConfigurationModule : AbstractModule() {
         botConfiguration = try {
             userBotConfiguration(userConfigFile, objectMapper)
         } catch (fnfe: FileNotFoundException) {
-            BotConfigurationModule.log.debug("User configuration file not found, falling back to default configuration.")
+            log.debug("User configuration file not found, falling back to default configuration.")
             defaultBotConfiguration(objectMapper)
         } catch (ioe: IOException) {
             val message = "Error reading from user configuration file"
-            BotConfigurationModule.log.error(message, ioe)
+            log.error(message, ioe)
             throw IOException(message, ioe)
         }
         return botConfiguration
@@ -135,7 +131,7 @@ internal class BotConfigurationModule : AbstractModule() {
             val message = String.format(
                     "User config file does not exist at %s",
                     userConfigFile.absolutePath)
-            BotConfigurationModule.log.warn(message)
+            log.warn(message)
             throw FileNotFoundException(message)
         }
         return objectMapper.readValue(userConfigFile, BotConfiguration::class.java)

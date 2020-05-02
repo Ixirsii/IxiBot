@@ -32,13 +32,12 @@
 
 package com.ixibot.database
 
+import com.ixibot.IxiBot
+import com.ixibot.Logging
+import com.ixibot.LoggingImpl
 import com.ixibot.data.RoleReaction
 import discord4j.core.`object`.reaction.ReactionEmoji
 import discord4j.core.`object`.util.Snowflake
-import lombok.RequiredArgsConstructor
-import lombok.extern.slf4j.Slf4j
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.sql.Connection
 import java.sql.SQLException
 
@@ -47,22 +46,18 @@ import java.sql.SQLException
  *
  * @author Ryan Porterfield
  */
-@RequiredArgsConstructor
-@Slf4j
 class Database(
         /**
          * Connection to SQLite database.
          */
         private val connection: Connection
-) {
+) : Logging by LoggingImpl<IxiBot>() {
 
     companion object {
         /**
          * Database version number.
          */
         private const val DATABASE_VERSION: Long = 1
-
-        private val log: Logger = LoggerFactory.getLogger(Database::class.java)
     }
 
     /**

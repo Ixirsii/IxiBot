@@ -34,9 +34,10 @@ package com.ixibot.listener
 
 import com.google.common.eventbus.EventBus
 import com.google.common.eventbus.Subscribe
+import com.ixibot.IxiBot
+import com.ixibot.Logging
+import com.ixibot.LoggingImpl
 import com.ixibot.event.BotStopEvent
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * Listen to console input.
@@ -48,15 +49,13 @@ class ConsoleListener(
      * Event bus to publish events to.
      */
     private val eventBus: EventBus
-) : Runnable {
+) : Logging by LoggingImpl<IxiBot>(),  Runnable {
 
     companion object {
         /**
          * Command to stop execution.
          */
         private const val QUIT_COMMAND = "quit"
-
-        private val log: Logger = LoggerFactory.getLogger(ConsoleListener::class.java)
     }
 
     /**

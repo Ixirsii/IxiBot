@@ -32,16 +32,12 @@
 
 package com.ixibot.command
 
-import lombok.AccessLevel
-import lombok.Getter
-
 /**
  * Command option base class.
  *
  * @param <T> Type of value parsed by this option.
  * @author Ryan Porterfield
-</T> */
-@Getter(AccessLevel.PACKAGE)
+ */
 internal abstract class Option<T>(
         /** POSIX long option and option name.  */
         private val longOption: String,

@@ -33,10 +33,11 @@
 package com.ixibot.subscriber
 
 import com.google.common.eventbus.Subscribe
+import com.ixibot.IxiBot
+import com.ixibot.Logging
+import com.ixibot.LoggingImpl
 import com.ixibot.database.Database
 import com.ixibot.event.RoleReactionEvent
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.sql.SQLException
 
 /**
@@ -49,7 +50,7 @@ class DatabaseSubscriber(
      * Database interface.
      */
     private val database: Database
-) {
+) : Logging by LoggingImpl<IxiBot>() {
 
     /**
      * RoleReactionEvent subscriber.
@@ -68,9 +69,5 @@ class DatabaseSubscriber(
         } catch (sqle: SQLException) {
             log.error("Failed to process role reaction event {}", event, sqle)
         }
-    }
-
-    companion object {
-        private val log: Logger = LoggerFactory.getLogger(DatabaseSubscriber::class.java)
     }
 }
