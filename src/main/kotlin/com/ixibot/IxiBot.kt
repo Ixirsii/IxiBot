@@ -32,20 +32,15 @@
 
 package com.ixibot
 
-import com.google.common.eventbus.Subscribe
 import com.ixibot.api.DiscordAPI
 import com.ixibot.data.RoleReaction
 import com.ixibot.database.Database
-import com.ixibot.event.DiscordReactionEvent
-import discord4j.core.`object`.entity.Member
-import discord4j.core.`object`.entity.Message
-import discord4j.core.`object`.reaction.ReactionEmoji
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import java.net.ConnectException
 import java.sql.SQLException
-import java.util.*
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
-import java.util.function.Predicate
 import java.util.stream.Collectors
 
 /**
@@ -74,20 +69,16 @@ const val USER_CONFIG_FILE = CONFIG_DIRECTORY + CONFIG_FILE_NAME
  * @author Ryan Porterfield
  */
 class IxiBot(
-        /**
-         * Database interface.
-         */
+        /** Database interface. */
         private val database: Database,
-        /**
-         * Discord API interface.
-         */
+        /** Discord API interface. */
         private val discordAPI: DiscordAPI,
-        /**
-         * Interval (in minutes) between Discord role verification checks.
-         */
+        /** Interval (in minutes) between Discord role verification checks. */
         private val roleVerifyDelay: Long,
         /**
          * Thread pool executor for scheduled async actions.
+         *
+         * TODO: Replace this with coroutines
          */
         private val scheduler: ScheduledExecutorService
 ) : AutoCloseable, Logging by LoggingImpl<IxiBot>(), Runnable {
@@ -122,71 +113,6 @@ class IxiBot(
         running = true
     }
 
-    // TODO: Fix this
-    /**
-     * DiscordReactionEvent subscriber.
-     *
-     * @param event Event published to the event bus.
-     */
-    @Subscribe
-    fun onDiscordReactionEvent(event: DiscordReactionEvent) {
-        val filter: Predicate<RoleReaction>
-        val optionalCustom: Optional<ReactionEmoji.Custom> = event.reactionEmoji
-                .asCustomEmoji()
-        val optionalUnicode = event.reactionEmoji
-                .asUnicodeEmoji()
-        filter = when {
-            optionalCustom.isPresent -> {
-                val custom: ReactionEmoji.Custom = optionalCustom.get()
-                Predicate { reaction: RoleReaction ->
-                    (reaction.messageID == event.messageID
-                            && reaction.channelID == event.channelID
-                            && reaction.reactionEmojiName == custom.name
-                            && reaction.boxedReactionEmojiID == custom.id.asLong())
-                }
-            }
-            optionalUnicode.isPresent -> {
-                val unicode = optionalUnicode.get()
-                Predicate { reaction: RoleReaction ->
-                    (reaction.messageID == event.messageID
-                            && reaction.channelID == event.channelID
-                            && reaction.reactionEmojiName == unicode.raw)
-                }
-            }
-            else -> {
-                log.error("Failed to get reaction that user added to message."
-                        + "\nUser: {}\nMessage: {}\nEmoji: {}",
-                        event.userID,
-                        event.messageID,
-                        event.reactionEmoji)
-                return
-            }
-        }
-        val reactionOptional = database.allRoleReactions.stream()
-                .filter(filter)
-                .findFirst()
-        if (reactionOptional.isPresent) {
-            val reasonFormat = if (event.isAdd) "User %s reacted to message %d with %s to get role %s." else "User %s reacted to message %d with %s to remove role %s."
-            val (_, _, _, _, _, reactionEmoji, roleID) = reactionOptional.get()
-            event.messageMono.subscribe { message: Message ->
-                message.authorAsMember.subscribe { member: Member ->
-                    val reason = String.format(
-                            reasonFormat,
-                            member.displayName,
-                            message.id.asLong(),
-                            reactionEmoji,
-                            roleID)
-                    log.info(reason)
-                    if (event.isAdd) {
-                        member.addRole(roleID, reason)
-                    } else {
-                        member.removeRole(roleID, reason)
-                    }
-                }
-            }
-        }
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -201,15 +127,12 @@ class IxiBot(
                 0,
                 roleVerifyDelay,
                 TimeUnit.MINUTES)
-        try {
-            while (running) { // Sleep for 1 second (1s * 1000ms/s = 1000ms)
-                Thread.sleep(1000)
+
+        // Keep main thread alive
+        while (running) {
+            runBlocking {
+                delay(1000L)
             }
-        } catch (ie: InterruptedException) {
-            log.error(
-                    "Thread \"{}\" interrupted while sleeping.",
-                    Thread.currentThread().name,
-                    ie)
         }
     }
 

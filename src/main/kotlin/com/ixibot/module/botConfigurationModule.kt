@@ -34,6 +34,7 @@ package com.ixibot.module
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ixibot.CONFIG_RESOURCE
+import com.ixibot.IxiBot
 import com.ixibot.LoggingImpl
 import com.ixibot.USER_CONFIG_FILE
 import com.ixibot.data.BotConfiguration
@@ -47,7 +48,7 @@ import java.io.IOException
 /**
  * Logger.
  */
-private val log: Logger = LoggerFactory.getLogger(LoggingImpl::class.java)
+private val log: Logger = LoggerFactory.getLogger(IxiBot::class.java)
 
 /**
  * Bot configuration provider.

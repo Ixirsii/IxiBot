@@ -35,6 +35,7 @@ package com.ixibot
 import com.google.common.eventbus.EventBus
 import com.ixibot.api.DiscordAPI
 import com.ixibot.data.BotConfiguration
+import com.ixibot.database.Database
 import com.ixibot.listener.ConsoleListener
 import com.ixibot.listener.DiscordListener
 import com.ixibot.module.botConfiguration
@@ -45,6 +46,8 @@ import com.ixibot.module.ixiBot
 import com.ixibot.module.scheduler
 import com.ixibot.module.userConfigFile
 import com.ixibot.module.yamlMapper
+import com.ixibot.subscriber.DatabaseSubscriber
+import com.ixibot.subscriber.DiscordSubscriber
 import kotlinx.coroutines.cancel
 import org.apache.commons.io.FileUtils
 import org.slf4j.Logger
@@ -56,7 +59,7 @@ import java.net.ConnectException
 /**
  * Logger.
  */
-private val log: Logger = LoggerFactory.getLogger(LoggingImpl::class.java)
+private val log: Logger = LoggerFactory.getLogger(IxiBot::class.java)
 
 /**
  * Main method.
@@ -65,18 +68,7 @@ fun main() {
     val botConfiguration: BotConfiguration = botConfiguration(userConfigFile(), yamlMapper())
 
     if (botConfiguration.isDefaultConfig) {
-        val configFile = File(USER_CONFIG_FILE)
-        try {
-            generateUserConfig(configFile)
-            log.info("Generated new user config file at \"{}\". "
-                    + "Please customize your configuration then restart the bot",
-                    configFile.absolutePath)
-        } catch (ioe: IOException) {
-            log.error(
-                    "Caught IOException trying to write new user config file to \"{}\"",
-                    configFile.absolutePath,
-                    ioe)
-        }
+        generateUserConfig()
     } else {
         run(botConfiguration)
     }
@@ -89,15 +81,24 @@ fun main() {
  * @throws IOException on error writing config file.
  */
 @Throws(IOException::class)
-fun generateUserConfig(configFile: File) {
-    resourceLoader.getResourceAsStream(CONFIG_RESOURCE).use { configResource ->
-        log.debug("Writing new user config file to \"{}\"", configFile.absolutePath)
-        FileUtils.copyToFile(configResource, configFile)
-    }
-}
+fun generateUserConfig() {
+    val configFile = File(USER_CONFIG_FILE)
 
-fun registerSubscribers(eventBus: EventBus, subscribers: List<Any>) {
-    subscribers.forEach(eventBus::register)
+    try {
+        resourceLoader.getResourceAsStream(CONFIG_RESOURCE).use { configResource ->
+            log.debug("Writing new user config file to \"{}\"", configFile.absolutePath)
+            FileUtils.copyToFile(configResource, configFile)
+        }
+
+        log.info("Generated new user config file at \"{}\". "
+                + "Please customize your configuration then restart the bot",
+                configFile.absolutePath)
+    } catch (ioe: IOException) {
+        log.error(
+                "Caught IOException trying to write new user config file to \"{}\"",
+                configFile.absolutePath,
+                ioe)
+    }
 }
 
 /**
@@ -106,8 +107,9 @@ fun registerSubscribers(eventBus: EventBus, subscribers: List<Any>) {
 fun run(botConfiguration: BotConfiguration) {
     val eventBus: EventBus = EventBus()
     val consoleListener: ConsoleListener = ConsoleListener(eventBus)
+    val database: Database = database(connection())
     val ixiBot: IxiBot = ixiBot(
-            database(connection()),
+            database,
             DiscordAPI(
                     discordClient(botConfiguration),
                     DiscordListener(eventBus),
@@ -115,16 +117,20 @@ fun run(botConfiguration: BotConfiguration) {
             botConfiguration,
             scheduler())
 
-    registerSubscribers(eventBus, listOf(ixiBot))
+    listOf<Any>(DatabaseSubscriber(database), DiscordSubscriber(database))
+            .forEach(eventBus::register)
 
+    // Start coroutines
     consoleListener.run()
 
+    // Run the bot
     try {
         ixiBot.init()
         ixiBot.run()
     } catch (ce: ConnectException) {
         log.error("Failed to connect to a required API, exiting", ce)
     } finally {
+        // clean up
         ixiBot.close()
         consoleListener.cancel()
     }
