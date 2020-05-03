@@ -54,11 +54,6 @@ jacoco {
     toolVersion = "0.8.4"
 }
 
-tasks.dokka {
-    outputFormat = "html"
-    outputDirectory = "$buildDir/javadoc"
-}
-
 tasks.compileKotlin {
     sourceCompatibility = "11"
     targetCompatibility = "11"
@@ -68,6 +63,30 @@ tasks.compileKotlin {
         jvmTarget = "11"
     }
 }
+
+tasks.dokka {
+    outputFormat = "html"
+    outputDirectory = "$buildDir/javadoc"
+}
+
+tasks.jacocoTestReport {
+    afterEvaluate {
+        classDirectories.setFrom(
+                fileTree("${buildDir}/intermediates/javac/debug/classes") {
+                    setExcludes(setOf("com/ixibot/api/**", "com/ixibot/module/**"))
+                }
+        )
+    }
+    reports {
+        csv.isEnabled = false
+        xml.isEnabled = true
+        xml.destination = file("${buildDir}/reports/jacoco/jacocoTestReport.xml")
+        html.destination = file("${buildDir}/reports/jacoco")
+    }
+}
+
+val check by tasks
+check.dependsOn(tasks.jacocoTestCoverageVerification)
 
 val run: JavaExec by tasks
 run.standardInput = System.`in`
