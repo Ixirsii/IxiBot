@@ -39,42 +39,14 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
-import com.ixibot.data.BotConfiguration
 import com.ixibot.data.RoleReaction
 import discord4j.core.`object`.reaction.ReactionEmoji
 import discord4j.core.`object`.util.Snowflake
 
 const val ABOUT_OPTION = "This is an option used for testing"
 const val CONFIG_RESOURCE = "/config.yaml"
-const val COMMAND_PREFIX = "./"
-const val DISCORD_TOKEN = "discordToken"
 const val LONG_OPTION = "long-option"
-const val ROLE_VERIFY_DELAY = 10L
 const val SHORT_OPTION = 's'
-
-val INVALID_CONFIGURATION = String.format(
-        "commandPrefix: %s%ndiscordToken: %s",
-        COMMAND_PREFIX,
-        DISCORD_TOKEN)
-val VALID_CONFIGURATION = String.format(
-        "commandPrefix: %s%ndiscordRequired: %b%ndiscordToken: %s%nroleVerifyDelay: %d",
-        COMMAND_PREFIX,
-        true,
-        DISCORD_TOKEN,
-        ROLE_VERIFY_DELAY)
-
-val DEFAULT_CONFIG = BotConfiguration(
-        commandPrefix = COMMAND_PREFIX,
-        isDefaultConfig = true,
-        isDiscordRequired = true,
-        discordToken = DISCORD_TOKEN,
-        roleVerifyDelay = ROLE_VERIFY_DELAY)
-val USER_CONFIG = BotConfiguration(
-        commandPrefix = COMMAND_PREFIX,
-        isDefaultConfig = false,
-        isDiscordRequired = true,
-        discordToken = DISCORD_TOKEN,
-        roleVerifyDelay = ROLE_VERIFY_DELAY)
 
 val CUSTOM_EMOJI: ReactionEmoji.Custom = ReactionEmoji.custom(
         Snowflake.of(1L), "ixiEyes", false)
@@ -105,7 +77,7 @@ val ROLE_REACTION_3 = RoleReaction(
         reactionEmoji = CUSTOM_EMOJI,
         roleID = Snowflake.of(3L))
 
-val YAML_MAPPER = ObjectMapper(YAMLFactory())
+val YAML_MAPPER: ObjectMapper = ObjectMapper(YAMLFactory())
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         .registerModule(ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
         .registerModule(Jdk8Module())

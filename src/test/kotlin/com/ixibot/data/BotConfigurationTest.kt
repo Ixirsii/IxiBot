@@ -32,17 +32,18 @@
 
 package com.ixibot.data
 
-import com.ixibot.util.TestData
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
+import testUtil.CONFIG_RESOURCE
+import testUtil.YAML_MAPPER
 
 class BotConfigurationTest {
     private var underTest: BotConfiguration? = null
 
     init {
-        javaClass.classLoader.getResourceAsStream(TestData.CONFIG_RESOURCE).use { configResource ->
-            underTest = TestData.YAML_MAPPER.readValue(
+        javaClass.classLoader.getResourceAsStream(CONFIG_RESOURCE).use { configResource ->
+            underTest = YAML_MAPPER.readValue(
                     configResource,
                     BotConfiguration::class.java)
         }
