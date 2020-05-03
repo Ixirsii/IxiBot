@@ -44,6 +44,11 @@ import discord4j.core.`object`.reaction.ReactionEmoji
 import java.util.Optional
 import java.util.function.Predicate
 
+/**
+ * Subscribe to events which trigger Discord actions.
+ *
+ * @author Ryan Porterfield
+ */
 class DiscordSubscriber(
         /** Database interface. */
         private val database: Database) : Logging by LoggingImpl<DiscordSubscriber>() {
@@ -107,9 +112,9 @@ class DiscordSubscriber(
                             roleID)
                     log.info(reason)
                     if (event.isAdd) {
-                        member.addRole(roleID, reason)
+                        member.addRole(roleID, reason).subscribe()
                     } else {
-                        member.removeRole(roleID, reason)
+                        member.removeRole(roleID, reason).subscribe()
                     }
                 }
             }

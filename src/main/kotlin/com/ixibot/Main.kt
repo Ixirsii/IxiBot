@@ -68,9 +68,25 @@ fun main() {
     val botConfiguration: BotConfiguration = botConfiguration(userConfigFile(), yamlMapper())
 
     if (botConfiguration.isDefaultConfig) {
-        generateUserConfig()
+        val configFile = File(USER_CONFIG_FILE)
+
+        generateUserConfig(configFile)
     } else {
-        run(botConfiguration)
+        val database: Database = database(connection())
+        val eventBus = EventBus()
+        val ixiBot: IxiBot = ixiBot(
+                database,
+                DiscordAPI(
+                        discordClient(botConfiguration),
+                        DiscordListener(eventBus),
+                        botConfiguration.isDiscordRequired),
+                botConfiguration,
+                scheduler())
+
+        listOf<Any>(DatabaseSubscriber(database), DiscordSubscriber(database))
+                .forEach(eventBus::register)
+
+        run(eventBus, ixiBot)
     }
 }
 
@@ -78,12 +94,8 @@ fun main() {
  * Write default configuration file and exit.
  *
  * @param configFile File path to user config file.
- * @throws IOException on error writing config file.
  */
-@Throws(IOException::class)
-fun generateUserConfig() {
-    val configFile = File(USER_CONFIG_FILE)
-
+fun generateUserConfig(configFile: File) {
     try {
         resourceLoader.getResourceAsStream(CONFIG_RESOURCE).use { configResource ->
             log.debug("Writing new user config file to \"{}\"", configFile.absolutePath)
@@ -104,21 +116,8 @@ fun generateUserConfig() {
 /**
  * Run bot.
  */
-fun run(botConfiguration: BotConfiguration) {
-    val eventBus: EventBus = EventBus()
-    val consoleListener: ConsoleListener = ConsoleListener(eventBus)
-    val database: Database = database(connection())
-    val ixiBot: IxiBot = ixiBot(
-            database,
-            DiscordAPI(
-                    discordClient(botConfiguration),
-                    DiscordListener(eventBus),
-                    botConfiguration.isDiscordRequired),
-            botConfiguration,
-            scheduler())
-
-    listOf<Any>(DatabaseSubscriber(database), DiscordSubscriber(database))
-            .forEach(eventBus::register)
+fun run(eventBus: EventBus, ixiBot: IxiBot) {
+    val consoleListener = ConsoleListener(eventBus)
 
     // Start coroutines
     consoleListener.run()

@@ -45,7 +45,6 @@ import com.ixibot.data.BotConfiguration
 import com.ixibot.database.Database
 import discord4j.core.DiscordClient
 import discord4j.core.DiscordClientBuilder
-import java.sql.SQLException
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledThreadPoolExecutor
 
@@ -74,9 +73,7 @@ fun discordClient(botConfiguration: BotConfiguration): DiscordClient {
  * @param botConfiguration Bot configuration.
  * @param scheduler Thread pool scheduler.
  * @return IxiBot instance.
- * @throws SQLException on error reading from database.
  */
-@Throws(SQLException::class)
 fun ixiBot(
         database: Database,
         discordAPI: DiscordAPI,

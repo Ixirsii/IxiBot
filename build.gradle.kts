@@ -39,16 +39,11 @@ dependencies {
     // SQLite3 drivers
     implementation("org.xerial:sqlite-jdbc:3.7.2")
 
-    // Kotlin test library.
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
-    // Kotlin JUnit integration.
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
     // JUnit testing framework
     testImplementation("org.junit.jupiter:junit-jupiter:5.5.0")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.5.0")
-    // Mockito
-    testImplementation("org.mockito:mockito-core:3.1.0")
-    testImplementation("org.mockito:mockito-junit-jupiter:3.1.0")
+    // MockK
+    testImplementation("io.mockk:mockk:1.9.3")
 }
 
 application {
