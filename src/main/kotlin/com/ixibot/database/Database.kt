@@ -51,11 +51,8 @@ private const val DATABASE_VERSION: Long = 1
  * @author Ryan Porterfield
  */
 class Database(
-        /**
-         * Connection to SQLite database.
-         */
-        private val connection: Connection
-) : Logging by LoggingImpl<Database>() {
+        /** Connection to SQLite database. */
+        private val connection: Connection) : Logging by LoggingImpl<Database>() {
 
     /**
      * Insert a role assignment reaction into the database.
@@ -68,17 +65,18 @@ class Database(
     @Throws(SQLException::class)
     fun addRoleReaction(roleReaction: RoleReaction): Boolean {
         log.trace("Adding role reaction to database: {}", roleReaction)
-        val insertStatement = String.format("INSERT INTO %s(%s, %s, %s, %s, %s, %s, %s, %s)"
-                + " VALUES (%s, %s, %s, %s, %d, %s, %s, %s)",
-                RoleReactionContract.TABLE_NAME,
-                RoleReactionContract.ADD_VERIFIED,
-                RoleReactionContract.CHANNEL_ID,
-                RoleReactionContract.GUILD_ID,
-                RoleReactionContract.MESSAGE_ID,
-                RoleReactionContract.REACTION_ID,
-                RoleReactionContract.REACTION_NAME,
-                RoleReactionContract.REMOVE_VERIFIED,
-                RoleReactionContract.ROLE_ID,
+        val insertStatement = String.format(
+                "INSERT INTO %s(%s, %s, %s, %s, %s, %s, %s, %s)" +
+                        " VALUES (%s, %s, %s, %s, %d, %s, %s, %s)",
+                TABLE_NAME,
+                ADD_VERIFIED,
+                CHANNEL_ID,
+                GUILD_ID,
+                MESSAGE_ID,
+                REACTION_ID,
+                REACTION_NAME,
+                REMOVE_VERIFIED,
+                ROLE_ID,
                 roleReaction.isAddVerified,
                 roleReaction.channelID,
                 roleReaction.guildID,
@@ -111,8 +109,9 @@ class Database(
     private fun createTable() {
         log.trace("Creating role assignment reactions table")
         connection.prepareStatement(
-                RoleReactionContract.CREATE_TABLE).use { createStatement -> createStatement.execute() }
-        connection.prepareStatement(String.format("PRAGMA user_version = %d", DATABASE_VERSION)).use { versionStatement -> versionStatement.execute() }
+                CREATE_TABLE).use { createStatement -> createStatement.execute() }
+        connection.prepareStatement(String.format("PRAGMA user_version = %d", DATABASE_VERSION))
+                .use { versionStatement -> versionStatement.execute() }
     }
 
     /**
@@ -126,11 +125,12 @@ class Database(
     @Throws(SQLException::class)
     fun deleteRoleReaction(reaction: RoleReaction): Boolean {
         log.trace("Deleting role reaction from database: {}", reaction)
-        val deleteStatement = String.format("DELETE FROM %s WHERE %s = %d AND %s = %s",
-                RoleReactionContract.TABLE_NAME,
-                RoleReactionContract.MESSAGE_ID,
+        val deleteStatement = String.format(
+                "DELETE FROM %s WHERE %s = %d AND %s = %s",
+                TABLE_NAME,
+                MESSAGE_ID,
                 reaction.messageID.asLong(),
-                RoleReactionContract.REACTION_NAME,
+                REACTION_NAME,
                 reaction.reactionEmojiName)
         connection.prepareStatement(deleteStatement).use { statement -> return statement.execute() }
     }
@@ -143,8 +143,9 @@ class Database(
     @Throws(SQLException::class)
     private fun dropTable() {
         log.trace("Dropping role assignment reactions table")
-        val dropStatement = String.format("DROP TABLE IF EXISTS %s",
-                RoleReactionContract.TABLE_NAME)
+        val dropStatement = String.format(
+                "DROP TABLE IF EXISTS %s",
+                TABLE_NAME)
         connection.prepareStatement(dropStatement).use { statement -> statement.execute() }
     }
 
@@ -159,26 +160,27 @@ class Database(
         get() {
             log.trace("Getting all role assignment reactions")
             val roleReactions: MutableList<RoleReaction> = ArrayList()
-            val selectStatement = String.format("SELECT * FROM %s",
-                    RoleReactionContract.TABLE_NAME)
+            val selectStatement = String.format(
+                    "SELECT * FROM %s",
+                    TABLE_NAME)
             connection.prepareStatement(selectStatement).use { statement ->
                 statement.executeQuery().use { resultSet ->
                     while (resultSet.next()) {
-                        val animated = resultSet.getBoolean(RoleReactionContract.ANIMATED)
-                        val reactionId = resultSet.getLong(RoleReactionContract.REACTION_ID)
-                        val reactionName = resultSet.getString(RoleReactionContract.REACTION_NAME)
+                        val animated = resultSet.getBoolean(ANIMATED)
+                        val reactionId = resultSet.getLong(REACTION_ID)
+                        val reactionName = resultSet.getString(REACTION_NAME)
                         val reactionEmoji: ReactionEmoji = ReactionEmoji.of(
                                 reactionId,
                                 reactionName,
                                 animated)
                         val roleReaction = RoleReaction(
-                                Snowflake.of(resultSet.getLong(RoleReactionContract.CHANNEL_ID)),
-                                Snowflake.of(resultSet.getLong(RoleReactionContract.GUILD_ID)),
-                                resultSet.getBoolean(RoleReactionContract.ADD_VERIFIED),
-                                resultSet.getBoolean(RoleReactionContract.REMOVE_VERIFIED),
-                                Snowflake.of(resultSet.getLong(RoleReactionContract.MESSAGE_ID)),
+                                Snowflake.of(resultSet.getLong(CHANNEL_ID)),
+                                Snowflake.of(resultSet.getLong(GUILD_ID)),
+                                resultSet.getBoolean(ADD_VERIFIED),
+                                resultSet.getBoolean(REMOVE_VERIFIED),
+                                Snowflake.of(resultSet.getLong(MESSAGE_ID)),
                                 reactionEmoji,
-                                Snowflake.of(resultSet.getLong(RoleReactionContract.ROLE_ID)))
+                                Snowflake.of(resultSet.getLong(ROLE_ID)))
                         roleReactions.add(roleReaction)
                     }
                 }

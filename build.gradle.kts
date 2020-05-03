@@ -1,9 +1,5 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     id("org.jetbrains.dokka") version "0.10.0"
-    id("org.jlleitschuh.gradle.ktlint") version "9.2.1"
-    id("org.jmailen.kotlinter") version "2.3.2"
 
     application
     idea
@@ -26,8 +22,6 @@ dependencies {
     // Kotlin coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5")
 
-    // ktlint for program style
-    implementation("org.jlleitschuh.gradle:ktlint-gradle:9.2.1")
     // Commons IO
     implementation("commons-io:commons-io:2.6")
     // Google Guava
@@ -55,6 +49,11 @@ dependencies {
     // Mockito
     testImplementation("org.mockito:mockito-core:3.1.0")
     testImplementation("org.mockito:mockito-junit-jupiter:3.1.0")
+
+    // ktlint rulesets
+//    ktlintRuleset("com.github.username:rulseset:master-SNAPSHOT")
+//    ktlintRuleset(files("/path/to/custom/rulseset.jar"))
+//    ktlintRuleset(project(":chore:project-ruleset"))
 }
 
 application {

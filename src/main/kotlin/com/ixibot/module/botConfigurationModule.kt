@@ -35,7 +35,6 @@ package com.ixibot.module
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ixibot.CONFIG_RESOURCE
 import com.ixibot.IxiBot
-import com.ixibot.LoggingImpl
 import com.ixibot.USER_CONFIG_FILE
 import com.ixibot.data.BotConfiguration
 import com.ixibot.resourceLoader

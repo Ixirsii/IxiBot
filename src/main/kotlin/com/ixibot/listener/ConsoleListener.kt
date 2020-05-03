@@ -51,9 +51,10 @@ private const val QUIT_COMMAND = "quit"
  * @author Ryan Porterfield
  */
 class ConsoleListener(
-    /** Event bus to publish events to. */
-    private val eventBus: EventBus
-) : CoroutineScope by CoroutineScope(Dispatchers.Default), Logging by LoggingImpl<ConsoleListener>() {
+        /** Event bus to publish events to. */
+        private val eventBus: EventBus) :
+        CoroutineScope by CoroutineScope(Dispatchers.Default),
+        Logging by LoggingImpl<ConsoleListener>() {
 
     /**
      * Launch async process to listen for console input.

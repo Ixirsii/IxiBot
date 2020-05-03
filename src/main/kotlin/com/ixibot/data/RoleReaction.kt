@@ -42,13 +42,9 @@ import java.util.Optional
  * @author Ryan Porterfield
  */
 data class RoleReaction @JvmOverloads constructor(
-        /**
-         * Channel ID containing the message.
-         */
+        /** Channel ID containing the message. */
         val channelID: Snowflake,
-        /**
-         * Guild ID containing the channel.
-         */
+        /** Guild ID containing the channel. */
         val guildID: Snowflake,
         /**
          * Is the role add verified.
@@ -64,17 +60,11 @@ data class RoleReaction @JvmOverloads constructor(
          * all users in the guild who haven't reacted with this reaction.
          */
         val isRemoveVerified: Boolean = false,
-        /**
-         * Message ID containing the reaction.
-         */
+        /** Message ID containing the reaction. */
         val messageID: Snowflake,
-        /**
-         * Reaction emoji name/raw.
-         */
+        /** Reaction emoji name/raw. */
         val reactionEmoji: ReactionEmoji,
-        /**
-         * Role ID to (un)assign.
-         */
+        /** Role ID to (un)assign. */
         val roleID: Snowflake) {
 
     /**

@@ -66,5 +66,4 @@ data class DiscordReactionEvent(
         /**
          * ID of the user who reacted on the message.
          */
-        val userID: Snowflake
-)
+        val userID: Snowflake)

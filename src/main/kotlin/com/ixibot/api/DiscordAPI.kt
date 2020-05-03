@@ -52,20 +52,13 @@ import java.net.ConnectException
  *
  * @author Ryan Porterfield
  */
-class DiscordAPI constructor(
-        /**
-         * Discord client.
-         */
+class DiscordAPI(
+        /** Discord client. */
         private val discordClient: DiscordClient,
-        /**
-         * Listener for Discord messages and events.
-         */
+        /** Listener for Discord messages and events. */
         private val discordListener: DiscordListener,
-        /**
-         * If `true` this API wrapper will throw an exception on failure to connect.
-         */
-        private val isDiscordRequired: Boolean = false
-) : Logging by LoggingImpl<DiscordAPI>() {
+        /** If `true` this API wrapper will throw an exception on failure to connect. */
+        private val isDiscordRequired: Boolean = false) : Logging by LoggingImpl<DiscordAPI>() {
 
     /**
      * Initialize Discord API.
@@ -134,10 +127,11 @@ class DiscordAPI constructor(
      * @param message Message containing reaction.
      * @param verifiedReaction Role assignment reaction.
      */
-    private fun updateReactionRoles(guild: Guild,
-                                    members: List<Member>,
-                                    message: Message,
-                                    verifiedReaction: RoleReaction) {
+    private fun updateReactionRoles(
+            guild: Guild,
+            members: List<Member>,
+            message: Message,
+            verifiedReaction: RoleReaction) {
         val reactors = message.getReactors(verifiedReaction.reactionEmoji)
                 .collectList()
                 .block()

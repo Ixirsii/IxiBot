@@ -48,7 +48,7 @@ private const val CONNECTION_URL = "jdbc:sqlite:" + CONFIG_DIRECTORY + "sqlite.d
  *
  * @return JDBC connection.
  * @throws ClassNotFoundException on failure to load JDBC driver.
- * @throws SQLException           if a database access error occurs.
+ * @throws SQLException if a database access error occurs.
  */
 @Throws(ClassNotFoundException::class, SQLException::class)
 fun connection(): Connection {

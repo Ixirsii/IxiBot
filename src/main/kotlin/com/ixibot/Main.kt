@@ -90,8 +90,8 @@ fun generateUserConfig() {
             FileUtils.copyToFile(configResource, configFile)
         }
 
-        log.info("Generated new user config file at \"{}\". "
-                + "Please customize your configuration then restart the bot",
+        log.info(
+                "Generated new user config file at \"{}\". Please customize your configuration then restart the bot",
                 configFile.absolutePath)
     } catch (ioe: IOException) {
         log.error(

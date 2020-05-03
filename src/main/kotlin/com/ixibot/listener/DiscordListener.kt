@@ -50,8 +50,7 @@ class DiscordListener(
         /**
          * Event bus to publish events to.
          */
-        private val eventBus: EventBus
-) : Logging by LoggingImpl<DiscordListener>() {
+        private val eventBus: EventBus) : Logging by LoggingImpl<DiscordListener>() {
 
     /**
      * MessageCreateEvent listener.
@@ -61,7 +60,8 @@ class DiscordListener(
     fun messageCreateListener(event: MessageCreateEvent) {
         val optionalMember = event.member
         val message = event.message
-        log.info("#{} [{}]: {}",
+        log.info(
+                "#{} [{}]: {}",
                 message.channelId.asLong(),
                 optionalMember.map { obj: Member -> obj.displayName }.orElse(""),
                 message.content.orElse(""))

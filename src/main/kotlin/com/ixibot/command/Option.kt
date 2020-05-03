@@ -34,6 +34,7 @@ package com.ixibot.command
 
 /** GNU long option prefix.  */
 private const val GNU_PREFIX = "--"
+
 /** POSIX short option prefix.  */
 private const val POSIX_PREFIX = "-"
 
@@ -54,14 +55,10 @@ internal abstract class Option<T>(
         private val aboutText: String
 ) : Comparable<Option<T>> {
 
-    /** POSIX long option and option name.  */
+    /** GNU long option and option name.  */
     val long: String = GNU_PREFIX + longOption
 
-    /**
-     * Get POSIX style short option.
-     *
-     * @return POSIX style short option
-     */
+    /** POSIX style short option. */
     val short: String = POSIX_PREFIX + shortOption
 
     /**
@@ -73,14 +70,14 @@ internal abstract class Option<T>(
      */
     fun match(argument: String): Int {
         val match: Boolean = when {
-            argument.startsWith(GNU_PREFIX) -> {
+            argument.startsWith(GNU_PREFIX)   -> {
                 matchLongOption(argument)
             }
             argument.startsWith(POSIX_PREFIX) -> {
                 // This if block has to go after the long option if block because "--" will be matched by this check.
                 matchShortOption(argument)
             }
-            else -> {
+            else                              -> {
                 false
             }
         }

@@ -45,11 +45,10 @@ import java.sql.SQLException
  * @author Ryan Porterfield
  */
 class DatabaseSubscriber(
-    /**
-     * Database interface.
-     */
-    private val database: Database
-) : Logging by LoggingImpl<DatabaseSubscriber>() {
+        /**
+         * Database interface.
+         */
+        private val database: Database) : Logging by LoggingImpl<DatabaseSubscriber>() {
 
     /**
      * RoleReactionEvent subscriber.

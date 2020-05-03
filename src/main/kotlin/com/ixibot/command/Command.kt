@@ -33,20 +33,24 @@
 package com.ixibot.command
 
 import com.google.common.collect.Lists
-import java.util.*
+import java.util.ArrayList
 import java.util.concurrent.ConcurrentHashMap
 
 /** Help option about text.  */
 private const val ABOUT_HELP = "Show this help message"
+
 /** Length of columns in help message.  */
 private const val COLUMN_LENGTH = 24
+
 /** Help parameter supported by every command.  */
 private val HELP = PresenceOption(
         "help",
         'h',
         ABOUT_HELP)
+
 /** Options header for help text.  */
 private const val OPTIONS_HEADER = "Options:"
+
 /** Usage header for help text.  */
 private const val USAGE_HEADER = "Usage:"
 
@@ -73,18 +77,16 @@ fun getSpace(optionLength: Int): String {
 abstract class Command<E> internal constructor(
         /** Command name.  */
         private val name: String,
+        /** List of options accepted by this command. */
         options: Array<Option<out Any?>?>,
         /** Command about message for help text.  */
         private val aboutText: String,
         /** Command format message for help text.  */
-        private val usageText: String) {
+        private val usageText: String
+) {
 
-    /** List of options accepted by this command.  */
-    private val options: List<Option<out Any?>?>
-
-    init {
-        this.options = Lists.asList(HELP, options)
-    }
+    /** List of options accepted by this command. */
+    private val options: List<Option<out Any?>?> = Lists.asList(HELP, options)
 
     /**
      * Tokenize command options and arguments.
@@ -155,12 +157,13 @@ abstract class Command<E> internal constructor(
      */
     val helpMessage: String
         get() {
-            val stringBuilder = StringBuilder(String.format(
-                    "%s%n%n%s%n%s%n%n%s%n",
-                    aboutText,
-                    USAGE_HEADER,
-                    usageText,
-                    OPTIONS_HEADER))
+            val stringBuilder = StringBuilder(
+                    String.format(
+                            "%s%n%n%s%n%s%n%n%s%n",
+                            aboutText,
+                            USAGE_HEADER,
+                            usageText,
+                            OPTIONS_HEADER))
 
             for (option in options) {
                 stringBuilder.append(option.toString()).append(System.getProperty("line.separator"))
@@ -194,9 +197,9 @@ abstract class Command<E> internal constructor(
      * Pair of start index and count of arguments consumed by an option.
      */
     data class ArgumentIndex(
-        /** Start index of arguments in tokenized array.  */
-        private val startIndex: Int,
-        /** Number of arguments consumed by option.  */
-        private val argumentCount: Int
+            /** Start index of arguments in tokenized array.  */
+            private val startIndex: Int,
+            /** Number of arguments consumed by option.  */
+            private val argumentCount: Int
     )
 }

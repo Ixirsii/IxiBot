@@ -120,9 +120,10 @@ class IxiBot(
         scheduler.scheduleAtFixedRate(
                 {
                     val roleReactions: List<RoleReaction> = database.allRoleReactions
-                    discordAPI.updateAllRoles(roleReactions.stream()
-                            .filter(RoleReaction::isVerified)
-                            .collect(Collectors.groupingBy(RoleReaction::guildID)))
+                    discordAPI.updateAllRoles(
+                            roleReactions.stream()
+                                    .filter(RoleReaction::isVerified)
+                                    .collect(Collectors.groupingBy(RoleReaction::guildID)))
                 },
                 0,
                 roleVerifyDelay,

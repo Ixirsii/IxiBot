@@ -41,8 +41,7 @@ import discord4j.core.`object`.util.Snowflake
  */
 class SnowflakeArgument internal constructor(
         name: String,
-        aboutText: String
-) : Argument<Snowflake>(name, aboutText) {
+        aboutText: String) : Argument<Snowflake>(name, aboutText) {
 
     override fun parse(argument: String): Snowflake {
         val snowflake: Snowflake

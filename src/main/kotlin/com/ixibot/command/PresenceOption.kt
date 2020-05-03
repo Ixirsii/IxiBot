@@ -43,8 +43,9 @@ import com.ixibot.LoggingImpl
 internal class PresenceOption(
         longOption: String,
         shortOption: Char,
-        aboutText: String
-) : Option<Boolean>(longOption, shortOption, 0, aboutText), Logging by LoggingImpl<PresenceOption>() {
+        aboutText: String) :
+        Option<Boolean>(longOption, shortOption, 0, aboutText),
+        Logging by LoggingImpl<PresenceOption>() {
 
     /**
      * {@inheritDoc}

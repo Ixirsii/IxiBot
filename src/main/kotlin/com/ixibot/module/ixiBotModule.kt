@@ -39,7 +39,6 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
-import com.google.common.eventbus.EventBus
 import com.ixibot.IxiBot
 import com.ixibot.api.DiscordAPI
 import com.ixibot.data.BotConfiguration

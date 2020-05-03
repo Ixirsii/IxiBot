@@ -37,16 +37,8 @@ package com.ixibot.command
  *
  * @param <T> Type of argument.
  * @author Ryan Porterfield
-</T> */
-/* default */
-abstract class Argument<T>
-/**
- * Required args constructor.
- *
- * @param name [Argument.name]
- * @param aboutText [Argument.aboutText]
  */
-/* default */(
+abstract class Argument<T>(
         /** Argument name.  */
         private val name: String,
         /** About message for help text.  */
@@ -67,5 +59,4 @@ abstract class Argument<T>
     override fun toString(): String {
         return name + getSpace(name.length) + aboutText + "."
     }
-
 }

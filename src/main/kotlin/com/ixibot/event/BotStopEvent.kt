@@ -47,5 +47,4 @@ data class BotStopEvent(
          * before exiting, otherwise the bot will "crash" and stop immediately.
          *
          */
-        val isGraceful: Boolean
-)
+        val isGraceful: Boolean)

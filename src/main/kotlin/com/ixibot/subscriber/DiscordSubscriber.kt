@@ -41,13 +41,12 @@ import com.ixibot.event.DiscordReactionEvent
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
 import discord4j.core.`object`.reaction.ReactionEmoji
-import java.util.*
+import java.util.Optional
 import java.util.function.Predicate
 
 class DiscordSubscriber(
         /** Database interface. */
-        private val database: Database
-) : Logging by LoggingImpl <DiscordSubscriber>() {
+        private val database: Database) : Logging by LoggingImpl<DiscordSubscriber>() {
 
     /**
      * DiscordReactionEvent subscriber.
@@ -62,26 +61,27 @@ class DiscordSubscriber(
         val optionalUnicode = event.reactionEmoji
                 .asUnicodeEmoji()
         filter = when {
-            optionalCustom.isPresent -> {
+            optionalCustom.isPresent  -> {
                 val custom: ReactionEmoji.Custom = optionalCustom.get()
                 Predicate { reaction: RoleReaction ->
-                    (reaction.messageID == event.messageID
-                            && reaction.channelID == event.channelID
-                            && reaction.reactionEmojiName == custom.name
-                            && reaction.boxedReactionEmojiID == custom.id.asLong())
+                    (reaction.messageID == event.messageID &&
+                            reaction.channelID == event.channelID &&
+                            reaction.reactionEmojiName == custom.name &&
+                            reaction.boxedReactionEmojiID == custom.id.asLong())
                 }
             }
             optionalUnicode.isPresent -> {
                 val unicode = optionalUnicode.get()
                 Predicate { reaction: RoleReaction ->
-                    (reaction.messageID == event.messageID
-                            && reaction.channelID == event.channelID
-                            && reaction.reactionEmojiName == unicode.raw)
+                    (reaction.messageID == event.messageID &&
+                            reaction.channelID == event.channelID &&
+                            reaction.reactionEmojiName == unicode.raw)
                 }
             }
-            else -> {
-                log.error("Failed to get reaction that user added to message."
-                        + "\nUser: {}\nMessage: {}\nEmoji: {}",
+            else                      -> {
+                log.error(
+                        "Failed to get reaction that user added to message." +
+                                "\nUser: {}\nMessage: {}\nEmoji: {}",
                         event.userID,
                         event.messageID,
                         event.reactionEmoji)

@@ -40,12 +40,11 @@ import com.ixibot.data.RoleReaction
  * @author Ryan Porterfield
  */
 data class RoleReactionEvent(
-    /**
-     * `true` if this is a create event, otherwise this is a delete event.
-     */
-    val isCreate: Boolean,
-    /**
-     * Role reaction to persist to database and listen for.
-     */
-    val roleReaction: RoleReaction
-)
+        /**
+         * `true` if this is a create event, otherwise this is a delete event.
+         */
+        val isCreate: Boolean,
+        /**
+         * Role reaction to persist to database and listen for.
+         */
+        val roleReaction: RoleReaction)
