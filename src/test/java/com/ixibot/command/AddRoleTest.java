@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AddRoleTest {
     private static final String ARGUMENTS = "--verify #channel 1234567890 \"EZ Clap\" @Member";
-    private static final String[] ARGUMENT_TOKENS = new String[] {
+    private static final String[] ARGUMENT_TOKENS = new String[]{
             "--verify",
             "#channel",
             "1234567890",
@@ -89,8 +89,7 @@ class AddRoleTest {
                         "-h, --help              Show this help message.",
                         "-V, --verify            Run both add and remove verify checks on this role reaction.",
                         "-A, --verifyadd         Run add verify checks on this role reaction.",
-                        "-R, --verifyremove      Run remove verify checks on this role reaction."
-                ),
+                        "-R, --verifyremove      Run remove verify checks on this role reaction."),
                 underTest.getHelpMessage(),
                 "help message should equal expected");
     }

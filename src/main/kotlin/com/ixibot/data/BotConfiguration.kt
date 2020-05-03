@@ -71,8 +71,7 @@ data class BotConfiguration(
             @JsonProperty(value = "discordToken", required = true)
             discordToken: String,
             @JsonProperty(value = "roleVerifyDelay", required = true)
-            roleVerifyDelay: Long
-    ) : this(
+            roleVerifyDelay: Long) : this(
             commandPrefix,
             false,
             isDiscordRequired,

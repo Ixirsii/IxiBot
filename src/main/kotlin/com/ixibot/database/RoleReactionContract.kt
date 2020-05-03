@@ -101,5 +101,4 @@ val CREATE_TABLE = String.format(
         REMOVE_VERIFIED,
         ROLE_ID, /* Primary key */
         MESSAGE_ID,
-        REACTION_NAME
-)
+        REACTION_NAME)

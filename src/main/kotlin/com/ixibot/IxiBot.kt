@@ -80,8 +80,7 @@ class IxiBot(
          *
          * TODO: Replace this with coroutines
          */
-        private val scheduler: ScheduledExecutorService
-) : AutoCloseable, Logging by LoggingImpl<IxiBot>(), Runnable {
+        private val scheduler: ScheduledExecutorService) : AutoCloseable, Logging by LoggingImpl<IxiBot>() {
 
     /**
      * `true` while bot is running, `false` when bot is terminating.
@@ -114,9 +113,9 @@ class IxiBot(
     }
 
     /**
-     * {@inheritDoc}
+     * Run the bot.
      */
-    override fun run() {
+    fun run() {
         scheduler.scheduleAtFixedRate(
                 {
                     val roleReactions: List<RoleReaction> = database.allRoleReactions

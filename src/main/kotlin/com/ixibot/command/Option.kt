@@ -52,8 +52,7 @@ internal abstract class Option<T>(
         /** Number of parameters consumed by this option.  */
         protected val parameterCount: Int,
         /** About message for help text.  */
-        private val aboutText: String
-) : Comparable<Option<T>> {
+        private val aboutText: String) : Comparable<Option<T>> {
 
     /** GNU long option and option name.  */
     val long: String = GNU_PREFIX + longOption

@@ -82,8 +82,7 @@ abstract class Command<E> internal constructor(
         /** Command about message for help text.  */
         private val aboutText: String,
         /** Command format message for help text.  */
-        private val usageText: String
-) {
+        private val usageText: String) {
 
     /** List of options accepted by this command. */
     private val options: List<Option<out Any?>?> = Lists.asList(HELP, options)
@@ -200,6 +199,5 @@ abstract class Command<E> internal constructor(
             /** Start index of arguments in tokenized array.  */
             private val startIndex: Int,
             /** Number of arguments consumed by option.  */
-            private val argumentCount: Int
-    )
+            private val argumentCount: Int)
 }
