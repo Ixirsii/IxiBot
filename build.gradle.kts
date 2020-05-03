@@ -49,11 +49,6 @@ dependencies {
     // Mockito
     testImplementation("org.mockito:mockito-core:3.1.0")
     testImplementation("org.mockito:mockito-junit-jupiter:3.1.0")
-
-    // ktlint rulesets
-//    ktlintRuleset("com.github.username:rulseset:master-SNAPSHOT")
-//    ktlintRuleset(files("/path/to/custom/rulseset.jar"))
-//    ktlintRuleset(project(":chore:project-ruleset"))
 }
 
 application {
