@@ -32,7 +32,6 @@
 
 package com.ixibot.api
 
-import com.ixibot.IxiBot
 import com.ixibot.Logging
 import com.ixibot.LoggingImpl
 import com.ixibot.data.RoleReaction
@@ -66,7 +65,7 @@ class DiscordAPI constructor(
          * If `true` this API wrapper will throw an exception on failure to connect.
          */
         private val isDiscordRequired: Boolean = false
-) : Logging by LoggingImpl<IxiBot>() {
+) : Logging by LoggingImpl<DiscordAPI>() {
 
     /**
      * Initialize Discord API.

@@ -21,20 +21,38 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jlleitschuh.gradle:ktlint-gradle:9.2.1")
+    // Kotlin JDK 8 standard library.
     implementation(kotlin("stdlib-jdk8"))
+    // Kotlin coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5")
+
+    // ktlint for program style
+    implementation("org.jlleitschuh.gradle:ktlint-gradle:9.2.1")
+    // Commons IO
     implementation("commons-io:commons-io:2.6")
-    implementation("com.google.guava:guava:28.0-jre")
+    // Google Guava
+    implementation("com.google.guava:guava:29.0-jre")
+    // Discord4J
     implementation("com.discord4j:discord4j-core:3.0.7")
+    // Jackson
     implementation("com.fasterxml.jackson.core:jackson-core:2.10.2")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.10.2")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.10.2")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.1")
     implementation("com.fasterxml.jackson.module:jackson-module-parameter-names:2.10.2")
+    // Log4J-SLF4J
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.12.0")
+    // SQLite3 drivers
     implementation("org.xerial:sqlite-jdbc:3.7.2")
+
+    // Kotlin test library.
+    testImplementation("org.jetbrains.kotlin:kotlin-test")
+    // Kotlin JUnit integration.
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+    // JUnit testing framework
     testImplementation("org.junit.jupiter:junit-jupiter:5.5.0")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.5.0")
+    // Mockito
     testImplementation("org.mockito:mockito-core:3.1.0")
     testImplementation("org.mockito:mockito-junit-jupiter:3.1.0")
 }
@@ -61,3 +79,6 @@ tasks.compileKotlin {
         jvmTarget = "11"
     }
 }
+
+val run: JavaExec by tasks
+run.standardInput = System.`in`

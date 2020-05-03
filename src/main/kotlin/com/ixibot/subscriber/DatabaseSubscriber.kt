@@ -33,7 +33,6 @@
 package com.ixibot.subscriber
 
 import com.google.common.eventbus.Subscribe
-import com.ixibot.IxiBot
 import com.ixibot.Logging
 import com.ixibot.LoggingImpl
 import com.ixibot.database.Database
@@ -50,7 +49,7 @@ class DatabaseSubscriber(
      * Database interface.
      */
     private val database: Database
-) : Logging by LoggingImpl<IxiBot>() {
+) : Logging by LoggingImpl<DatabaseSubscriber>() {
 
     /**
      * RoleReactionEvent subscriber.

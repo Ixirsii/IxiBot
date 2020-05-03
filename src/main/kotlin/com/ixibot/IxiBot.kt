@@ -37,7 +37,6 @@ import com.ixibot.api.DiscordAPI
 import com.ixibot.data.RoleReaction
 import com.ixibot.database.Database
 import com.ixibot.event.DiscordReactionEvent
-import com.ixibot.event.RoleReactionEvent
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
 import discord4j.core.`object`.reaction.ReactionEmoji
@@ -185,21 +184,6 @@ class IxiBot(
                     }
                 }
             }
-        }
-    }
-
-    /**
-     * RoleReactionEvent subscriber.
-     *
-     * @param event Event published to event bus.
-     */
-    @Subscribe
-    fun onRoleReactionEvent(event: RoleReactionEvent) {
-        val roleReaction = event.roleReaction
-        if (event.isCreate) {
-            database.addRoleReaction(roleReaction);
-        } else {
-            database.deleteRoleReaction(roleReaction);
         }
     }
 

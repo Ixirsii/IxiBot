@@ -32,7 +32,6 @@
 
 package com.ixibot.database
 
-import com.ixibot.IxiBot
 import com.ixibot.Logging
 import com.ixibot.LoggingImpl
 import com.ixibot.data.RoleReaction
@@ -56,7 +55,7 @@ class Database(
          * Connection to SQLite database.
          */
         private val connection: Connection
-) : Logging by LoggingImpl<IxiBot>() {
+) : Logging by LoggingImpl<Database>() {
 
     /**
      * Insert a role assignment reaction into the database.

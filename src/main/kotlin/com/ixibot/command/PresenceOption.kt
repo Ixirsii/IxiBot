@@ -32,7 +32,6 @@
 
 package com.ixibot.command
 
-import com.ixibot.IxiBot
 import com.ixibot.Logging
 import com.ixibot.LoggingImpl
 
@@ -45,7 +44,7 @@ internal class PresenceOption(
         longOption: String,
         shortOption: Char,
         aboutText: String
-) : Option<Boolean>(longOption, shortOption, 0, aboutText), Logging by LoggingImpl<IxiBot>() {
+) : Option<Boolean>(longOption, shortOption, 0, aboutText), Logging by LoggingImpl<PresenceOption>() {
 
     /**
      * {@inheritDoc}

@@ -45,6 +45,7 @@ import com.ixibot.module.ixiBot
 import com.ixibot.module.scheduler
 import com.ixibot.module.userConfigFile
 import com.ixibot.module.yamlMapper
+import kotlinx.coroutines.cancel
 import org.apache.commons.io.FileUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -104,25 +105,27 @@ fun registerSubscribers(eventBus: EventBus, subscribers: List<Any>) {
  */
 fun run(botConfiguration: BotConfiguration) {
     val eventBus: EventBus = EventBus()
-    // TODO: Multithreading
     val consoleListener: ConsoleListener = ConsoleListener(eventBus)
-    val discordListener: DiscordListener = DiscordListener(eventBus)
     val ixiBot: IxiBot = ixiBot(
             database(connection()),
             DiscordAPI(
                     discordClient(botConfiguration),
-                    discordListener,
+                    DiscordListener(eventBus),
                     botConfiguration.isDiscordRequired),
             botConfiguration,
             scheduler())
 
-    registerSubscribers(eventBus, listOf(consoleListener, discordListener, ixiBot))
+    registerSubscribers(eventBus, listOf(ixiBot))
+
+    consoleListener.run()
 
     try {
         ixiBot.init()
         ixiBot.run()
-        ixiBot.close()
     } catch (ce: ConnectException) {
         log.error("Failed to connect to a required API, exiting", ce)
+    } finally {
+        ixiBot.close()
+        consoleListener.cancel()
     }
 }

@@ -33,11 +33,12 @@
 package com.ixibot.listener
 
 import com.google.common.eventbus.EventBus
-import com.google.common.eventbus.Subscribe
-import com.ixibot.IxiBot
 import com.ixibot.Logging
 import com.ixibot.LoggingImpl
 import com.ixibot.event.BotStopEvent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Command to stop execution.
@@ -50,39 +51,24 @@ private const val QUIT_COMMAND = "quit"
  * @author Ryan Porterfield
  */
 class ConsoleListener(
-    /**
-     * Event bus to publish events to.
-     */
+    /** Event bus to publish events to. */
     private val eventBus: EventBus
-) : Logging by LoggingImpl<IxiBot>(), Runnable {
+) : CoroutineScope by CoroutineScope(Dispatchers.Default), Logging by LoggingImpl<ConsoleListener>() {
 
     /**
-     * Program loop control.
+     * Launch async process to listen for console input.
      */
-    private var running: Boolean = true
-
-    /**
-     * BotStopEvent subscriber.
-     *
-     * @param event Event published to the event bus.
-     */
-    @Subscribe
-    fun onStop(event: BotStopEvent) {
-        running = false
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    override fun run() {
-        log.info("Type \"quit\" to exit")
-        while (running) {
-            val input: String? = readLine()
-            log.debug("Got user input: {}", input)
-            // TODO: Map of command -> dispatcher instead of if statements
-            if (QUIT_COMMAND == input) {
-                val event = BotStopEvent(true)
-                eventBus.post(event)
+    fun run() {
+        launch {
+            log.info("Type \"quit\" to exit")
+            while (true) {
+                val input: String? = readLine()
+                log.debug("Got user input: {}", input)
+                // TODO: Map of command -> dispatcher instead of if statements
+                if (QUIT_COMMAND == input) {
+                    val event = BotStopEvent(true)
+                    eventBus.post(event)
+                }
             }
         }
     }

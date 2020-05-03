@@ -33,7 +33,6 @@
 package com.ixibot.listener
 
 import com.google.common.eventbus.EventBus
-import com.ixibot.IxiBot
 import com.ixibot.Logging
 import com.ixibot.LoggingImpl
 import com.ixibot.event.DiscordReactionEvent
@@ -52,7 +51,7 @@ class DiscordListener(
          * Event bus to publish events to.
          */
         private val eventBus: EventBus
-) : Logging by LoggingImpl<IxiBot>() {
+) : Logging by LoggingImpl<DiscordListener>() {
 
     /**
      * MessageCreateEvent listener.
