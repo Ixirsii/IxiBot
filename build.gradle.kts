@@ -70,13 +70,11 @@ tasks.dokka {
 }
 
 tasks.jacocoTestReport {
-    afterEvaluate {
-        classDirectories.setFrom(
-                fileTree("${buildDir}/intermediates/javac/debug/classes") {
-                    setExcludes(setOf("com/ixibot/api/**", "com/ixibot/module/**"))
-                }
-        )
-    }
+    classDirectories.setFrom(
+            fileTree("${buildDir}/intermediates/javac/debug/classes") {
+                setExcludes(setOf("com/ixibot/api/**", "com/ixibot/module/**"))
+            }
+    )
     reports {
         csv.isEnabled = false
         xml.isEnabled = true
@@ -85,8 +83,25 @@ tasks.jacocoTestReport {
     }
 }
 
-val check by tasks
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.5.toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
+
+val check: DefaultTask by tasks
 check.dependsOn(tasks.jacocoTestCoverageVerification)
 
 val run: JavaExec by tasks
 run.standardInput = System.`in`
+
+val test by tasks
+test.finalizedBy(project.tasks.jacocoTestReport)
