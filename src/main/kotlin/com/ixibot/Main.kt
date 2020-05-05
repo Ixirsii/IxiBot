@@ -117,6 +117,7 @@ fun generateUserConfig(configFile: File) {
  * Run bot.
  */
 fun run(eventBus: EventBus, ixiBot: IxiBot) {
+    // TODO: Mock this?
     val consoleListener = ConsoleListener(eventBus)
 
     // Start coroutines
@@ -129,7 +130,7 @@ fun run(eventBus: EventBus, ixiBot: IxiBot) {
     } catch (ce: ConnectException) {
         log.error("Failed to connect to a required API, exiting", ce)
     } finally {
-        // clean up
+        // TODO: Should these be cleaned up here?
         ixiBot.close()
         consoleListener.cancel()
     }
