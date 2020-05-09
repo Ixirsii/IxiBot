@@ -11,7 +11,7 @@ pipelines:
         caches:
           - gradle
         script:
-          - bash ./gradlew build
+          - bash ./gradlew clean build
   tags:
     release-*:
       - script:
