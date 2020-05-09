@@ -41,6 +41,8 @@ import com.ixibot.event.DiscordReactionEvent
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
 import discord4j.core.`object`.reaction.ReactionEmoji
+import discord4j.core.`object`.util.Snowflake
+import reactor.core.Disposable
 import java.util.Optional
 import java.util.function.Predicate
 
@@ -53,24 +55,18 @@ class DiscordSubscriber(
         /** Database interface. */
         private val database: Database) : Logging by LoggingImpl<DiscordSubscriber>() {
 
-    /**
-     * DiscordReactionEvent subscriber.
-     *
-     * @param event Event published to the event bus.
-     */
-    @Subscribe
-    fun onDiscordReactionEvent(event: DiscordReactionEvent) {
-        val filter: Predicate<RoleReaction>
-        val optionalCustom: Optional<ReactionEmoji.Custom> = event.reactionEmoji
-                .asCustomEmoji()
-        val optionalUnicode = event.reactionEmoji
-                .asUnicodeEmoji()
-        filter = when {
-            optionalCustom.isPresent  -> {
+    @Throws(IllegalArgumentException::class)
+    private fun getFilter(
+            channelID: Snowflake,
+            messageID: Snowflake,
+            optionalCustom: Optional<ReactionEmoji.Custom>,
+            optionalUnicode: Optional<ReactionEmoji.Unicode>): Predicate<RoleReaction> {
+        return when {
+            optionalCustom.isPresent -> {
                 val custom: ReactionEmoji.Custom = optionalCustom.get()
                 Predicate { reaction: RoleReaction ->
-                    (reaction.messageID == event.messageID &&
-                            reaction.channelID == event.channelID &&
+                    (reaction.messageID == messageID &&
+                            reaction.channelID == channelID &&
                             reaction.reactionEmojiName == custom.name &&
                             reaction.boxedReactionEmojiID == custom.id.asLong())
                 }
@@ -78,44 +74,78 @@ class DiscordSubscriber(
             optionalUnicode.isPresent -> {
                 val unicode = optionalUnicode.get()
                 Predicate { reaction: RoleReaction ->
-                    (reaction.messageID == event.messageID &&
-                            reaction.channelID == event.channelID &&
+                    (reaction.messageID == messageID &&
+                            reaction.channelID == channelID &&
                             reaction.reactionEmojiName == unicode.raw)
                 }
             }
-            else                      -> {
-                log.error(
-                        "Failed to get reaction that user added to message." +
-                                "\nUser: {}\nMessage: {}\nEmoji: {}",
-                        event.userID,
-                        event.messageID,
-                        event.reactionEmoji)
-                return
+            else -> {
+                throw IllegalArgumentException("One of either optionalCustom or optionalUnicode must be present")
             }
         }
-        val reactionOptional = database.allRoleReactions.stream()
-                .filter(filter)
-                .findFirst()
+    }
+
+    private fun getMemberConsumer(
+            isAdd: Boolean,
+            messageID: Long,
+            reactionEmoji: ReactionEmoji,
+            roleID: Snowflake): (Member) -> Disposable {
+
+        val reasonFormat: String = getReasonFormat(isAdd)
+
+        return { member: Member ->
+            val reason: String = String.format(
+                    reasonFormat,
+                    member.displayName,
+                    messageID,
+                    reactionEmoji,
+                    roleID)
+            log.info(reason)
+            if (isAdd) {
+                member.addRole(roleID, reason).subscribe()
+            } else {
+                member.removeRole(roleID, reason).subscribe()
+            }
+        }
+    }
+
+    private fun getReasonFormat(isAdd: Boolean): String {
+        return if (isAdd)
+            "User %s reacted to message %d with %s to get role %s."
+        else
+            "User %s reacted to message %d with %s to remove role %s."
+    }
+
+    /**
+     * DiscordReactionEvent subscriber.
+     *
+     * @param event Event published to the event bus.
+     */
+    @Subscribe
+    fun onDiscordReactionEvent(event: DiscordReactionEvent) {
+        val filter: Predicate<RoleReaction> = try {
+            getFilter(
+                    channelID = event.channelID,
+                    messageID = event.messageID,
+                    optionalCustom = event.reactionEmoji.asCustomEmoji(),
+                    optionalUnicode = event.reactionEmoji.asUnicodeEmoji())
+        } catch (iae: IllegalArgumentException) {
+            log.error(
+                    "Failed to get reaction that user added to message.\nUser: {}\nMessage: {}\nEmoji: {}",
+                    event.userID,
+                    event.messageID,
+                    event.reactionEmoji,
+                    iae)
+            return
+        }
+
+        val reactionOptional: Optional<RoleReaction> = database.allRoleReactions.stream().filter(filter).findFirst()
+        val (_, _, _, _, _, reactionEmoji, roleID) = reactionOptional.get()
+
         if (reactionOptional.isPresent) {
-            val reasonFormat = if (event.isAdd)
-                "User %s reacted to message %d with %s to get role %s."
-            else
-                "User %s reacted to message %d with %s to remove role %s."
-            val (_, _, _, _, _, reactionEmoji, roleID) = reactionOptional.get()
             event.messageMono.subscribe { message: Message ->
-                message.authorAsMember.subscribe { member: Member ->
-                    val reason = String.format(
-                            reasonFormat,
-                            member.displayName,
-                            message.id.asLong(),
-                            reactionEmoji,
-                            roleID)
-                    log.info(reason)
-                    if (event.isAdd) {
-                        member.addRole(roleID, reason).subscribe()
-                    } else {
-                        member.removeRole(roleID, reason).subscribe()
-                    }
+                message.authorAsMember.subscribe {
+                    getMemberConsumer(event.isAdd, message.id.asLong(), reactionEmoji, roleID)
                 }
             }
         }
