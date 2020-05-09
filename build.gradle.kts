@@ -4,7 +4,7 @@ plugins {
     application
     idea
     jacoco
-    kotlin("jvm") version("1.3.72")
+    kotlin("jvm") version ("1.3.72")
 }
 
 group = "com.ixibot"
@@ -27,7 +27,7 @@ dependencies {
     // Google Guava
     implementation("com.google.guava:guava:29.0-jre")
     // Discord4J
-    implementation("com.discord4j:discord4j-core:3.0.7")
+    implementation("com.discord4j:discord4j-core:3.0.14")
     // Jackson
     implementation("com.fasterxml.jackson.core:jackson-core:2.10.2")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.10.2")
@@ -51,7 +51,7 @@ application {
 }
 
 jacoco {
-    toolVersion = "0.8.4"
+    toolVersion = "0.8.5"
 }
 
 tasks.compileKotlin {
@@ -69,11 +69,17 @@ tasks.dokka {
     outputDirectory = "$buildDir/javadoc"
 }
 
+val excludePaths: Set<String> = setOf(
+        "com/ixibot/api/**",
+        "com/ixibot/module/**",
+        "com/ixibot/subscriber/DiscordSubscriber*")
+
 tasks.jacocoTestReport {
-    sourceDirectories.setFrom(files("${project.projectDir}/src/main"))
     classDirectories.setFrom(
-            fileTree("${buildDir}/classes/kotlin/main") {
-                setExcludes(setOf("com/ixibot/api/**", "com/ixibot/module/**"))
+            classDirectories.files.map {
+                fileTree(it).apply {
+                    exclude(excludePaths)
+                }
             }
     )
     reports {
@@ -85,16 +91,17 @@ tasks.jacocoTestReport {
 }
 
 tasks.jacocoTestCoverageVerification {
-    sourceDirectories.setFrom(files("${project.projectDir}/src/main"))
     classDirectories.setFrom(
-            fileTree("${buildDir}/classes/kotlin/main") {
-                setExcludes(setOf("com/ixibot/api/**", "com/ixibot/module/**"))
+            classDirectories.files.map {
+                fileTree(it).apply {
+                    exclude(excludePaths)
+                }
             }
     )
     violationRules {
         rule {
             limit {
-                minimum = 0.5.toBigDecimal()
+                minimum = 0.2.toBigDecimal()
             }
         }
     }
@@ -102,6 +109,7 @@ tasks.jacocoTestCoverageVerification {
 
 tasks.test {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
 }
 
 val check: DefaultTask by tasks
@@ -109,6 +117,3 @@ check.dependsOn(tasks.jacocoTestCoverageVerification)
 
 val run: JavaExec by tasks
 run.standardInput = System.`in`
-
-val test by tasks
-test.finalizedBy(project.tasks.jacocoTestReport)

@@ -55,6 +55,7 @@ class DiscordSubscriber(
         /** Database interface. */
         private val database: Database) : Logging by LoggingImpl<DiscordSubscriber>() {
 
+    // TODO: Add documentation
     @Throws(IllegalArgumentException::class)
     private fun getFilter(
             channelID: Snowflake,
@@ -85,6 +86,7 @@ class DiscordSubscriber(
         }
     }
 
+    // TODO: Add documentation
     private fun getMemberConsumer(
             isAdd: Boolean,
             messageID: Long,
@@ -109,6 +111,7 @@ class DiscordSubscriber(
         }
     }
 
+    // TODO: Add documentation
     private fun getReasonFormat(isAdd: Boolean): String {
         return if (isAdd)
             "User %s reacted to message %d with %s to get role %s."

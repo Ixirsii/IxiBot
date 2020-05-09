@@ -35,10 +35,9 @@ package com.ixibot
 import com.ixibot.listener.ConsoleListener
 import io.mockk.confirmVerified
 import io.mockk.every
-import io.mockk.impl.annotations.MockK
+import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import kotlinx.coroutines.cancel
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -49,9 +48,9 @@ import java.net.ConnectException
 
 @ExtendWith(MockKExtension::class)
 class MainTest {
-    @MockK(relaxed = true, relaxUnitFun = true)
+    @RelaxedMockK
     private lateinit var consoleListenerMock: ConsoleListener
-    @MockK(relaxed = true, relaxUnitFun = true)
+    @RelaxedMockK
     private lateinit var ixiBotMock: IxiBot
 
     @AfterEach
