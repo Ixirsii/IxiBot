@@ -46,17 +46,12 @@ import java.util.stream.Collectors
 /**
  * Bot configuration file.
  */
-private const val CONFIG_FILE_NAME = "config.yaml"
+const val CONFIG_FILE_NAME = "config.yaml"
 
 /**
  * Bot configuration directory.
  */
 const val CONFIG_DIRECTORY = "config/"
-
-/**
- * File path to bot configuration resource.
- */
-const val CONFIG_RESOURCE = "/$CONFIG_FILE_NAME"
 
 /**
  * Config file configured by the user.

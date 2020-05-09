@@ -125,13 +125,8 @@ class PresenceOptionTest {
     @Test
     fun parseWhenIncorrectNumberOfParameters() {
         val parameter = "parameter"
-        val errorMessage = String.format(
-                "Incorrect number of arguments passed to option"
-                        + " \"%s\". Expected %d but was %d, [%s]",
-                "--$LONG_OPTION",
-                0,
-                1,
-                parameter)
+        val errorMessage = "Incorrect number of arguments passed to option \"--$LONG_OPTION\". " +
+                "Expected 0 but was 1, [$parameter]"
         val exception: Throwable = assertThrows(
                 IllegalArgumentException::class.java,
                 { underTest.parse(parameter) },

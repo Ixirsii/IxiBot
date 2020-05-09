@@ -65,26 +65,18 @@ class AddRoleTest {
     }
 
     @Test
-    fun `GIVEN argument tokens WHEN getArgumentMap THEN returns argument map`() {
-        Assertions.assertEquals(
-                ImmutableMap.of("--verify", ArgumentIndex(0, 1)),
-                underTest.getArgumentMap(*ARGUMENT_TOKENS),
-                "argument map should equal expected")
-    }
-
-    @Test
     fun `GIVEN NA WHEN getHelpMessage THEN message is properly formatted`() {
         Assertions.assertEquals(
                 String.format(
                         "%s%n%n%s%n%s%n%n%s%n%s%n%s%n%s%n%s%n",
                         "Add a role reaction listener",
                         "Usage:",
-                        "addrole [options] <channel> <message id> <emoji> <role>",
+                        "add_role [options] <channel> <message id> <emoji> <role>",
                         "Options:",
                         "-h, --help              Show this help message.",
                         "-V, --verify            Run both add and remove verify checks on this role reaction.",
-                        "-A, --verifyadd         Run add verify checks on this role reaction.",
-                        "-R, --verifyremove      Run remove verify checks on this role reaction."),
+                        "-A, --verify_add        Run add verify checks on this role reaction.",
+                        "-R, --verify_remove     Run remove verify checks on this role reaction."),
                 underTest.helpMessage,
                 "help message should equal expected")
     }
@@ -92,7 +84,7 @@ class AddRoleTest {
     @Test
     fun `GIVEN matching command WHEN match THEN returns true`() {
         Assertions.assertTrue(
-                underTest.match("addrole"),
+                underTest.match("add_role"),
                 "Match should be true when command matches")
     }
 

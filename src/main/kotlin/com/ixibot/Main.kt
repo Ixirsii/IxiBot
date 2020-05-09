@@ -48,6 +48,8 @@ import com.ixibot.module.userConfigFile
 import com.ixibot.module.yamlMapper
 import com.ixibot.subscriber.DatabaseSubscriber
 import com.ixibot.subscriber.DiscordSubscriber
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import org.apache.commons.io.FileUtils
 import org.slf4j.Logger
@@ -82,11 +84,12 @@ fun main() {
                         botConfiguration.isDiscordRequired),
                 botConfiguration,
                 scheduler())
+        val consoleListener = ConsoleListener(eventBus, CoroutineScope(Dispatchers.Default).coroutineContext)
 
         listOf<Any>(DatabaseSubscriber(database), DiscordSubscriber(database))
                 .forEach(eventBus::register)
 
-        run(eventBus, ixiBot)
+        run(consoleListener, ixiBot)
     }
 }
 
@@ -97,7 +100,7 @@ fun main() {
  */
 fun generateUserConfig(configFile: File) {
     try {
-        resourceLoader.getResourceAsStream(CONFIG_RESOURCE).use { configResource ->
+        resourceLoader.getResourceAsStream(CONFIG_FILE_NAME).use { configResource ->
             log.debug("Writing new user config file to \"{}\"", configFile.absolutePath)
             FileUtils.copyToFile(configResource, configFile)
         }
@@ -107,7 +110,7 @@ fun generateUserConfig(configFile: File) {
                 configFile.absolutePath)
     } catch (ioe: IOException) {
         log.error(
-                "Caught IOException trying to write new user config file to \"{}\"",
+                "Encountered exception while trying to write new user config file to \"{}\"",
                 configFile.absolutePath,
                 ioe)
     }
@@ -115,11 +118,13 @@ fun generateUserConfig(configFile: File) {
 
 /**
  * Run bot.
+ *
+ * This function handles initialization and cleanup of parameters passed to it.
+ *
+ * @param consoleListener Coroutine which listens for console input.
+ * @param ixiBot Bot instance.
  */
-fun run(eventBus: EventBus, ixiBot: IxiBot) {
-    // TODO: Mock this?
-    val consoleListener = ConsoleListener(eventBus)
-
+fun run(consoleListener: ConsoleListener, ixiBot: IxiBot) {
     // Start coroutines
     consoleListener.run()
 
@@ -130,8 +135,7 @@ fun run(eventBus: EventBus, ixiBot: IxiBot) {
     } catch (ce: ConnectException) {
         log.error("Failed to connect to a required API, exiting", ce)
     } finally {
-        // TODO: Should these be cleaned up here?
         ixiBot.close()
-        consoleListener.cancel()
+        consoleListener.close()
     }
 }

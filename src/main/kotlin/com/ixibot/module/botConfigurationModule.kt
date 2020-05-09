@@ -33,7 +33,7 @@
 package com.ixibot.module
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.ixibot.CONFIG_RESOURCE
+import com.ixibot.CONFIG_FILE_NAME
 import com.ixibot.IxiBot
 import com.ixibot.USER_CONFIG_FILE
 import com.ixibot.data.BotConfiguration
@@ -84,7 +84,7 @@ fun botConfiguration(
  */
 @Throws(IOException::class)
 private fun defaultBotConfiguration(objectMapper: ObjectMapper): BotConfiguration {
-    resourceLoader.getResourceAsStream(CONFIG_RESOURCE).use { configResource ->
+    resourceLoader.getResourceAsStream(CONFIG_FILE_NAME).use { configResource ->
         val (commandPrefix, _, isDiscordRequired, discordToken, roleVerifyDelay) = objectMapper.readValue(
                 configResource,
                 BotConfiguration::class.java)

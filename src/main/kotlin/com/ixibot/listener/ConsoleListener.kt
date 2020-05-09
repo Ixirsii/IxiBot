@@ -37,8 +37,9 @@ import com.ixibot.Logging
 import com.ixibot.LoggingImpl
 import com.ixibot.event.BotStopEvent
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Command to stop execution.
@@ -52,9 +53,14 @@ private const val QUIT_COMMAND = "quit"
  */
 class ConsoleListener(
         /** Event bus to publish events to. */
-        private val eventBus: EventBus) :
-        CoroutineScope by CoroutineScope(Dispatchers.Default),
+        private val eventBus: EventBus,
+        override val coroutineContext: CoroutineContext) :
+        CoroutineScope,
         Logging by LoggingImpl<ConsoleListener>() {
+
+    fun close() {
+        cancel()
+    }
 
     /**
      * Launch async process to listen for console input.

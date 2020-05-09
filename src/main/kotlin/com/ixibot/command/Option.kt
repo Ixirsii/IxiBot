@@ -55,10 +55,16 @@ internal abstract class Option<T>(
         private val aboutText: String) : Comparable<Option<T>> {
 
     /** GNU long option and option name.  */
-    val long: String = GNU_PREFIX + longOption
+    val long: String
+        get() {
+            return GNU_PREFIX + longOption
+        }
 
     /** POSIX style short option. */
-    val short: String = POSIX_PREFIX + shortOption
+    val short: String
+        get() {
+            return POSIX_PREFIX + shortOption
+        }
 
     /**
      * Check if argument matches this option.
@@ -91,7 +97,7 @@ internal abstract class Option<T>(
      * `false`
      */
     private fun matchLongOption(argument: String): Boolean {
-        return argument == longOption
+        return argument == long
     }
 
     /**
@@ -102,8 +108,8 @@ internal abstract class Option<T>(
      * `false`
      */
     private fun matchShortOption(argument: String): Boolean {
-        return if (argument.length == 1) { // If length is 1, we can either match or not match
-            argument[0] == shortOption
+        return if (argument.length == short.length) { // If length is 2, we can either match or not match
+            argument == short
         } else { /*
              * If length is < 1 this check fails and returns 0.
              * If length is > 1 multiple short options were passed together, (IE. ps -ef) and we

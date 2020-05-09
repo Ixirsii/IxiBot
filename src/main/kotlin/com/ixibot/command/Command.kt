@@ -123,33 +123,6 @@ abstract class Command<E> internal constructor(
     }
 
     /**
-     * Get map of Options to index that consume them.
-     *
-     * @param arguments Tokenized array of arguments.
-     * @return map of arguments to Options that consume them.
-     */
-    fun getArgumentMap(vararg arguments: String?): Map<String, ArgumentIndex> {
-        val argumentMap: MutableMap<String, ArgumentIndex> = ConcurrentHashMap()
-        var i = 0
-        while (i < arguments.size) {
-            val argument = arguments[i]
-            val option = options.stream()
-                    .filter { opt: Option<*>? -> opt!!.match(argument!!) > 0 }
-                    .findAny()
-                    .orElse(null)
-            if (option == null) {
-                ++i
-                continue
-            }
-            val consumeCount = option.match(argument!!)
-            argumentMap[option.long] = ArgumentIndex(i, consumeCount)
-            i += consumeCount
-            ++i
-        }
-        return argumentMap
-    }
-
-    /**
      * Get help text.
      *
      * @return help text.

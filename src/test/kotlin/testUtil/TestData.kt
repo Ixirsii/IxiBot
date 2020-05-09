@@ -44,7 +44,6 @@ import discord4j.core.`object`.reaction.ReactionEmoji
 import discord4j.core.`object`.util.Snowflake
 
 const val ABOUT_OPTION = "This is an option used for testing"
-const val CONFIG_RESOURCE = "/config.yaml"
 const val LONG_OPTION = "long-option"
 const val SHORT_OPTION = 's'
 

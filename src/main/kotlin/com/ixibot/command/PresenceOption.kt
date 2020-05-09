@@ -54,7 +54,7 @@ internal class PresenceOption(
     override fun parse(vararg parameters: String?): Boolean {
         if (parameters.size != parameterCount) {
             val errorMessage = "Incorrect number of arguments passed to option \"$long\". " +
-                    "Expected $parameterCount but was $parameters.size, $parameters.contentToString()"
+                    "Expected $parameterCount but was ${parameters.size}, ${parameters.contentToString()}"
 
             log.debug(errorMessage)
             throw IllegalArgumentException(errorMessage)

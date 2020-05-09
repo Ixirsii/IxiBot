@@ -32,12 +32,13 @@
 
 package com.ixibot
 
-import com.google.common.eventbus.EventBus
+import com.ixibot.listener.ConsoleListener
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
+import kotlinx.coroutines.cancel
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -48,36 +49,41 @@ import java.net.ConnectException
 
 @ExtendWith(MockKExtension::class)
 class MainTest {
-    @MockK
-    private lateinit var eventBusMock: EventBus
-    @MockK
+    @MockK(relaxed = true, relaxUnitFun = true)
+    private lateinit var consoleListenerMock: ConsoleListener
+    @MockK(relaxed = true, relaxUnitFun = true)
     private lateinit var ixiBotMock: IxiBot
 
     @AfterEach
     fun cleanUp() {
-        confirmVerified(ixiBotMock)
+        confirmVerified(consoleListenerMock, ixiBotMock)
     }
 
     @Test
     fun `GIVEN successful init WHEN start THEN run and close`() {
         try {
-            run(eventBusMock, ixiBotMock)
+            run(consoleListenerMock, ixiBotMock)
         } finally {
+            verify { consoleListenerMock.run() }
             verify { ixiBotMock.init() }
             verify { ixiBotMock.run() }
             verify { ixiBotMock.close() }
+            verify { consoleListenerMock.close() }
         }
     }
 
     @Test
     fun `GIVEN ConnectionException WHEN start THEN exits`() {
+        every { consoleListenerMock.run() } answers { nothing }
         every { ixiBotMock.init() } throws ConnectException()
 
         try {
-            run(eventBusMock, ixiBotMock)
+            run(consoleListenerMock, ixiBotMock)
         } finally {
+            verify { consoleListenerMock.run() }
             verify { ixiBotMock.init() }
             verify { ixiBotMock.close() }
+            verify { consoleListenerMock.close() }
         }
     }
 
