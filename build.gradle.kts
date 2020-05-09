@@ -70,8 +70,9 @@ tasks.dokka {
 }
 
 tasks.jacocoTestReport {
+    sourceDirectories.setFrom(files("${project.projectDir}/src/main"))
     classDirectories.setFrom(
-            fileTree("${buildDir}/intermediates/javac/debug/classes") {
+            fileTree("${buildDir}/classes/kotlin/main") {
                 setExcludes(setOf("com/ixibot/api/**", "com/ixibot/module/**"))
             }
     )
@@ -84,6 +85,12 @@ tasks.jacocoTestReport {
 }
 
 tasks.jacocoTestCoverageVerification {
+    sourceDirectories.setFrom(files("${project.projectDir}/src/main"))
+    classDirectories.setFrom(
+            fileTree("${buildDir}/classes/kotlin/main") {
+                setExcludes(setOf("com/ixibot/api/**", "com/ixibot/module/**"))
+            }
+    )
     violationRules {
         rule {
             limit {
