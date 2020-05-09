@@ -55,8 +55,8 @@ jacoco {
 }
 
 tasks.compileKotlin {
-    sourceCompatibility = "11"
-    targetCompatibility = "11"
+    sourceCompatibility = "1.8"
+    targetCompatibility = "1.8"
 
     kotlinOptions {
         javaParameters = true

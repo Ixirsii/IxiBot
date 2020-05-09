@@ -22,7 +22,7 @@ IxiBot is a self-hosted bot, meaning you have to download and run the bot on you
 
 IxiBot requires the following software to be installed:
 
-* [Java 11](https://adoptopenjdk.net/?variant=openjdk11&jvmVariant=hotspot)
+* [Java 8](https://adoptopenjdk.net/?variant=openjdk8&jvmVariant=hotspot)
 
 ## License
 Copyright (c) 2019, Ryan Porterfield  
