@@ -72,7 +72,7 @@ tasks.dokka {
 val excludePaths: Set<String> = setOf(
         "com/ixibot/api/**",
         "com/ixibot/module/**",
-        "com/ixibot/subscriber/DiscordSubscriber*")
+        "com/ixibot/**/*Discord*")
 
 tasks.jacocoTestReport {
     classDirectories.setFrom(

@@ -74,12 +74,12 @@ class DiscordListener(
      */
     fun reactionAddListener(event: ReactionAddEvent) {
         val internalEvent = DiscordReactionEvent(
-                event.channelId,
-                true,
-                event.message,
-                event.messageId,
-                event.emoji,
-                event.userId)
+                channelID = event.channelId,
+                isAdd = true,
+                messageMono = event.message,
+                messageID = event.messageId,
+                reactionEmoji = event.emoji,
+                userID = event.userId)
         eventBus.post(internalEvent)
     }
 
@@ -90,12 +90,12 @@ class DiscordListener(
      */
     fun reactionRemoveListener(event: ReactionRemoveEvent) {
         val internalEvent = DiscordReactionEvent(
-                event.channelId,
-                false,
-                event.message,
-                event.messageId,
-                event.emoji,
-                event.userId)
+                channelID = event.channelId,
+                isAdd = false,
+                messageMono = event.message,
+                messageID = event.messageId,
+                reactionEmoji = event.emoji,
+                userID = event.userId)
         eventBus.post(internalEvent)
     }
 }
