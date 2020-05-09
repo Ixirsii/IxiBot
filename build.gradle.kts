@@ -85,7 +85,7 @@ tasks.jacocoTestReport {
     reports {
         csv.isEnabled = false
         xml.isEnabled = true
-        xml.destination = file("${buildDir}/reports/jacoco/jacocoTestReport.xml")
+        xml.destination = file("${buildDir}/reports/jacoco/report.xml")
         html.destination = file("${buildDir}/reports/jacoco")
     }
 }
