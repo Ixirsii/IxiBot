@@ -3,8 +3,7 @@
 [![Discord](https://discordapp.com/api/guilds/452233740408717313/widget.png)](https://discord.gg/tERrRkd)
 [![Release](https://img.shields.io/badge/release-0.1.0-blue.svg?style=flat-square)](https://bitbucket.org/Ixirsii/ixibot/downloads/)
 ![Build Status](https://img.shields.io/bitbucket/pipelines/Ixirsii/ixibot.svg?style=flat-square)
-![Scrutinizer coverage (GitHub/BitBucket)](https://img.shields.io/scrutinizer/coverage/b/Ixirsii/IxiBot?style=flat-square)
-![Scrutinizer code quality (GitHub/Bitbucket)](https://img.shields.io/scrutinizer/quality/b/Ixirsii/ixibot?style=flat-square)
+![Test coverage (GitHub/BitBucket)](https://img.shields.io/codecov/c/bitbucket/Ixirsii/ixibot?style=flat-square)
 [![BSD licensed](https://img.shields.io/badge/license-BSD-green.svg?style=flat-square)](https://opensource.org/licenses/BSD-3-Clause)
 
 [**IxiBot**](https://bitbucket.org/Ixirsii/ixibot) is an open source chat bot for Twitch and Discord.
