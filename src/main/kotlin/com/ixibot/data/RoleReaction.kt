@@ -41,7 +41,7 @@ import java.util.Optional
  *
  * @author Ryan Porterfield
  */
-data class RoleReaction @JvmOverloads constructor(
+data class RoleReaction constructor(
         /** Channel ID containing the message. */
         val channelID: Snowflake,
         /** Guild ID containing the channel. */

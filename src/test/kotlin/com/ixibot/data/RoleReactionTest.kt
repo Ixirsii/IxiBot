@@ -32,6 +32,7 @@
 
 package com.ixibot.data
 
+import discord4j.core.`object`.util.Snowflake
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -44,6 +45,52 @@ import testUtil.ROLE_REACTION_3
 import testUtil.UNICODE_EMOJI
 
 class RoleReactionTest {
+    private val snowflake: Snowflake = Snowflake.of(1L)
+    @Test
+    fun `GIVEN channelID WHEN channelID THEN returns channelID`() {
+        assertEquals(snowflake, ROLE_REACTION_1.channelID, "chanelID should equal expected")
+    }
+
+    @Test
+    fun `GIVEN guildID WHEN guildID THEN returns guildID`() {
+        assertEquals(snowflake, ROLE_REACTION_1.guildID, "guildID should equal expected")
+    }
+
+    @Test
+    fun `GIVEN isAddVerified WHEN isAddVerified THEN returns true`() {
+        assertTrue(ROLE_REACTION_1.isAddVerified, "isAddVerified should be true")
+    }
+
+    @Test
+    fun `GIVEN not isAddVerified WHEN isAddVerified THEN returns false`() {
+        assertFalse(ROLE_REACTION_2.isAddVerified, "isAddVerified should be false")
+    }
+
+    @Test
+    fun `GIVEN isRemoveVerified WHEN isRemoveVerified THEN returns true`() {
+        assertTrue(ROLE_REACTION_2.isRemoveVerified, "isRemoveVerified should be true")
+    }
+
+    @Test
+    fun `GIVEN not isRemoveVerified WHEN isRemoveVerified THEN returns false`() {
+        assertFalse(ROLE_REACTION_1.isRemoveVerified, "isRemoveVerified should be false")
+    }
+
+    @Test
+    fun `GIVEN messageID WHEN messageID THEN returns messageID`() {
+        assertEquals(snowflake, ROLE_REACTION_1.messageID, "messageID should equal expected")
+    }
+
+    @Test
+    fun `GIVEN reactionEmoji WHEN reactionEmoji THEN returns reactionEmoji`() {
+        assertEquals(CUSTOM_EMOJI, ROLE_REACTION_1.reactionEmoji, "reactionEmoji should equal expected")
+    }
+
+    @Test
+    fun `GIVEN roleID WHEN roleID THEN returns roleID`() {
+        assertEquals(snowflake, ROLE_REACTION_1.roleID, "roleID should equal expected")
+    }
+
     @Test
     fun `GIVEN custom emoji WHEN boxedReactionEmojiID THEN returns emoji ID`() {
         assertEquals(

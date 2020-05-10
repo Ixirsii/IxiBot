@@ -34,18 +34,26 @@ package com.ixibot.data
 
 import com.ixibot.CONFIG_FILE_NAME
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import testUtil.YAML_MAPPER
 
 class BotConfigurationTest {
-    private var underTest: BotConfiguration? = null
+    private lateinit var underTest: BotConfiguration
 
     init {
         javaClass.classLoader.getResourceAsStream(CONFIG_FILE_NAME).use { configResource ->
-            underTest = YAML_MAPPER.readValue(
+            val botConfiguration: BotConfiguration = YAML_MAPPER.readValue(
                     configResource,
                     BotConfiguration::class.java)
+            underTest = BotConfiguration(
+                    commandPrefix = botConfiguration.commandPrefix,
+                    isDefaultConfig = true,
+                    isDiscordRequired = botConfiguration.isDiscordRequired,
+                    discordToken = botConfiguration.discordToken,
+                    roleVerifyDelay = botConfiguration.roleVerifyDelay)
         }
     }
 
@@ -55,26 +63,36 @@ class BotConfigurationTest {
     }
 
     @Test
-    fun `GIVEN defaultValue WHEN commandPrefix THEN returns expected`() {
+    fun `GIVEN default value WHEN commandPrefix THEN returns expected`() {
         assertEquals(
                 "./",
-                underTest?.commandPrefix,
+                underTest.commandPrefix,
                 "Command prefix should equal expected")
     }
 
     @Test
-    fun `GIVEN defaultValue WHEN discordToken THEN returns expected`() {
+    fun `GIVEN default value WHEN discordToken THEN returns expected`() {
         assertEquals(
                 "discordToken",
-                underTest?.discordToken,
+                underTest.discordToken,
                 "Discord token should equal expected")
     }
 
     @Test
-    fun `GIVEN defaultValue WHEN roleVerifyDelay THEN returns expected`() {
+    fun `GIVEN default config WHEN isDefaultConfig THEN returns true`() {
+        assertTrue(underTest.isDefaultConfig, "Config object should not be default")
+    }
+
+    @Test
+    fun `GIVEN default value WHEN isDiscordRequired THEN returns false`() {
+        assertTrue(underTest.isDiscordRequired, "Discord should be required")
+    }
+
+    @Test
+    fun `GIVEN default value WHEN roleVerifyDelay THEN returns expected`() {
         assertEquals(
                 10L,
-                underTest?.roleVerifyDelay,
+                underTest.roleVerifyDelay,
                 "Role verification delay should equal expected")
     }
 }
