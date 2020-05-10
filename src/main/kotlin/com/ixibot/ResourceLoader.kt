@@ -18,11 +18,4 @@ class ResourceLoader {
     fun getResourceAsStream(asset: String): InputStream? {
         return javaClass.classLoader.getResourceAsStream(asset)
     }
-
-    /**
-     * Get resource.
-     */
-    fun getResource(asset: String): URL? {
-        return javaClass.classLoader.getResource(asset)
-    }
 }
