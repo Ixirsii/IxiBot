@@ -33,41 +33,31 @@
 package com.ixibot
 
 import com.ixibot.listener.ConsoleListener
-import io.mockk.confirmVerified
 import io.mockk.every
-import io.mockk.impl.annotations.RelaxedMockK
-import io.mockk.junit5.MockKExtension
-import io.mockk.verify
-import org.junit.jupiter.api.AfterEach
+import io.mockk.mockk
+import io.mockk.verifySequence
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.net.ConnectException
 
-@ExtendWith(MockKExtension::class)
 class MainTest {
-    @RelaxedMockK
-    private lateinit var consoleListenerMock: ConsoleListener
-    @RelaxedMockK
-    private lateinit var ixiBotMock: IxiBot
-
-    @AfterEach
-    fun cleanUp() {
-        confirmVerified(consoleListenerMock, ixiBotMock)
-    }
+    private val consoleListenerMock: ConsoleListener = mockk(relaxed = true, relaxUnitFun = true)
+    private val ixiBotMock: IxiBot = mockk(relaxed = true, relaxUnitFun = true)
 
     @Test
     fun `GIVEN successful init WHEN start THEN run and close`() {
         try {
             run(consoleListenerMock, ixiBotMock)
         } finally {
-            verify { consoleListenerMock.run() }
-            verify { ixiBotMock.init() }
-            verify { ixiBotMock.run() }
-            verify { ixiBotMock.close() }
-            verify { consoleListenerMock.close() }
+            verifySequence {
+                consoleListenerMock.run()
+                ixiBotMock.init()
+                ixiBotMock.run()
+                ixiBotMock.close()
+                consoleListenerMock.close()
+            }
         }
     }
 
@@ -79,10 +69,12 @@ class MainTest {
         try {
             run(consoleListenerMock, ixiBotMock)
         } finally {
-            verify { consoleListenerMock.run() }
-            verify { ixiBotMock.init() }
-            verify { ixiBotMock.close() }
-            verify { consoleListenerMock.close() }
+            verifySequence {
+                consoleListenerMock.run()
+                ixiBotMock.init()
+                ixiBotMock.close()
+                consoleListenerMock.close()
+            }
         }
     }
 

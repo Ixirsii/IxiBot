@@ -34,34 +34,23 @@ package com.ixibot.listener
 
 import com.google.common.eventbus.EventBus
 import com.ixibot.event.BotStopEvent
-import io.mockk.confirmVerified
-import io.mockk.impl.annotations.RelaxedMockK
-import io.mockk.junit5.MockKExtension
-import io.mockk.verify
+import io.mockk.clearAllMocks
+import io.mockk.mockk
+import io.mockk.verifySequence
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 
-@ExtendWith(MockKExtension::class)
 class ConsoleListenerTest {
-    @RelaxedMockK
-    private lateinit var eventBusMock: EventBus
-
-    private lateinit var underTest: ConsoleListener
+    private val eventBusMock: EventBus = mockk(relaxed = true, relaxUnitFun = true)
+    private val underTest: ConsoleListener = ConsoleListener(eventBusMock, CoroutineScope(Dispatchers.Default).coroutineContext)
 
     @BeforeEach
     fun setUp() {
-        underTest = ConsoleListener(eventBusMock, CoroutineScope(Dispatchers.Default).coroutineContext)
-    }
-
-    @AfterEach
-    fun cleanUp() {
-        confirmVerified(eventBusMock)
+        clearAllMocks()
     }
 
     @Test
@@ -75,7 +64,7 @@ class ConsoleListenerTest {
         underTest.run()
         underTest.close()
 
-        verify { eventBusMock.post(botStopEvent) }
+        verifySequence { eventBusMock.post(botStopEvent) }
 
         // Restore System.in
         System.setIn(sysInBackup)

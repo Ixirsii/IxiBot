@@ -34,39 +34,19 @@ package com.ixibot
 
 import com.ixibot.api.DiscordAPI
 import com.ixibot.database.Database
-import io.mockk.confirmVerified
 import io.mockk.every
-import io.mockk.impl.annotations.RelaxedMockK
-import io.mockk.junit5.MockKExtension
-import io.mockk.verify
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
+import io.mockk.mockk
+import io.mockk.verifySequence
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import java.sql.SQLException
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
-@ExtendWith(MockKExtension::class)
 class IxiBotTest {
-    @RelaxedMockK
-    private lateinit var databaseMock: Database
-    @RelaxedMockK
-    private lateinit var discordAPIMock: DiscordAPI
-    @RelaxedMockK
-    private lateinit var schedulerMock: ScheduledExecutorService
-
-    private lateinit var underTest: IxiBot
-
-    @BeforeEach
-    fun setUp() {
-        underTest = IxiBot(databaseMock, discordAPIMock, 10L, schedulerMock)
-    }
-
-    @AfterEach
-    fun cleanUp() {
-        confirmVerified(databaseMock, discordAPIMock, schedulerMock)
-    }
+    private val databaseMock: Database = mockk(relaxed = true, relaxUnitFun = true)
+    private val discordAPIMock: DiscordAPI = mockk(relaxed = true, relaxUnitFun = true)
+    private val schedulerMock: ScheduledExecutorService = mockk(relaxed = true, relaxUnitFun = true)
+    private val underTest: IxiBot = IxiBot(databaseMock, discordAPIMock, 10L, schedulerMock)
 
     @Test
     fun `GIVEN success WHEN close THEN closes resources`() {
@@ -74,10 +54,13 @@ class IxiBotTest {
 
         underTest.close()
 
-        verify { discordAPIMock.logout() }
-        verify { schedulerMock.shutdown() }
-        verify { schedulerMock.awaitTermination(30, TimeUnit.SECONDS) }
-        verify { databaseMock.close() }
+        verifySequence {
+            discordAPIMock.logout()
+            schedulerMock.shutdown()
+            schedulerMock.awaitTermination(30, TimeUnit.SECONDS)
+            databaseMock.close()
+        }
+
     }
 
     @Test
@@ -87,9 +70,18 @@ class IxiBotTest {
 
         underTest.close()
 
-        verify { discordAPIMock.logout() }
-        verify { schedulerMock.shutdown() }
-        verify { schedulerMock.awaitTermination(30, TimeUnit.SECONDS) }
-        verify { databaseMock.close() }
+        verifySequence {
+            discordAPIMock.logout()
+            schedulerMock.shutdown()
+            schedulerMock.awaitTermination(30, TimeUnit.SECONDS)
+            databaseMock.close()
+        }
+    }
+
+    @Test
+    fun `GIVEN successful discord connection WHEN init THEN initializes`() {
+        underTest.init()
+
+        verifySequence { discordAPIMock.init() }
     }
 }
