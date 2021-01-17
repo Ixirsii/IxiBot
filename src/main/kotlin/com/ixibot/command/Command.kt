@@ -33,8 +33,6 @@
 package com.ixibot.command
 
 import com.google.common.collect.Lists
-import java.util.ArrayList
-import java.util.concurrent.ConcurrentHashMap
 
 /** Help option about text.  */
 private const val ABOUT_HELP = "Show this help message"
@@ -42,6 +40,7 @@ private const val ABOUT_HELP = "Show this help message"
 /** Length of columns in help message.  */
 private const val COLUMN_LENGTH = 24
 
+// TODO: const
 /** Help parameter supported by every command.  */
 private val HELP = PresenceOption(
         "help",
@@ -88,41 +87,6 @@ abstract class Command<E> internal constructor(
     private val options: List<Option<out Any?>?> = Lists.asList(HELP, options)
 
     /**
-     * Tokenize command options and arguments.
-     *
-     * @param argumentString Options and arguments string.
-     * @return array of separated options and arguments.
-     * @throws IllegalArgumentException on incorrectly formatted arguments.
-     */
-    @Throws(IllegalArgumentException::class)
-    fun argumentTokenizer(argumentString: String): Array<String> {
-        val argumentList: MutableList<String> = ArrayList()
-        var i = 0
-        while (i < argumentString.length) {
-            val substring = argumentString.substring(i)
-            i += if (substring.startsWith("\"")) {
-                val index = substring.indexOf('"', 1)
-                require(index != -1) {
-                    String.format(
-                            "Unterminated quote found in %s",
-                            substring)
-                }
-                val token = substring.substring(1, index)
-                argumentList.add(token)
-                index + 2
-            } else {
-                val spaceIndex = substring.indexOf(' ')
-                val index = if (spaceIndex == -1) substring.length else spaceIndex
-                val token = substring.substring(0, index)
-                argumentList.add(token)
-                index + 1
-            }
-        }
-
-        return argumentList.toTypedArray()
-    }
-
-    /**
      * Get help text.
      *
      * @return help text.
@@ -145,6 +109,16 @@ abstract class Command<E> internal constructor(
         }
 
     /**
+     * Parse parameters to a matched option.
+     *
+     * @param parameters List of parameters to the option.
+     * @return Event which can be published to the event bus.
+     * @throws IllegalArgumentException if length of parameters is different from expected value.
+     */
+    @Throws(IllegalArgumentException::class)
+    abstract fun parse(vararg parameters: String): E
+
+    /**
      * Check if command matches this command.
      *
      * @param command Command entered by user.
@@ -153,24 +127,4 @@ abstract class Command<E> internal constructor(
     fun match(command: String): Boolean {
         return command == name
     }
-
-    /**
-     * Parse parameters to a matched option.
-     *
-     * @param parameters List of parameters to the option.
-     * @return Event which can be published to the event bus.
-     * @throws IllegalArgumentException if length of parameters is different from expected value.
-     */
-
-    @Throws(IllegalArgumentException::class)
-    abstract fun parse(vararg parameters: String): E
-
-    /**
-     * Pair of start index and count of arguments consumed by an option.
-     */
-    data class ArgumentIndex(
-            /** Start index of arguments in tokenized array.  */
-            private val startIndex: Int,
-            /** Number of arguments consumed by option.  */
-            private val argumentCount: Int)
 }
