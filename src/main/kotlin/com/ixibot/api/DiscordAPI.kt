@@ -106,15 +106,17 @@ class DiscordAPI(
         reactionsMap.forEach { (guildID: Snowflake, verifiedReactions: List<RoleReaction>) ->
             discordClient.getGuildById(guildID)
                     .subscribe { guild: Guild ->
-                        val members: List<Member> = guild.members.collectList().block()
-                        for (reaction in verifiedReactions) {
-                            discordClient.getMessageById(
-                                    reaction.channelID,
-                                    reaction.messageID)
-                                    .subscribe { message: Message ->
-                                        updateReactionRoles(guild, members, message, reaction)
-                                    }
+                        guild.members.collectList().subscribe { members: List<Member> ->
+                            for (reaction in verifiedReactions) {
+                                discordClient.getMessageById(
+                                        reaction.channelID,
+                                        reaction.messageID)
+                                        .subscribe { message: Message ->
+                                            updateReactionRoles(guild, members, message, reaction)
+                                        }
+                            }
                         }
+
                     }
         }
     }
