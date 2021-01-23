@@ -34,7 +34,6 @@ package com.ixibot.data
 
 import com.ixibot.CONFIG_FILE_NAME
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

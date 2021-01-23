@@ -42,30 +42,31 @@ import java.util.Optional
  * @author Ryan Porterfield
  */
 data class RoleReaction constructor(
-        /** Channel ID containing the message. */
-        val channelID: Snowflake,
-        /** Guild ID containing the channel. */
-        val guildID: Snowflake,
-        /**
-         * Is the role add verified.
-         *
-         * If this is true, the bot will periodically check all users who have reacted with this
-         * reaction and assign them the role if they don't have it.
-         */
-        val isAddVerified: Boolean = false,
-        /**
-         * Is the role remove verified.
-         *
-         * If this is true, the bot will periodically check all users and remove the role from
-         * all users in the guild who haven't reacted with this reaction.
-         */
-        val isRemoveVerified: Boolean = false,
-        /** Message ID containing the reaction. */
-        val messageID: Snowflake,
-        /** Reaction emoji name/raw. */
-        val reactionEmoji: ReactionEmoji,
-        /** Role ID to (un)assign. */
-        val roleID: Snowflake) {
+    /** Channel ID containing the message. */
+    val channelID: Snowflake,
+    /** Guild ID containing the channel. */
+    val guildID: Snowflake,
+    /**
+     * Is the role add verified.
+     *
+     * If this is true, the bot will periodically check all users who have reacted with this
+     * reaction and assign them the role if they don't have it.
+     */
+    val isAddVerified: Boolean = false,
+    /**
+     * Is the role remove verified.
+     *
+     * If this is true, the bot will periodically check all users and remove the role from
+     * all users in the guild who haven't reacted with this reaction.
+     */
+    val isRemoveVerified: Boolean = false,
+    /** Message ID containing the reaction. */
+    val messageID: Snowflake,
+    /** Reaction emoji name/raw. */
+    val reactionEmoji: ReactionEmoji,
+    /** Role ID to (un)assign. */
+    val roleID: Snowflake
+) {
 
     /**
      * Get boxed reaction emoji ID.
@@ -92,7 +93,7 @@ data class RoleReaction constructor(
             val optionalCustom: Optional<ReactionEmoji.Custom> = reactionEmoji.asCustomEmoji()
             val optionalUnicode = reactionEmoji.asUnicodeEmoji()
             return optionalCustom.map<String> { it.name }
-                    .orElseGet { optionalUnicode.map<String> { it.raw }.orElse("") }
+                .orElseGet { optionalUnicode.map<String> { it.raw }.orElse("") }
         }
 
     /**

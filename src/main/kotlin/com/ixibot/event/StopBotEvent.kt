@@ -30,65 +30,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.ixibot.command
-
-import com.ixibot.event.RoleReactionEvent
-
-/** Verify option about text.  */
-private const val ABOUT_VERIFY = "Run both add and remove verify checks on this role reaction"
-
-/** Add verify option about text.  */
-private const val ABOUT_VERIFY_ADD = "Run add verify checks on this role reaction"
-
-/** Remove verify option about text.  */
-private const val ABOUT_VERIFY_RM = "Run remove verify checks on this role reaction"
-
-/** Command name.  */
-private const val COMMAND = "add_role"
-
-/** Command help text.  */
-private const val ABOUT = "Add a role reaction listener"
-
-/** Command format.  */
-private const val USAGE = "$COMMAND [options] <channel> <message id> <emoji> <role>"
-
-/** Verify (both verifyAdd and verifyRemove) option.  */
-private val VERIFY = PresenceOption(
-        "verify",
-        'V',
-        ABOUT_VERIFY)
-
-/** Verify add option.  */
-private val VERIFY_ADD = PresenceOption(
-        "verify_add",
-        'A',
-        ABOUT_VERIFY_ADD)
-
-/** Verify remove option.  */
-private val VERIFY_REMOVE = PresenceOption(
-        "verify_remove",
-        'R',
-        ABOUT_VERIFY_RM)
+package com.ixibot.event
 
 /**
- * List of options accepted by this command.
- *
- * @see Command.options
- */
-private val OPTIONS = arrayOf<Option<out Any?>?>(
-        VERIFY,
-        VERIFY_ADD,
-        VERIFY_REMOVE)
-
-/**
- * Add a role reaction.
+ * Event to stop the bot.
  *
  * @author Ryan Porterfield
  */
-class AddRole : Command<RoleReactionEvent?>(COMMAND, OPTIONS, ABOUT, USAGE) {
-
-    @Throws(IllegalArgumentException::class)
-    override fun parse(vararg parameters: String): RoleReactionEvent? {
-        TODO("Implement this later")
-    }
-}
+data class StopBotEvent(
+        /**
+         * Is the stop graceful.
+         *
+         *
+         *
+         * If `true` the bot will try to gracefully disconnect from APIs and stop all threads
+         * before exiting, otherwise the bot will "crash" and stop immediately.
+         *
+         */
+        val isGraceful: Boolean)

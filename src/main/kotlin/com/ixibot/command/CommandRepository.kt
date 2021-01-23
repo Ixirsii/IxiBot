@@ -1,42 +1,120 @@
+/*
+ * Copyright (c) 2021, Ryan Porterfield
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ *     1. Redistributions of source code must retain the above copyright
+ *        notice, this list of conditions and the following disclaimer.
+ *
+ *     2. Redistributions in binary form must reproduce the above copyright
+ *        notice, this list of conditions and the following disclaimer in the
+ *        documentation and/or other materials provided with the distribution.
+ *
+ *     3. Neither the name of the copyright holder nor the names of its
+ *        contributors may be used to endorse or promote products derived from
+ *        this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+ *  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ *  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ *  PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ *  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ *  TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ *  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package com.ixibot.command
 
-import com.ixibot.data.BotConfiguration
-
-// TODO: this
+/**
+ * A command repository is responsible for parsing valid commands.
+ *
+ * @author Ryan Porterfield
+ */
 class CommandRepository(
-        private val commandPrefix: String
+    /** The prefix used so the bot knows what's a command and what's not. */
+    private val commandPrefix: String
 ) {
-    private val commands: MutableList<Command<Any>> by lazy { ArrayList<Command<Any>>() }
+    /** List of valid (registered) commands. */
+    private val commands: MutableSet<Command<out Any>> by lazy { LinkedHashSet<Command<out Any>>() }
 
-    fun isCommand(str: String): Boolean {
-        return str.startsWith(commandPrefix)
+    /**
+     * Check if input is a command this repository recognizes.
+     *
+     * Note that this only checks if the input starts with the command prefix, it doesn't check the list of
+     * registered commands to see if the command is valid.
+     *
+     * @param input The text input by the user.
+     * @return true if input looks like a command, otherwise false.
+     */
+    fun isCommand(input: String): Boolean {
+        return input.startsWith(commandPrefix)
     }
 
-    fun register(command: Command<Any>) {
+    /**
+     * Parse the input into an internal bet event which can be published to the event bus.
+     *
+     * @param input The text input by the user.
+     * @return internal bot event if the command is valid.
+     * @throws IllegalArgumentException if the command is not registered with the repository.
+     */
+    @Throws(IllegalArgumentException::class)
+    fun parse(input: String): Any {
+        val trimmedInput: String = input.substring(commandPrefix.length)
+        val commandArgsPair: Pair<String, String> = splitCommand(trimmedInput)
+        val arguments: List<String> = splitArguments(commandArgsPair.second)
+        val command: Command<out Any>? = findCommand(commandArgsPair.first)
+
+        require(command != null) {
+            "Command \"${commandArgsPair.first}\" is not registered"
+        }
+
+        return command.parse(arguments)
+    }
+
+    /**
+     * Register a command with the repository.
+     *
+     * @param command Command to register.
+     */
+    fun register(command: Command<out Any>) {
         commands.add(command)
     }
 
-    fun unregister(command: Command<Any>): Boolean {
+    /**
+     * Remove/unregister a command from the repository.
+     *
+     * @param command Command to unregister.
+     * @return result of {@link Set#remove}.
+     */
+    fun unregister(command: Command<out Any>): Boolean {
         return commands.remove(command)
     }
 
+    /**
+     * Remove/unregister a command from the repository.
+     *
+     * @param commandName Name of the command to unregister.
+     * @return result of {@link Set#remove}.
+     */
     fun unregister(commandName: String): Boolean {
         return commands.removeIf { command -> command.match(commandName) }
     }
 
-    private fun findCommand(str: String): Command<Any>? {
-        return commands.find { command -> command.match(str) }
-    }
-
-    private fun split(str: String): Pair<String, String> {
-        val strSansPrefix: String = str.substring(commandPrefix.length)
-        val index: Int = str.indexOf(' ')
-
-        return if (index == -1) {
-            Pair(strSansPrefix, "")
-        } else {
-            Pair(strSansPrefix.substring(0, index), strSansPrefix.substring(index))
-        }
+    /**
+     * Find command in the repository by its name.
+     *
+     * @param commandName Name of the command to find.
+     * @return command with name commandName if it exists, otherwise null.
+     */
+    private fun findCommand(commandName: String): Command<out Any>? {
+        return commands.find { command -> command.match(commandName) }
     }
 
     /**
@@ -55,7 +133,7 @@ class CommandRepository(
             i += if (substring.startsWith("\"")) {
                 val index = substring.indexOf('"', 1)
                 require(index != -1) {
-                    String.format("Unterminated quote found in %s", substring)
+                    "Unterminated quote found in $substring"
                 }
                 val token = substring.substring(1, index)
                 argumentList.add(token)
@@ -70,5 +148,21 @@ class CommandRepository(
         }
 
         return argumentList
+    }
+
+    /**
+     * Split user input into a pair of command and argument string.
+     *
+     * @param input  The text input by the user.
+     * @return Pair of command name and argument string.
+     */
+    private fun splitCommand(input: String): Pair<String, String> {
+        val index: Int = input.indexOf(' ')
+
+        return if (index == -1) {
+            Pair(input, "")
+        } else {
+            Pair(input.substring(0, index), input.substring(index))
+        }
     }
 }

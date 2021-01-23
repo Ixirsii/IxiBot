@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Ryan Porterfield
+ * Copyright (c) 2021, Ryan Porterfield
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,43 +30,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.ixibot.listener
+package com.ixibot.commands
 
-import com.google.common.eventbus.EventBus
-import com.ixibot.event.StopBotEvent
-import io.mockk.clearAllMocks
-import io.mockk.mockk
-import io.mockk.verifySequence
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import java.io.ByteArrayInputStream
-import java.io.InputStream
+import com.ixibot.command.Command
 
-class ConsoleListenerTest {
-    private val eventBusMock: EventBus = mockk(relaxed = true, relaxUnitFun = true)
-    private val underTest: ConsoleListener = ConsoleListener(eventBusMock, CoroutineScope(Dispatchers.Default).coroutineContext)
+private const val ABOUT_TEXT: String = ""
+private const val NAME: String = ""
+private const val USAGE_TEXT: String = ""
 
-    @BeforeEach
-    fun setUp() {
-        clearAllMocks()
-    }
-
-    @Test
-    fun `GIVEN quit WHEN run THEN posts event`() {
-        val botStopEvent = StopBotEvent(isGraceful = true)
-        // Put command in stdin
-        val sysInBackup: InputStream = System.`in`
-        val input = ByteArrayInputStream("quit".toByteArray())
-        System.setIn(input)
-
-        underTest.run()
-        underTest.close()
-
-        verifySequence { eventBusMock.post(botStopEvent) }
-
-        // Restore System.in
-        System.setIn(sysInBackup)
+class ExitCommand: Command<Boolean>(
+    aboutText = ABOUT_TEXT,
+    name = NAME,
+    usageText = USAGE_TEXT,
+    _options = emptyList()
+) {
+    override fun parse(vararg parameters: String): Boolean {
+        TODO("Not yet implemented")
     }
 }

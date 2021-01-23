@@ -35,7 +35,7 @@ package com.ixibot.listener
 import com.google.common.eventbus.EventBus
 import com.ixibot.Logging
 import com.ixibot.LoggingImpl
-import com.ixibot.event.BotStopEvent
+import com.ixibot.event.StopBotEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -73,7 +73,7 @@ class ConsoleListener(
                 log.debug("Got user input: {}", input)
                 // TODO: Map of command -> dispatcher instead of if statements
                 if (QUIT_COMMAND == input) {
-                    val event = BotStopEvent(true)
+                    val event = StopBotEvent(true)
                     eventBus.post(event)
                 }
             }

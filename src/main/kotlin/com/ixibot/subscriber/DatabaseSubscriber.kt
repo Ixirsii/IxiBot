@@ -36,7 +36,7 @@ import com.google.common.eventbus.Subscribe
 import com.ixibot.Logging
 import com.ixibot.LoggingImpl
 import com.ixibot.database.Database
-import com.ixibot.event.RoleReactionEvent
+import com.ixibot.event.AddRoleReactionEvent
 import java.sql.SQLException
 
 /**
@@ -56,7 +56,7 @@ class DatabaseSubscriber(
      * @param event Event published to event bus.
      */
     @Subscribe
-    fun onRoleReactionEvent(event: RoleReactionEvent) {
+    fun onRoleReactionEvent(event: AddRoleReactionEvent) {
         val roleReaction = event.roleReaction
         try {
             if (event.isCreate) {

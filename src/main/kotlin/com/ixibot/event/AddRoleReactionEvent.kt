@@ -32,19 +32,28 @@
 
 package com.ixibot.event
 
-import com.ixibot.data.RoleReaction
-
 /**
  * Create role reaction pub/sub event.
  *
  * @author Ryan Porterfield
  */
-data class RoleReactionEvent(
-        /**
-         * `true` if this is a create event, otherwise this is a delete event.
-         */
-        val isCreate: Boolean,
-        /**
-         * Role reaction to persist to database and listen for.
-         */
-        val roleReaction: RoleReaction)
+data class AddRoleReactionEvent(
+    // Options
+    /** Was the help flag passed? */
+    val help: Boolean,
+    /** Was the verify flag passed? */
+    val verify: Boolean,
+    /** Was the verify_add flag passed? */
+    val verifyAdd: Boolean,
+    /** Was the verify_remove flag passed? */
+    val verifyRemove: Boolean
+    // TODO: Arguments
+    /** Channel ID containing the message. */
+//    val channelID: Snowflake,
+    /** Message ID containing the reaction. */
+//    val messageID: Snowflake,
+    /** Reaction emoji name/raw. */
+//    val reactionEmoji: ReactionEmoji,
+    /** Role ID to (un)assign. */
+//    val roleID: Snowflake
+)

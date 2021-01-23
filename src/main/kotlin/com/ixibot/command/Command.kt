@@ -32,26 +32,23 @@
 
 package com.ixibot.command
 
-import com.google.common.collect.Lists
-
 /** Help option about text.  */
 private const val ABOUT_HELP = "Show this help message"
 
 /** Length of columns in help message.  */
 private const val COLUMN_LENGTH = 24
 
-// TODO: const
-/** Help parameter supported by every command.  */
-private val HELP = PresenceOption(
-        "help",
-        'h',
-        ABOUT_HELP)
-
 /** Options header for help text.  */
 private const val OPTIONS_HEADER = "Options:"
 
 /** Usage header for help text.  */
 private const val USAGE_HEADER = "Usage:"
+
+/** Help parameter supported by every command.  */
+private val HELP = PresenceOption(
+    "help",
+    'h',
+    ABOUT_HELP)
 
 /**
  * Get space between option and help text.
@@ -75,16 +72,23 @@ fun getSpace(optionLength: Int): String {
  */
 abstract class Command<E> internal constructor(
         /** Command name.  */
-        private val name: String,
-        /** List of options accepted by this command. */
-        options: Array<Option<out Any?>?>,
+        val name: String,
         /** Command about message for help text.  */
-        private val aboutText: String,
+        val aboutText: String,
         /** Command format message for help text.  */
-        private val usageText: String) {
+        val usageText: String,
+        /** List of options accepted by this command. */
+        _options: List<Option<out Any>>
+) {
 
     /** List of options accepted by this command. */
-    private val options: List<Option<out Any?>?> = Lists.asList(HELP, options)
+    private val options: List<Option<out Any>>
+
+    init {
+        val mutable: MutableList<Option<out Any>> = mutableListOf(HELP)
+        mutable.addAll(_options)
+        options = mutable
+    }
 
     /**
      * Get help text.
@@ -116,7 +120,7 @@ abstract class Command<E> internal constructor(
      * @throws IllegalArgumentException if length of parameters is different from expected value.
      */
     @Throws(IllegalArgumentException::class)
-    abstract fun parse(vararg parameters: String): E
+    abstract fun parse(arguments: List<String>): E
 
     /**
      * Check if command matches this command.

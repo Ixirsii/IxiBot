@@ -33,7 +33,7 @@
 package com.ixibot.subscriber
 
 import com.ixibot.database.Database
-import com.ixibot.event.RoleReactionEvent
+import com.ixibot.event.AddRoleReactionEvent
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -61,7 +61,7 @@ class DatabaseSubscriberTest {
 
     @Test
     fun `GIVEN create event WHEN onRoleReaction THEN adds to database`() {
-        val roleReactionEvent = RoleReactionEvent(isCreate = true, roleReaction = ROLE_REACTION_1)
+        val roleReactionEvent = AddRoleReactionEvent(isCreate = true, roleReaction = ROLE_REACTION_1)
 
         underTest.onRoleReactionEvent(roleReactionEvent)
 
@@ -70,7 +70,7 @@ class DatabaseSubscriberTest {
 
     @Test
     fun `GIVEN delete event WHEN onRoleReaction THEN deletes from database`() {
-        val roleReactionEvent = RoleReactionEvent(isCreate = false, roleReaction = ROLE_REACTION_1)
+        val roleReactionEvent = AddRoleReactionEvent(isCreate = false, roleReaction = ROLE_REACTION_1)
 
         underTest.onRoleReactionEvent(roleReactionEvent)
 
@@ -79,7 +79,7 @@ class DatabaseSubscriberTest {
 
     @Test
     fun `GIVEN SQLException WHEN onRoleReaction THEN does nothing`() {
-        val roleReactionEvent = RoleReactionEvent(isCreate = true, roleReaction = ROLE_REACTION_1)
+        val roleReactionEvent = AddRoleReactionEvent(isCreate = true, roleReaction = ROLE_REACTION_1)
 
         every { databaseMock.addRoleReaction(ROLE_REACTION_1) } throws SQLException()
 

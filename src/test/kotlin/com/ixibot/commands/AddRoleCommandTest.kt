@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Ryan Porterfield
+ * Copyright (c) 2021, Ryan Porterfield
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,10 +30,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.ixibot.command
+package com.ixibot.commands
 
-import com.google.common.collect.ImmutableMap
-import com.ixibot.command.Command.ArgumentIndex
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -45,8 +43,8 @@ private val ARGUMENT_TOKENS = arrayOf(
         "EZ Clap",
         "@Member")
 
-class AddRoleTest {
-    private val underTest = AddRole()
+class AddRoleCommandTest {
+    private val underTest = AddRoleCommand()
 
     @Test
     fun `GIVEN valid arguments WHEN argumentTokenizer THEN returns tokens`() {
