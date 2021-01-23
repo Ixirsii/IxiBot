@@ -35,13 +35,13 @@ package com.ixibot.command
 import com.ixibot.event.RoleReactionEvent
 
 /** Verify option about text.  */
-private const val ABOUT_VERIFY = ("Run both add and remove verify checks on this role reaction")
+private const val ABOUT_VERIFY = "Run both add and remove verify checks on this role reaction"
 
 /** Add verify option about text.  */
 private const val ABOUT_VERIFY_ADD = "Run add verify checks on this role reaction"
 
 /** Remove verify option about text.  */
-private const val ABOUT_VERIFY_RM = ("Run remove verify checks on this role reaction")
+private const val ABOUT_VERIFY_RM = "Run remove verify checks on this role reaction"
 
 /** Command name.  */
 private const val COMMAND = "add_role"
