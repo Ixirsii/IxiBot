@@ -44,13 +44,13 @@ import com.ixibot.event.CommandEvent
  */
 internal class PresenceOption<E : CommandEvent<E>>(
     aboutText: String,
-    function: (accumulator: E, value: Boolean) -> E,
+    accumulate: (accumulator: E, value: Boolean) -> E,
     longOption: String,
     shortOption: Char
 ) :
     Option<Boolean, E>(
         aboutText = aboutText,
-        function = function,
+        accumulate = accumulate,
         longOption = longOption,
         shortOption = shortOption
     ),

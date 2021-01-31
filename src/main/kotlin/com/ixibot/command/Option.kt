@@ -50,8 +50,8 @@ private const val POSIX_PREFIX = "-"
 internal abstract class Option<out T, E : CommandEvent<E>>(
     /** About message for help text.  */
     private val aboutText: String,
-    /** Function which takes parsed value and returns partial event. */
-    private val function: (accumulator: E, value: T) -> E,
+    /** Function which takes parsed value and accumulates it into event. */
+    private val accumulate: (accumulator: E, value: T) -> E,
     /** POSIX long option and option name.  */
     private val longOption: String,
     /** GNU short option.  */
@@ -69,7 +69,7 @@ internal abstract class Option<out T, E : CommandEvent<E>>(
     fun consume(accumulator: E, input: String): E {
         val value: T = parse(input)
 
-        return function(accumulator, value)
+        return accumulate(accumulator, value)
     }
 
     /**

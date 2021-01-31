@@ -55,7 +55,7 @@ private const val USAGE = "$COMMAND [options] <channel> <message id> <emoji> <ro
 /** Verify (both verifyAdd and verifyRemove) option.  */
 private val VERIFY = PresenceOption(
     aboutText = "Run both add and remove verify checks on this role reaction",
-    function = { accumulator: AddRoleReactionEvent, value: Boolean -> accumulator.toBuilder().isVerify(value).build() },
+    accumulate = { accumulator: AddRoleReactionEvent, value: Boolean -> accumulator.toBuilder().isVerify(value).build() },
     longOption = "verify",
     shortOption = 'V'
 )
@@ -63,7 +63,7 @@ private val VERIFY = PresenceOption(
 /** Verify add option.  */
 private val VERIFY_ADD = PresenceOption(
     aboutText = ABOUT_VERIFY_ADD,
-    function = { accumulator: AddRoleReactionEvent, value: Boolean -> accumulator.toBuilder().isVerifyAdd(value).build() },
+    accumulate = { accumulator: AddRoleReactionEvent, value: Boolean -> accumulator.toBuilder().isVerifyAdd(value).build() },
     longOption = "verify_add",
     shortOption = 'A'
 )
@@ -71,7 +71,7 @@ private val VERIFY_ADD = PresenceOption(
 /** Verify remove option.  */
 private val VERIFY_REMOVE = PresenceOption(
     aboutText = ABOUT_VERIFY_RM,
-    function = { accumulator: AddRoleReactionEvent, value: Boolean -> accumulator.toBuilder().isVerifyRemove(value).build() },
+    accumulate = { accumulator: AddRoleReactionEvent, value: Boolean -> accumulator.toBuilder().isVerifyRemove(value).build() },
     longOption = "verify_remove",
     shortOption = 'R'
 )

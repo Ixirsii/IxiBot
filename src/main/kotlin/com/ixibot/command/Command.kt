@@ -74,7 +74,7 @@ abstract class Command<out E : CommandEvent<E>> internal constructor(
     init {
         val help = PresenceOption(
             aboutText = "Show this help message",
-            function = { accumulator: E, value: Boolean -> accumulator.toBuilder().isHelp(value).build() },
+            accumulate = { accumulator: E, value: Boolean -> accumulator.toBuilder().isHelp(value).build() },
             longOption = "help",
             shortOption = 'h'
         )

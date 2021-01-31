@@ -44,7 +44,7 @@ import testUtil.TestCommandEvent
 class PresenceOptionTest {
     private val underTest = PresenceOption(
         aboutText = ABOUT_OPTION,
-        function = { accumulator: TestCommandEvent, value: Boolean -> accumulator.toBuilder().isValid(value).build() },
+        accumulate = { accumulator: TestCommandEvent, value: Boolean -> accumulator.toBuilder().isValid(value).build() },
         longOption = LONG_OPTION,
         shortOption = SHORT_OPTION
     )
