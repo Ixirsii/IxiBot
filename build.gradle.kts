@@ -4,7 +4,7 @@ plugins {
     application
     idea
     jacoco
-    kotlin("jvm") version ("1.3.72")
+    kotlin("jvm") version ("1.4.21")
 }
 
 group = "com.ixibot"
@@ -17,8 +17,6 @@ repositories {
 }
 
 dependencies {
-    // Kotlin JDK 8 standard library.
-    implementation(kotlin("stdlib-jdk8"))
     // Kotlin coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5")
 
@@ -71,7 +69,6 @@ tasks.dokka {
 
 val excludePaths: Set<String> = setOf(
         "com/ixibot/api/**",
-        "com/ixibot/module/**",
         "com/ixibot/**/*Discord*")
 
 tasks.jacocoTestReport {
@@ -101,7 +98,7 @@ tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
             limit {
-                minimum = 0.5.toBigDecimal()
+                minimum = 0.1.toBigDecimal()
             }
         }
     }
