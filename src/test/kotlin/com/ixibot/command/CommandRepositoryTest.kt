@@ -34,7 +34,6 @@ package com.ixibot.command
 
 import com.ixibot.commands.AddRoleReaction
 import com.ixibot.event.AddRoleReactionEvent
-import com.ixibot.event.AddRoleReactionEventBuilder
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -67,7 +66,7 @@ class CommandRepositoryTest {
     @Test
     fun `GIVEN registered command WHEN parse THEN returns event`() {
         // Given
-        val addRole: Command<AddRoleReactionEvent, AddRoleReactionEventBuilder> = AddRoleReaction()
+        val addRole: Command<AddRoleReactionEvent> = AddRoleReaction()
 
         underTest.register(addRole)
 
@@ -90,7 +89,7 @@ class CommandRepositoryTest {
     @Test
     fun `GIVEN registered command WHEN unregister Command THEN returns true`() {
         // Given
-        val addRole: Command<AddRoleReactionEvent, AddRoleReactionEventBuilder> = AddRoleReaction()
+        val addRole: Command<AddRoleReactionEvent> = AddRoleReaction()
         underTest.register(addRole)
 
         // When
@@ -103,7 +102,7 @@ class CommandRepositoryTest {
     @Test
     fun `GIVEN registered command WHEN unregister String THEN returns true`() {
         // Given
-        val addRole: Command<AddRoleReactionEvent, AddRoleReactionEventBuilder> = AddRoleReaction()
+        val addRole: Command<AddRoleReactionEvent> = AddRoleReaction()
         underTest.register(addRole)
 
         // When
@@ -116,7 +115,7 @@ class CommandRepositoryTest {
     @Test
     fun `GIVEN unregistered command WHEN unregister Command THEN returns false`() {
         // Given
-        val addRole: Command<AddRoleReactionEvent, AddRoleReactionEventBuilder> = AddRoleReaction()
+        val addRole: Command<AddRoleReactionEvent> = AddRoleReaction()
 
         // When
         val actual: Boolean = underTest.unregister(addRole)
@@ -128,7 +127,7 @@ class CommandRepositoryTest {
     @Test
     fun `GIVEN unregistered command WHEN unregister String THEN returns false`() {
         // Given
-        val addRole: Command<AddRoleReactionEvent, AddRoleReactionEventBuilder> = AddRoleReaction()
+        val addRole: Command<AddRoleReactionEvent> = AddRoleReaction()
 
         // When
         val actual: Boolean = underTest.unregister(addRole.name)

@@ -36,7 +36,6 @@ import com.ixibot.command.Command
 import com.ixibot.command.Option
 import com.ixibot.command.PresenceOption
 import com.ixibot.event.AddRoleReactionEvent
-import com.ixibot.event.AddRoleReactionEventBuilder
 
 /** Add verify option about text.  */
 private const val ABOUT_VERIFY_ADD = "Run add verify checks on this role reaction"
@@ -56,7 +55,7 @@ private const val USAGE = "$COMMAND [options] <channel> <message id> <emoji> <ro
 /** Verify (both verifyAdd and verifyRemove) option.  */
 private val VERIFY = PresenceOption(
     aboutText = "Run both add and remove verify checks on this role reaction",
-    function = { builder: AddRoleReactionEventBuilder, value: Boolean -> builder.isVerify(value) },
+    function = { accumulator: AddRoleReactionEvent, value: Boolean -> accumulator.toBuilder().isVerify(value).build() },
     longOption = "verify",
     shortOption = 'V'
 )
@@ -64,7 +63,7 @@ private val VERIFY = PresenceOption(
 /** Verify add option.  */
 private val VERIFY_ADD = PresenceOption(
     aboutText = ABOUT_VERIFY_ADD,
-    function = { builder: AddRoleReactionEventBuilder, value: Boolean -> builder.isVerifyAdd(value) },
+    function = { accumulator: AddRoleReactionEvent, value: Boolean -> accumulator.toBuilder().isVerifyAdd(value).build() },
     longOption = "verify_add",
     shortOption = 'A'
 )
@@ -72,7 +71,7 @@ private val VERIFY_ADD = PresenceOption(
 /** Verify remove option.  */
 private val VERIFY_REMOVE = PresenceOption(
     aboutText = ABOUT_VERIFY_RM,
-    function = { builder: AddRoleReactionEventBuilder, value: Boolean -> builder.isVerifyRemove(value) },
+    function = { accumulator: AddRoleReactionEvent, value: Boolean -> accumulator.toBuilder().isVerifyRemove(value).build() },
     longOption = "verify_remove",
     shortOption = 'R'
 )
@@ -82,7 +81,7 @@ private val VERIFY_REMOVE = PresenceOption(
  *
  * @see Command.options
  */
-private val OPTIONS = listOf<Option<out Any, AddRoleReactionEvent, AddRoleReactionEventBuilder>>(
+private val OPTIONS = listOf<Option<Any, AddRoleReactionEvent>>(
     VERIFY, VERIFY_ADD, VERIFY_REMOVE
 )
 
@@ -91,14 +90,14 @@ private val OPTIONS = listOf<Option<out Any, AddRoleReactionEvent, AddRoleReacti
  *
  * @author Ryan Porterfield
  */
-class AddRoleReaction : Command<AddRoleReactionEvent, AddRoleReactionEventBuilder>(
+class AddRoleReaction : Command<AddRoleReactionEvent>(
     aboutText = ABOUT,
     name = COMMAND,
     usageText = USAGE,
-    _options = OPTIONS
+    options = OPTIONS
 ) {
 
-    override fun getBuilder(): AddRoleReactionEventBuilder {
-        return AddRoleReactionEventBuilder()
+    override fun getAccumulator(): AddRoleReactionEvent {
+        return AddRoleReactionEvent()
     }
 }

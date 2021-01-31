@@ -35,59 +35,53 @@ package com.ixibot.event
 /**
  * Base class for bot command events.
  */
-abstract class CommandEvent(
+abstract class CommandEvent<out E : CommandEvent<E>>(
     /** Is the help flag present in the command? */
     val isHelp: Boolean,
     /** Is the command valid? */
     val isValid: Boolean
-)
-
-/**
- * Base class for CommandEvent builders.
- */
-abstract class Builder<E : CommandEvent, B : Builder<E, B>> {
-    /** Mutable placeholder for CommandEvent#isHelp. */
-    protected var isHelp: Boolean = false
-        private set
-    /** Mutable placeholder for CommandEvent#isValid. */
-    protected var isValid: Boolean = true
-        private set
+) {
 
     /**
-     * Build event.
+     * Get a Builder pre-populated with the values in this event.
      *
-     * @return immutable event object.
+     * @return a Builder pre-populated with the values in this event.
      */
-    abstract fun build(): E
+    abstract fun toBuilder(): Builder<E>
 
     /**
-     * Hack to return this from generic implementing class.
-     *
-     * @return this.
+     * Base class for CommandEvent builders.
      */
-    protected abstract fun getThis(): B
+    abstract class Builder<out E : CommandEvent<E>> {
+        /** Mutable placeholder for CommandEvent#isHelp. */
+        protected var isHelp: Boolean = false
+            private set
 
-    /**
-     * Set isHelp.
-     *
-     * @param isHelp value.
-     * @return this.
-     */
-    fun isHelp(isHelp: Boolean): B {
-        this.isHelp = isHelp
+        /** Mutable placeholder for CommandEvent#isValid. */
+        protected var isValid: Boolean = true
+            private set
 
-        return getThis()
-    }
+        /**
+         * Build event.
+         *
+         * @return immutable event object.
+         */
+        abstract fun build(): E
 
-    /**
-     * Set isValid.
-     *
-     * @param isValid value.
-     * @return this.
-     */
-    fun isValid(isValid: Boolean): B {
-        this.isValid = isValid
+        /**
+         * Set isHelp.
+         *
+         * @param isHelp value.
+         * @return this.
+         */
+        fun isHelp(isHelp: Boolean): Builder<E> = apply { this.isHelp = isHelp }
 
-        return getThis()
+        /**
+         * Set isValid.
+         *
+         * @param isValid value.
+         * @return this.
+         */
+        fun isValid(isValid: Boolean): Builder<E> = apply { this.isValid = isValid }
     }
 }

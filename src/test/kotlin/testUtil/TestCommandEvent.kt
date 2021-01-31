@@ -32,20 +32,20 @@
 
 package testUtil
 
-import com.ixibot.event.Builder
 import com.ixibot.event.CommandEvent
 
 class TestCommandEvent(
     isHelp: Boolean,
     isValid: Boolean
-) : CommandEvent(isHelp = isHelp, isValid = isValid)
+) : CommandEvent<TestCommandEvent>(isHelp = isHelp, isValid = isValid) {
 
-class TestCommandEventBuilder: Builder<TestCommandEvent, TestCommandEventBuilder>() {
-    override fun build(): TestCommandEvent {
-        return TestCommandEvent(isHelp = isHelp, isValid = isValid)
+    override fun toBuilder(): Builder<TestCommandEvent> {
+        return TestCommandEventBuilder()
     }
 
-    override fun getThis(): TestCommandEventBuilder {
-        return this
+    class TestCommandEventBuilder : Builder<TestCommandEvent>() {
+        override fun build(): TestCommandEvent {
+            return TestCommandEvent(isHelp = isHelp, isValid = isValid)
+        }
     }
 }

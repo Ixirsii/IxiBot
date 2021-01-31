@@ -32,7 +32,6 @@
 
 package com.ixibot.command
 
-import com.ixibot.event.Builder
 import com.ixibot.event.CommandEvent
 
 /** Length of columns in help message.  */
@@ -58,30 +57,30 @@ fun getSpace(optionLength: Int): String {
  * @param <E> Type of event emitted by this command.
  * @author Ryan Porterfield
  */
-abstract class Command<E : CommandEvent, B : Builder<E, B>> internal constructor(
-    /** Command name.  */
+abstract class Command<out E : CommandEvent<E>> internal constructor(
+    /** Command name. */
     val name: String,
-    /** Command about message for help text.  */
+    /** Command about message for help text. */
     val aboutText: String,
-    /** Command format message for help text.  */
+    /** Command format message for help text. */
     val usageText: String,
     /** List of options accepted by this command. */
-    _options: List<Option<out Any, E, B>>
+    options: List<Option<Any, E>>
 ) {
 
     /** List of options accepted by this command. */
-    private val options: List<Option<out Any, E, B>>
+    private val options: List<Option<Any, E>>
 
     init {
         val help = PresenceOption(
             aboutText = "Show this help message",
-            function = { builder: B, value: Boolean -> builder.isHelp(value) },
+            function = { accumulator: E, value: Boolean -> accumulator.toBuilder().isHelp(value).build() },
             longOption = "help",
             shortOption = 'h'
         )
-        val mutable: MutableList<Option<out Any, E, B>> = mutableListOf(help)
-        mutable.addAll(_options)
-        options = mutable
+        val mutable: MutableList<Option<Any, E>> = mutableListOf(help)
+        mutable.addAll(options)
+        this.options = mutable
     }
 
     /**
@@ -100,20 +99,22 @@ abstract class Command<E : CommandEvent, B : Builder<E, B>> internal constructor
             return stringBuilder.toString()
         }
 
-    abstract fun getBuilder(): B
+    abstract fun getAccumulator(): E
 
     fun parse(arguments: List<String>): E {
-        val builder: B = getBuilder()
+        var accumulator: E = getAccumulator()
 
         for (argument in arguments) {
             for (option in options) {
                 if (option.match(argument)) {
-                    option.consume(builder, argument)
+                    accumulator = option.consume(accumulator, argument)
+
+                    break
                 }
             }
         }
 
-        return builder.build()
+        return accumulator
     }
 
     /**

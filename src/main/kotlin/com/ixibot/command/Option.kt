@@ -32,7 +32,6 @@
 
 package com.ixibot.command
 
-import com.ixibot.event.Builder
 import com.ixibot.event.CommandEvent
 
 /** GNU long option prefix.  */
@@ -46,14 +45,13 @@ private const val POSIX_PREFIX = "-"
  *
  * @param <T> Type of value parsed by this option.
  * @param <E> The type of event constructed by the consumer.
- * @param <B> The type of the builder for events
  * @author Ryan Porterfield
  */
-internal abstract class Option<T, E : CommandEvent, B : Builder<E, B>>(
+internal abstract class Option<out T, E : CommandEvent<E>>(
     /** About message for help text.  */
     private val aboutText: String,
     /** Function which takes parsed value and returns partial event. */
-    private val function: (builder: B, value: T) -> B,
+    private val function: (accumulator: E, value: T) -> E,
     /** POSIX long option and option name.  */
     private val longOption: String,
     /** GNU short option.  */
@@ -68,10 +66,10 @@ internal abstract class Option<T, E : CommandEvent, B : Builder<E, B>>(
      */
     internal abstract fun parse(input: String): T
 
-    fun consume(builder: B, input: String): Builder<E, B> {
+    fun consume(accumulator: E, input: String): E {
         val value: T = parse(input)
 
-        return function(builder, value)
+        return function(accumulator, value)
     }
 
     /**

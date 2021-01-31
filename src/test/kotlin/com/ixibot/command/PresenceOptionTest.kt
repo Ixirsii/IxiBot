@@ -34,18 +34,17 @@ package com.ixibot.command
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import testUtil.ABOUT_OPTION
 import testUtil.LONG_OPTION
 import testUtil.SHORT_OPTION
-import testUtil.TestCommandEventBuilder
+import testUtil.TestCommandEvent
 
 class PresenceOptionTest {
     private val underTest = PresenceOption(
         aboutText = ABOUT_OPTION,
-        function = { builder: TestCommandEventBuilder, value: Boolean -> builder.isValid(value) },
+        function = { accumulator: TestCommandEvent, value: Boolean -> accumulator.toBuilder().isValid(value).build() },
         longOption = LONG_OPTION,
         shortOption = SHORT_OPTION
     )
@@ -54,56 +53,64 @@ class PresenceOptionTest {
     fun `GIVEN different long option WHEN match THEN returns false`() {
         assertFalse(
             underTest.match("--not-an-option"),
-            "match should return false when long option does not match")
+            "match should return false when long option does not match"
+        )
     }
 
     @Test
     fun `GIVEN long option WHEN match THEN returns true`() {
         assertTrue(
-                underTest.match("--$LONG_OPTION"),
-                "match should return true when long option matches")
+            underTest.match("--$LONG_OPTION"),
+            "match should return true when long option matches"
+        )
     }
 
     @Test
     fun `GIVEN different short option WHEN match THEN returns false`() {
         assertFalse(
-                underTest.match("-a"),
-                "match should return false when short option does not match")
+            underTest.match("-a"),
+            "match should return false when short option does not match"
+        )
     }
 
     @Test
     fun `GIVEN absent short option WHEN match THEN returns false`() {
         assertFalse(
-                underTest.match("-abcde"),
-                "match should return false when short option is not present")
+            underTest.match("-abcde"),
+            "match should return false when short option is not present"
+        )
     }
 
     @Test
     fun `GIVEN short option WHEN match THEN returns true`() {
         assertTrue(
-                underTest.match("-$SHORT_OPTION"),
-                "match should return true when short option matches")
+            underTest.match("-$SHORT_OPTION"),
+            "match should return true when short option matches"
+        )
     }
 
     @Test
     fun `GIVEN present short option WHEN match THEN returns true`() {
         assertTrue(
-                underTest.match("-abcde$SHORT_OPTION"),
-                "match should return true when short option is present")
+            underTest.match("-abcde$SHORT_OPTION"),
+            "match should return true when short option is present"
+        )
     }
 
     @Test
     fun `GIVEN NA WHEN parse THEN returns true`() {
         assertTrue(
-                underTest.parse(""),
-                "parse should return true")
+            underTest.parse(""),
+            "parse should return true"
+        )
     }
 
     @Test
     fun `GIVEN NA WHEN toString THEN result is correctly formatted`() {
         assertEquals(
-                "-$SHORT_OPTION, --$LONG_OPTION       $ABOUT_OPTION.",
-                underTest.toString(),
-                "toString should equal expected")
+            "-$SHORT_OPTION, --$LONG_OPTION       $ABOUT_OPTION.",
+            underTest.toString(),
+            "toString should equal expected"
+        )
     }
 }

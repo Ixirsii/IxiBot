@@ -34,30 +34,32 @@ package com.ixibot.command
 
 import com.ixibot.Logging
 import com.ixibot.LoggingImpl
-import com.ixibot.event.Builder
 import com.ixibot.event.CommandEvent
 
 /**
  * Command option which is true if present.
  *
+ * @param <E> The type of event constructed by the consumer.
  * @author Ryan Porterfield
  */
-internal class PresenceOption<E : CommandEvent, B : Builder<E, B>>(
+internal class PresenceOption<E : CommandEvent<E>>(
     aboutText: String,
-    function: (builder: B, value: Boolean) -> B,
+    function: (accumulator: E, value: Boolean) -> E,
     longOption: String,
     shortOption: Char
 ) :
-    Option<Boolean, E, B>(
+    Option<Boolean, E>(
         aboutText = aboutText,
         function = function,
         longOption = longOption,
         shortOption = shortOption
     ),
-    Logging by LoggingImpl<PresenceOption<E, B>>() {
+    Logging by LoggingImpl<PresenceOption<E>>() {
 
     /**
-     * {@inheritDoc}
+     * If parse was called we assume the argument has been matched previously and return true.
+     *
+     * @return true
      */
     override fun parse(input: String): Boolean {
         return true
