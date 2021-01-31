@@ -32,6 +32,9 @@
 
 package com.ixibot.command
 
+import com.ixibot.event.Builder
+import com.ixibot.event.CommandEvent
+
 /** GNU long option prefix.  */
 private const val GNU_PREFIX = "--"
 
@@ -42,51 +45,54 @@ private const val POSIX_PREFIX = "-"
  * Command option base class.
  *
  * @param <T> Type of value parsed by this option.
+ * @param <E> The type of event constructed by the consumer.
+ * @param <B> The type of the builder for events
  * @author Ryan Porterfield
  */
-internal abstract class Option<T>(
-        /** POSIX long option and option name.  */
-        private val longOption: String,
-        /** GNU short option.  */
-        private val shortOption: Char,
-        /** Number of parameters consumed by this option.  */
-        protected val parameterCount: Int,
-        /** About message for help text.  */
-        private val aboutText: String) : Comparable<Option<T>> {
+internal abstract class Option<T, E : CommandEvent, B : Builder<E, B>>(
+    /** About message for help text.  */
+    private val aboutText: String,
+    /** Function which takes parsed value and returns partial event. */
+    private val function: (builder: B, value: T) -> B,
+    /** POSIX long option and option name.  */
+    private val longOption: String,
+    /** GNU short option.  */
+    private val shortOption: Char
+) {
 
-    /** GNU long option and option name.  */
-    val long: String
-        get() {
-            return GNU_PREFIX + longOption
-        }
+    /**
+     * Parse parameters to a matched option.
+     *
+     * @param input Option input (String, Pair, Triple, etc).
+     * @return parsed value.
+     */
+    internal abstract fun parse(input: String): T
 
-    /** POSIX style short option. */
-    val short: String
-        get() {
-            return POSIX_PREFIX + shortOption
-        }
+    fun consume(builder: B, input: String): Builder<E, B> {
+        val value: T = parse(input)
+
+        return function(builder, value)
+    }
 
     /**
      * Check if argument matches this option.
      *
      * @param argument Argument passed to command.
-     * @return number of parameters consumed by this option if argument matches, otherwise
-     * NON_MATCH.
+     * @return true if the argument matches this option, otherwise false.
      */
-    fun match(argument: String): Int {
-        val match: Boolean = when {
-            argument.startsWith(GNU_PREFIX)   -> {
+    fun match(argument: String): Boolean {
+        return when {
+            argument.startsWith(GNU_PREFIX) -> {
                 matchLongOption(argument)
             }
             argument.startsWith(POSIX_PREFIX) -> {
                 // This if block has to go after the long option if block because "--" will be matched by this check.
                 matchShortOption(argument)
             }
-            else                              -> {
+            else -> {
                 false
             }
         }
-        return if (match) 1 + parameterCount else 0
     }
 
     /**
@@ -97,7 +103,7 @@ internal abstract class Option<T>(
      * `false`
      */
     private fun matchLongOption(argument: String): Boolean {
-        return argument == long
+        return argument == getLongOption()
     }
 
     /**
@@ -108,8 +114,8 @@ internal abstract class Option<T>(
      * `false`
      */
     private fun matchShortOption(argument: String): Boolean {
-        return if (argument.length == short.length) { // If length is 2, we can either match or not match
-            argument == short
+        return if (argument.length == getShortOption().length) { // If length is 2, we can either match or not match
+            argument == getShortOption()
         } else { /*
              * If length is < 1 this check fails and returns 0.
              * If length is > 1 multiple short options were passed together, (IE. ps -ef) and we
@@ -120,22 +126,30 @@ internal abstract class Option<T>(
     }
 
     /**
-     * Parse parameters to a matched option.
+     * Get GNU style long option.
      *
-     * @param parameters List of parameters to the option.
-     * @return parsed value.
-     * @throws IllegalArgumentException if length of parameters is different from
-     * [Option.parameterCount]
+     * @return GNU style long option.
      */
-    @Throws(IllegalArgumentException::class)
-    abstract fun parse(vararg parameters: String?): T
-
-    override fun compareTo(other: Option<T>): Int {
-        return shortOption.compareTo(other.shortOption)
+    private fun getLongOption(): String {
+        return GNU_PREFIX + longOption
     }
 
+    /**
+     * Get POSIX style short option.
+     *
+     * @return POSIX style short option.
+     */
+    private fun getShortOption(): String {
+        return POSIX_PREFIX + shortOption
+    }
+
+    /**
+     * Convert option to string for logging and help text.
+     *
+     * @return help text for option.
+     */
     override fun toString(): String {
-        val option = "$short, $long"
+        val option = "${getShortOption()}, ${getLongOption()}"
         val optionSpace = getSpace(option.length)
         return "$option$optionSpace$aboutText."
     }

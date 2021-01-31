@@ -32,23 +32,11 @@
 
 package com.ixibot.command
 
-/** Help option about text.  */
-private const val ABOUT_HELP = "Show this help message"
+import com.ixibot.event.Builder
+import com.ixibot.event.CommandEvent
 
 /** Length of columns in help message.  */
 private const val COLUMN_LENGTH = 24
-
-/** Options header for help text.  */
-private const val OPTIONS_HEADER = "Options:"
-
-/** Usage header for help text.  */
-private const val USAGE_HEADER = "Usage:"
-
-/** Help parameter supported by every command.  */
-private val HELP = PresenceOption(
-    "help",
-    'h',
-    ABOUT_HELP)
 
 /**
  * Get space between option and help text.
@@ -70,22 +58,28 @@ fun getSpace(optionLength: Int): String {
  * @param <E> Type of event emitted by this command.
  * @author Ryan Porterfield
  */
-abstract class Command<E> internal constructor(
-        /** Command name.  */
-        val name: String,
-        /** Command about message for help text.  */
-        val aboutText: String,
-        /** Command format message for help text.  */
-        val usageText: String,
-        /** List of options accepted by this command. */
-        _options: List<Option<out Any>>
+abstract class Command<E : CommandEvent, B : Builder<E, B>> internal constructor(
+    /** Command name.  */
+    val name: String,
+    /** Command about message for help text.  */
+    val aboutText: String,
+    /** Command format message for help text.  */
+    val usageText: String,
+    /** List of options accepted by this command. */
+    _options: List<Option<out Any, E, B>>
 ) {
 
     /** List of options accepted by this command. */
-    private val options: List<Option<out Any>>
+    private val options: List<Option<out Any, E, B>>
 
     init {
-        val mutable: MutableList<Option<out Any>> = mutableListOf(HELP)
+        val help = PresenceOption(
+            aboutText = "Show this help message",
+            function = { builder: B, value: Boolean -> builder.isHelp(value) },
+            longOption = "help",
+            shortOption = 'h'
+        )
+        val mutable: MutableList<Option<out Any, E, B>> = mutableListOf(help)
         mutable.addAll(_options)
         options = mutable
     }
@@ -97,30 +91,30 @@ abstract class Command<E> internal constructor(
      */
     val helpMessage: String
         get() {
-            val stringBuilder = StringBuilder(
-                    String.format(
-                            "%s%n%n%s%n%s%n%n%s%n",
-                            aboutText,
-                            USAGE_HEADER,
-                            usageText,
-                            OPTIONS_HEADER))
+            val stringBuilder = StringBuilder("$aboutText\n\nUsage:\n$usageText\n\nOptions:\n")
 
             for (option in options) {
-                stringBuilder.append(option.toString()).append(System.getProperty("line.separator"))
+                stringBuilder.append(option.toString()).append('\n')
             }
 
             return stringBuilder.toString()
         }
 
-    /**
-     * Parse parameters to a matched option.
-     *
-     * @param parameters List of parameters to the option.
-     * @return Event which can be published to the event bus.
-     * @throws IllegalArgumentException if length of parameters is different from expected value.
-     */
-    @Throws(IllegalArgumentException::class)
-    abstract fun parse(arguments: List<String>): E
+    abstract fun getBuilder(): B
+
+    fun parse(arguments: List<String>): E {
+        val builder: B = getBuilder()
+
+        for (argument in arguments) {
+            for (option in options) {
+                if (option.match(argument)) {
+                    option.consume(builder, argument)
+                }
+            }
+        }
+
+        return builder.build()
+    }
 
     /**
      * Check if command matches this command.

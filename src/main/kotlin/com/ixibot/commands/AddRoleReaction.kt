@@ -36,9 +36,7 @@ import com.ixibot.command.Command
 import com.ixibot.command.Option
 import com.ixibot.command.PresenceOption
 import com.ixibot.event.AddRoleReactionEvent
-
-/** Verify option about text.  */
-private const val ABOUT_VERIFY = "Run both add and remove verify checks on this role reaction"
+import com.ixibot.event.AddRoleReactionEventBuilder
 
 /** Add verify option about text.  */
 private const val ABOUT_VERIFY_ADD = "Run add verify checks on this role reaction"
@@ -57,23 +55,26 @@ private const val USAGE = "$COMMAND [options] <channel> <message id> <emoji> <ro
 
 /** Verify (both verifyAdd and verifyRemove) option.  */
 private val VERIFY = PresenceOption(
-    "verify",
-    'V',
-    ABOUT_VERIFY
+    aboutText = "Run both add and remove verify checks on this role reaction",
+    function = { builder: AddRoleReactionEventBuilder, value: Boolean -> builder.isVerify(value) },
+    longOption = "verify",
+    shortOption = 'V'
 )
 
 /** Verify add option.  */
 private val VERIFY_ADD = PresenceOption(
-    "verify_add",
-    'A',
-    ABOUT_VERIFY_ADD
+    aboutText = ABOUT_VERIFY_ADD,
+    function = { builder: AddRoleReactionEventBuilder, value: Boolean -> builder.isVerifyAdd(value) },
+    longOption = "verify_add",
+    shortOption = 'A'
 )
 
 /** Verify remove option.  */
 private val VERIFY_REMOVE = PresenceOption(
-    "verify_remove",
-    'R',
-    ABOUT_VERIFY_RM
+    aboutText = ABOUT_VERIFY_RM,
+    function = { builder: AddRoleReactionEventBuilder, value: Boolean -> builder.isVerifyRemove(value) },
+    longOption = "verify_remove",
+    shortOption = 'R'
 )
 
 /**
@@ -81,22 +82,23 @@ private val VERIFY_REMOVE = PresenceOption(
  *
  * @see Command.options
  */
-private val OPTIONS = listOf<Option<out Any>>(VERIFY, VERIFY_ADD, VERIFY_REMOVE)
+private val OPTIONS = listOf<Option<out Any, AddRoleReactionEvent, AddRoleReactionEventBuilder>>(
+    VERIFY, VERIFY_ADD, VERIFY_REMOVE
+)
 
 /**
  * Add a role reaction.
  *
  * @author Ryan Porterfield
  */
-class AddRoleCommand : Command<AddRoleReactionEvent>(
+class AddRoleReaction : Command<AddRoleReactionEvent, AddRoleReactionEventBuilder>(
     aboutText = ABOUT,
     name = COMMAND,
     usageText = USAGE,
     _options = OPTIONS
 ) {
 
-    @Throws(IllegalArgumentException::class)
-    override fun parse(arguments: List<String>): AddRoleReactionEvent {
-        TODO("Implement this later")
+    override fun getBuilder(): AddRoleReactionEventBuilder {
+        return AddRoleReactionEventBuilder()
     }
 }

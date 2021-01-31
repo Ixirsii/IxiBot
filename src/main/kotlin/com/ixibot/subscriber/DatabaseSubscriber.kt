@@ -57,15 +57,16 @@ class DatabaseSubscriber(
      */
     @Subscribe
     fun onRoleReactionEvent(event: AddRoleReactionEvent) {
-        val roleReaction = event.roleReaction
-        try {
-            if (event.isCreate) {
-                database.addRoleReaction(roleReaction)
-            } else {
-                database.deleteRoleReaction(roleReaction)
-            }
-        } catch (sqle: SQLException) {
-            log.error("Failed to process role reaction event {}", event, sqle)
-        }
+        TODO("Update this with new event")
+//        val roleReaction = event.roleReaction
+//        try {
+//            if (event.isCreate) {
+//                database.addRoleReaction(roleReaction)
+//            } else {
+//                database.deleteRoleReaction(roleReaction)
+//            }
+//        } catch (sqle: SQLException) {
+//            log.error("Failed to process role reaction event {}", event, sqle)
+//        }
     }
 }

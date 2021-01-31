@@ -42,7 +42,7 @@ class CommandRepository(
     private val commandPrefix: String
 ) {
     /** List of valid (registered) commands. */
-    private val commands: MutableSet<Command<out Any>> by lazy { LinkedHashSet<Command<out Any>>() }
+    private val commands: MutableSet<Command<*, *>> by lazy { LinkedHashSet<Command<*, *>>() }
 
     /**
      * Check if input is a command this repository recognizes.
@@ -69,7 +69,7 @@ class CommandRepository(
         val trimmedInput: String = input.substring(commandPrefix.length)
         val commandArgsPair: Pair<String, String> = splitCommand(trimmedInput)
         val arguments: List<String> = splitArguments(commandArgsPair.second)
-        val command: Command<out Any>? = findCommand(commandArgsPair.first)
+        val command: Command<*, *>? = findCommand(commandArgsPair.first)
 
         require(command != null) {
             "Command \"${commandArgsPair.first}\" is not registered"
@@ -83,7 +83,7 @@ class CommandRepository(
      *
      * @param command Command to register.
      */
-    fun register(command: Command<out Any>) {
+    fun register(command: Command<*, *>) {
         commands.add(command)
     }
 
@@ -93,7 +93,7 @@ class CommandRepository(
      * @param command Command to unregister.
      * @return result of {@link Set#remove}.
      */
-    fun unregister(command: Command<out Any>): Boolean {
+    fun unregister(command: Command<*, *>): Boolean {
         return commands.remove(command)
     }
 
@@ -113,7 +113,7 @@ class CommandRepository(
      * @param commandName Name of the command to find.
      * @return command with name commandName if it exists, otherwise null.
      */
-    private fun findCommand(commandName: String): Command<out Any>? {
+    private fun findCommand(commandName: String): Command<*, *>? {
         return commands.find { command -> command.match(commandName) }
     }
 

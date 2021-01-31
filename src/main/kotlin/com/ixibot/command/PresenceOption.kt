@@ -34,33 +34,32 @@ package com.ixibot.command
 
 import com.ixibot.Logging
 import com.ixibot.LoggingImpl
+import com.ixibot.event.Builder
+import com.ixibot.event.CommandEvent
 
 /**
  * Command option which is true if present.
  *
  * @author Ryan Porterfield
  */
-internal class PresenceOption(
+internal class PresenceOption<E : CommandEvent, B : Builder<E, B>>(
+    aboutText: String,
+    function: (builder: B, value: Boolean) -> B,
     longOption: String,
-    shortOption: Char,
-    aboutText: String
+    shortOption: Char
 ) :
-    Option<Boolean>(longOption, shortOption, 0, aboutText),
-    Logging by LoggingImpl<PresenceOption>() {
+    Option<Boolean, E, B>(
+        aboutText = aboutText,
+        function = function,
+        longOption = longOption,
+        shortOption = shortOption
+    ),
+    Logging by LoggingImpl<PresenceOption<E, B>>() {
 
     /**
      * {@inheritDoc}
      */
-    @Throws(IllegalArgumentException::class)
-    override fun parse(vararg parameters: String?): Boolean {
-        if (parameters.size != parameterCount) {
-            val errorMessage = "Incorrect number of arguments passed to option \"$long\". " +
-                    "Expected $parameterCount but was ${parameters.size}, ${parameters.contentToString()}"
-
-            log.debug(errorMessage)
-            throw IllegalArgumentException(errorMessage)
-        }
-
+    override fun parse(input: String): Boolean {
         return true
     }
 }

@@ -30,21 +30,64 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.ixibot.commands
+package com.ixibot.event
 
-import com.ixibot.command.Command
+/**
+ * Base class for bot command events.
+ */
+abstract class CommandEvent(
+    /** Is the help flag present in the command? */
+    val isHelp: Boolean,
+    /** Is the command valid? */
+    val isValid: Boolean
+)
 
-private const val ABOUT_TEXT: String = ""
-private const val NAME: String = ""
-private const val USAGE_TEXT: String = ""
+/**
+ * Base class for CommandEvent builders.
+ */
+abstract class Builder<E : CommandEvent, B : Builder<E, B>> {
+    /** Mutable placeholder for CommandEvent#isHelp. */
+    protected var isHelp: Boolean = false
+        private set
+    /** Mutable placeholder for CommandEvent#isValid. */
+    protected var isValid: Boolean = true
+        private set
 
-class ExitCommand: Command<Boolean>(
-    aboutText = ABOUT_TEXT,
-    name = NAME,
-    usageText = USAGE_TEXT,
-    _options = emptyList()
-) {
-    override fun parse(vararg parameters: String): Boolean {
-        TODO("Not yet implemented")
+    /**
+     * Build event.
+     *
+     * @return immutable event object.
+     */
+    abstract fun build(): E
+
+    /**
+     * Hack to return this from generic implementing class.
+     *
+     * @return this.
+     */
+    protected abstract fun getThis(): B
+
+    /**
+     * Set isHelp.
+     *
+     * @param isHelp value.
+     * @return this.
+     */
+    fun isHelp(isHelp: Boolean): B {
+        this.isHelp = isHelp
+
+        return getThis()
+    }
+
+    /**
+     * Set isValid.
+     *
+     * @param isValid value.
+     * @return this.
+     */
+    fun isValid(isValid: Boolean): B {
+        this.isValid = isValid
+
+        return getThis()
     }
 }

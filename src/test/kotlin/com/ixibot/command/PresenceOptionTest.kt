@@ -33,114 +33,76 @@
 package com.ixibot.command
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import testUtil.ABOUT_OPTION
 import testUtil.LONG_OPTION
 import testUtil.SHORT_OPTION
+import testUtil.TestCommandEventBuilder
 
 class PresenceOptionTest {
-    private val underTest = PresenceOption(LONG_OPTION, SHORT_OPTION, ABOUT_OPTION)
+    private val underTest = PresenceOption(
+        aboutText = ABOUT_OPTION,
+        function = { builder: TestCommandEventBuilder, value: Boolean -> builder.isValid(value) },
+        longOption = LONG_OPTION,
+        shortOption = SHORT_OPTION
+    )
 
     @Test
-    fun getShortOptionText() {
-        assertEquals(
-                "-$SHORT_OPTION",
-                underTest.short,
-                "Short option text should equal expected")
+    fun `GIVEN different long option WHEN match THEN returns false`() {
+        assertFalse(
+            underTest.match("--not-an-option"),
+            "match should return false when long option does not match")
     }
 
     @Test
-    fun matchWhenLongOptionDoesNotMatch() {
-        assertEquals(
-                0,
-                underTest.match("--not-an-option"),
-                "match should return 0 when long option does not match")
-    }
-
-    @Test
-    fun matchWhenLongOptionMatches() {
-        assertEquals(
-                1,
-                underTest.match("--$LONG_OPTION"),
-                "match should return 1 when long option matches")
-    }
-
-    @Test
-    fun matchWhenShortOptionDoesNotMatch() {
-        assertEquals(
-                0,
-                underTest.match("-a"),
-                "match should return 0 when long option does not match")
-    }
-
-    @Test
-    fun matchWhenShortOptionDoesNotContainMatch() {
-        assertEquals(
-                0,
-                underTest.match("-abcde"),
-                "match should return 0 when long option does not match")
-    }
-
-    @Test
-    fun matchWhenShortOptionMatches() {
-        assertEquals(
-                1,
-                underTest.match("-$SHORT_OPTION"),
-                "match should return 1 when long option matches")
-    }
-
-    @Test
-    fun matchWhenShortOptionContainsMatch() {
-        assertEquals(
-                1,
-                underTest.match("-abcde$SHORT_OPTION"),
-                "match should return 1 when long option contains match")
-    }
-
-    @Test
-    fun matchWhenPositionalOptionDoesNotMatch() {
-        assertEquals(
-                0,
-                underTest.match("not-an-option"),
-                "match should return 0 when positional option does not match")
-    }
-
-    @Test
-    fun matchWhenPositionalOptionMatches() {
-        assertEquals(
-                1,
-                underTest.match("--$LONG_OPTION"),
-                "match should return 1 when positional option matches")
-    }
-
-    @Test
-    fun parseWhenCorrectNumberOfParameters() {
+    fun `GIVEN long option WHEN match THEN returns true`() {
         assertTrue(
-                underTest.parse(),
-                "parse should return true when no arguments are passed")
+                underTest.match("--$LONG_OPTION"),
+                "match should return true when long option matches")
     }
 
     @Test
-    fun parseWhenIncorrectNumberOfParameters() {
-        val parameter = "parameter"
-        val errorMessage = "Incorrect number of arguments passed to option \"--$LONG_OPTION\". " +
-                "Expected 0 but was 1, [$parameter]"
-        val exception: Throwable = assertThrows(
-                IllegalArgumentException::class.java,
-                { underTest.parse(parameter) },
-                "parse should throw IllegalArgumentException when arguments are passed")
-        assertEquals(
-                errorMessage,
-                exception.message,
-                "exception message should equal expected")
+    fun `GIVEN different short option WHEN match THEN returns false`() {
+        assertFalse(
+                underTest.match("-a"),
+                "match should return false when short option does not match")
     }
 
     @Test
-    fun toStringTest() {
+    fun `GIVEN absent short option WHEN match THEN returns false`() {
+        assertFalse(
+                underTest.match("-abcde"),
+                "match should return false when short option is not present")
+    }
+
+    @Test
+    fun `GIVEN short option WHEN match THEN returns true`() {
+        assertTrue(
+                underTest.match("-$SHORT_OPTION"),
+                "match should return true when short option matches")
+    }
+
+    @Test
+    fun `GIVEN present short option WHEN match THEN returns true`() {
+        assertTrue(
+                underTest.match("-abcde$SHORT_OPTION"),
+                "match should return true when short option is present")
+    }
+
+    @Test
+    fun `GIVEN NA WHEN parse THEN returns true`() {
+        assertTrue(
+                underTest.parse(""),
+                "parse should return true")
+    }
+
+    @Test
+    fun `GIVEN NA WHEN toString THEN result is correctly formatted`() {
         assertEquals(
-                "-s, --long-option       This is an option used for testing.",
+                "-$SHORT_OPTION, --$LONG_OPTION       $ABOUT_OPTION.",
                 underTest.toString(),
                 "toString should equal expected")
     }
