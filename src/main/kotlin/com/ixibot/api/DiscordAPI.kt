@@ -102,7 +102,7 @@ class DiscordAPI(
      * @param reactionsMap Map of guild ID to list of role reactions in that guild.
      */
     fun updateAllRoles(reactionsMap: Map<Snowflake, List<RoleReaction>>) {
-        // TODO: Clean this function up
+        // TODO: Clean this up
         reactionsMap.forEach { (guildID: Snowflake, verifiedReactions: List<RoleReaction>) ->
             discordClient.getGuildById(guildID)
                     .subscribe { guild: Guild ->

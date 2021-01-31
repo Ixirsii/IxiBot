@@ -50,7 +50,7 @@ private const val POSIX_PREFIX = "-"
 internal abstract class Option<out T, E : CommandEvent<E>>(
     /** About message for help text.  */
     private val aboutText: String,
-    /** Function which takes parsed value and accumulates it into event. */
+    /** Consume parsed value and accumulate it into event. */
     private val accumulate: (accumulator: E, value: T) -> E,
     /** POSIX long option and option name.  */
     private val longOption: String,

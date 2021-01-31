@@ -50,7 +50,6 @@ import com.ixibot.subscriber.DatabaseSubscriber
 import com.ixibot.subscriber.DiscordSubscriber
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import org.apache.commons.io.FileUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -77,17 +76,19 @@ fun main() {
         val database: Database = database(connection())
         val eventBus = EventBus()
         val ixiBot: IxiBot = ixiBot(
-                database,
-                DiscordAPI(
-                        discordClient(botConfiguration),
-                        DiscordListener(eventBus),
-                        botConfiguration.isDiscordRequired),
-                botConfiguration,
-                scheduler())
+            database,
+            DiscordAPI(
+                discordClient(botConfiguration),
+                DiscordListener(eventBus),
+                botConfiguration.isDiscordRequired
+            ),
+            botConfiguration,
+            scheduler()
+        )
         val consoleListener = ConsoleListener(eventBus, CoroutineScope(Dispatchers.Default).coroutineContext)
 
         listOf<Any>(DatabaseSubscriber(database), DiscordSubscriber(database))
-                .forEach(eventBus::register)
+            .forEach(eventBus::register)
 
         run(consoleListener, ixiBot)
     }
@@ -106,20 +107,22 @@ fun generateUserConfig(configFile: File) {
         }
 
         log.info(
-                "Generated new user config file at \"{}\". Please customize your configuration then restart the bot",
-                configFile.absolutePath)
+            "Generated new user config file at \"{}\". Please customize your configuration then restart the bot",
+            configFile.absolutePath
+        )
     } catch (ioe: IOException) {
         log.error(
-                "Encountered exception while trying to write new user config file to \"{}\"",
-                configFile.absolutePath,
-                ioe)
+            "Encountered exception while trying to write new user config file to \"{}\"",
+            configFile.absolutePath,
+            ioe
+        )
     }
 }
 
 /**
  * Run bot.
  *
- * This function handles initialization and cleanup of parameters passed to it.
+ * Initialization and cleanup of parameters is done here.
  *
  * @param consoleListener Coroutine which listens for console input.
  * @param ixiBot Bot instance.

@@ -44,7 +44,6 @@ import discord4j.core.`object`.reaction.ReactionEmoji
 import discord4j.core.`object`.util.Snowflake
 import reactor.core.Disposable
 import java.util.Optional
-import java.util.function.Predicate
 
 /**
  * Subscribe to events which trigger Discord actions.
@@ -52,20 +51,22 @@ import java.util.function.Predicate
  * @author Ryan Porterfield
  */
 class DiscordSubscriber(
-        /** Database interface. */
-        private val database: Database) : Logging by LoggingImpl<DiscordSubscriber>() {
+    /** Database interface. */
+    private val database: Database
+) : Logging by LoggingImpl<DiscordSubscriber>() {
 
     // TODO: Add documentation
     @Throws(IllegalArgumentException::class)
     private fun getFilter(
-            channelID: Snowflake,
-            messageID: Snowflake,
-            optionalCustom: Optional<ReactionEmoji.Custom>,
-            optionalUnicode: Optional<ReactionEmoji.Unicode>): Predicate<RoleReaction> {
+        channelID: Snowflake,
+        messageID: Snowflake,
+        optionalCustom: Optional<ReactionEmoji.Custom>,
+        optionalUnicode: Optional<ReactionEmoji.Unicode>
+    ): (reaction: RoleReaction) -> Boolean {
         return when {
             optionalCustom.isPresent -> {
-                val custom: ReactionEmoji.Custom = optionalCustom.get()
-                Predicate { reaction: RoleReaction ->
+                { reaction: RoleReaction ->
+                    val custom: ReactionEmoji.Custom = optionalCustom.get()
                     (reaction.messageID == messageID &&
                             reaction.channelID == channelID &&
                             reaction.reactionEmojiName == custom.name &&
@@ -73,8 +74,8 @@ class DiscordSubscriber(
                 }
             }
             optionalUnicode.isPresent -> {
-                val unicode = optionalUnicode.get()
-                Predicate { reaction: RoleReaction ->
+                { reaction: RoleReaction ->
+                    val unicode = optionalUnicode.get()
                     (reaction.messageID == messageID &&
                             reaction.channelID == channelID &&
                             reaction.reactionEmojiName == unicode.raw)
@@ -88,20 +89,22 @@ class DiscordSubscriber(
 
     // TODO: Add documentation
     private fun getMemberConsumer(
-            isAdd: Boolean,
-            messageID: Long,
-            reactionEmoji: ReactionEmoji,
-            roleID: Snowflake): (Member) -> Disposable {
+        isAdd: Boolean,
+        messageID: Long,
+        reactionEmoji: ReactionEmoji,
+        roleID: Snowflake
+    ): (Member) -> Disposable {
 
         val reasonFormat: String = getReasonFormat(isAdd)
 
         return { member: Member ->
             val reason: String = String.format(
-                    reasonFormat,
-                    member.displayName,
-                    messageID,
-                    reactionEmoji,
-                    roleID)
+                reasonFormat,
+                member.displayName,
+                messageID,
+                reactionEmoji,
+                roleID
+            )
             log.info(reason)
             if (isAdd) {
                 member.addRole(roleID, reason).subscribe()
@@ -126,19 +129,21 @@ class DiscordSubscriber(
      */
     @Subscribe
     fun onDiscordReactionEvent(event: DiscordReactionEvent) {
-        val filter: Predicate<RoleReaction> = try {
+        val filter: (reaction: RoleReaction) -> Boolean = try {
             getFilter(
-                    channelID = event.channelID,
-                    messageID = event.messageID,
-                    optionalCustom = event.reactionEmoji.asCustomEmoji(),
-                    optionalUnicode = event.reactionEmoji.asUnicodeEmoji())
+                channelID = event.channelID,
+                messageID = event.messageID,
+                optionalCustom = event.reactionEmoji.asCustomEmoji(),
+                optionalUnicode = event.reactionEmoji.asUnicodeEmoji()
+            )
         } catch (iae: IllegalArgumentException) {
             log.error(
-                    "Failed to get reaction that user added to message.\nUser: {}\nMessage: {}\nEmoji: {}",
-                    event.userID,
-                    event.messageID,
-                    event.reactionEmoji,
-                    iae)
+                "Failed to get reaction that user added to message.\nUser: {}\nMessage: {}\nEmoji: {}",
+                event.userID,
+                event.messageID,
+                event.reactionEmoji,
+                iae
+            )
             return
         }
 
