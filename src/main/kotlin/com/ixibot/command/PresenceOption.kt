@@ -42,19 +42,19 @@ import com.ixibot.event.CommandEvent
  * @param <E> The type of event constructed by the consumer.
  * @author Ryan Porterfield
  */
-internal class PresenceOption<E : CommandEvent<E>>(
+internal class PresenceOption<E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B>>(
     aboutText: String,
-    accumulate: (accumulator: E, value: Boolean) -> E,
+    accumulate: (accumulator: B, value: Boolean) -> B,
     longOption: String,
     shortOption: Char
 ) :
-    Option<Boolean, E>(
+    Option<Boolean, E, B>(
         aboutText = aboutText,
         accumulate = accumulate,
         longOption = longOption,
         shortOption = shortOption
     ),
-    Logging by LoggingImpl<PresenceOption<E>>() {
+    Logging by LoggingImpl<PresenceOption<E, B>>() {
 
     /**
      * If parse was called we assume the argument has been matched previously and return true.

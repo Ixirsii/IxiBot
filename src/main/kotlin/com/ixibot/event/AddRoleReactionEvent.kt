@@ -38,65 +38,22 @@ import discord4j.core.`object`.util.Snowflake
 /**
  * Create role reaction pub/sub event.
  */
-class AddRoleReactionEvent : CommandEvent<AddRoleReactionEvent> {
+class AddRoleReactionEvent(
     /** Channel ID containing the message. */
-    val channelID: Snowflake?
-
+    val channelID: Snowflake?, isHelp: Boolean, isValid: Boolean,
     /** Was the verify flag passed? */
-    val isVerify: Boolean
-
+    val isVerify: Boolean,
     /** Was the verify_add flag passed? */
-    val isVerifyAdd: Boolean
-
+    val isVerifyAdd: Boolean,
     /** Was the verify_remove flag passed? */
-    val isVerifyRemove: Boolean
-
+    val isVerifyRemove: Boolean,
     /** Message ID containing the reaction. */
-    val messageID: Snowflake?
-
+    val messageID: Snowflake?,
     /** Reaction emoji name/raw. */
-    val reactionEmoji: ReactionEmoji?
-
+    val reactionEmoji: ReactionEmoji?,
     /** Role ID to (un)assign. */
     val roleID: Snowflake?
-
-    /**
-     * Default constructor, initialize all values to false/0/null.
-     */
-    constructor() : this(
-        channelID = null,
-        isHelp = false,
-        isValid = false,
-        isVerify = false,
-        isVerifyAdd = false,
-        isVerifyRemove = false,
-        messageID = null,
-        reactionEmoji = null,
-        roleID = null
-    )
-
-    /**
-     * Initializer constructor, specify value for all fields.
-     */
-    constructor(
-        channelID: Snowflake?,
-        isHelp: Boolean,
-        isValid: Boolean,
-        isVerify: Boolean,
-        isVerifyAdd: Boolean,
-        isVerifyRemove: Boolean,
-        messageID: Snowflake?,
-        reactionEmoji: ReactionEmoji?,
-        roleID: Snowflake?
-    ) : super(isHelp = isHelp, isValid = isValid) {
-        this.channelID = channelID
-        this.isVerify = isVerify
-        this.isVerifyAdd = isVerifyAdd
-        this.isVerifyRemove = isVerifyRemove
-        this.messageID = messageID
-        this.reactionEmoji = reactionEmoji
-        this.roleID = roleID
-    }
+) : CommandEvent<AddRoleReactionEvent, AddRoleReactionEvent.Builder>(isHelp = isHelp, isValid = isValid) {
 
     /**
      * Get a Builder pre-populated with the values in this event.
@@ -118,7 +75,7 @@ class AddRoleReactionEvent : CommandEvent<AddRoleReactionEvent> {
         var messageID: Snowflake? = null,
         var reactionEmoji: ReactionEmoji? = null,
         var roleID: Snowflake? = null
-    ) : CommandEvent.Builder<AddRoleReactionEvent>() {
+    ) : CommandEvent.Builder<AddRoleReactionEvent, Builder>() {
 
         override fun build(): AddRoleReactionEvent {
             return AddRoleReactionEvent(
@@ -132,6 +89,10 @@ class AddRoleReactionEvent : CommandEvent<AddRoleReactionEvent> {
                 reactionEmoji = reactionEmoji,
                 roleID = roleID
             )
+        }
+
+        override fun self(): Builder {
+            return this
         }
 
         fun channelID(channelID: Snowflake): Builder = apply { this.channelID = channelID }

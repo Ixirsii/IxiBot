@@ -57,7 +57,7 @@ fun getSpace(optionLength: Int): String {
  * @param <E> Type of event emitted by this command.
  * @author Ryan Porterfield
  */
-abstract class Command<out E : CommandEvent<E>> internal constructor(
+abstract class Command<out E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B>> internal constructor(
     /** Command name. */
     val name: String,
     /** Command about message for help text. */
@@ -65,20 +65,20 @@ abstract class Command<out E : CommandEvent<E>> internal constructor(
     /** Command format message for help text. */
     val usageText: String,
     /** List of options accepted by this command. */
-    options: List<Option<Any, E>>
+    options: List<Option<Any, E, B>>
 ) {
 
     /** List of options accepted by this command. */
-    private val options: List<Option<Any, E>>
+    private val options: List<Option<Any, E, B>>
 
     init {
         val help = PresenceOption(
             aboutText = "Show this help message",
-            accumulate = { accumulator: E, value: Boolean -> accumulator.toBuilder().isHelp(value).build() },
+            accumulate = { accumulator: B, value: Boolean -> accumulator.isHelp(value) },
             longOption = "help",
             shortOption = 'h'
         )
-        val mutable: MutableList<Option<Any, E>> = mutableListOf(help)
+        val mutable: MutableList<Option<Any, E, B>> = mutableListOf(help)
         mutable.addAll(options)
         this.options = mutable
     }
@@ -99,10 +99,10 @@ abstract class Command<out E : CommandEvent<E>> internal constructor(
             return stringBuilder.toString()
         }
 
-    abstract fun getAccumulator(): E
+    abstract fun getAccumulator(): B
 
     fun parse(arguments: List<String>): E {
-        var accumulator: E = getAccumulator()
+        var accumulator: B = getAccumulator()
 
         for (argument in arguments) {
             for (option in options) {
@@ -114,7 +114,7 @@ abstract class Command<out E : CommandEvent<E>> internal constructor(
             }
         }
 
-        return accumulator
+        return accumulator.build()
     }
 
     /**

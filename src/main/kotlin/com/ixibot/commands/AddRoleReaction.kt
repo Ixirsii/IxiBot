@@ -55,7 +55,7 @@ private const val USAGE = "$COMMAND [options] <channel> <message id> <emoji> <ro
 /** Verify (both verifyAdd and verifyRemove) option.  */
 private val VERIFY = PresenceOption(
     aboutText = "Run both add and remove verify checks on this role reaction",
-    accumulate = { accumulator: AddRoleReactionEvent, value: Boolean -> accumulator.toBuilder().isVerify(value).build() },
+    accumulate = { accumulator: AddRoleReactionEvent.Builder, value: Boolean -> accumulator.isVerify(value) },
     longOption = "verify",
     shortOption = 'V'
 )
@@ -63,7 +63,7 @@ private val VERIFY = PresenceOption(
 /** Verify add option.  */
 private val VERIFY_ADD = PresenceOption(
     aboutText = ABOUT_VERIFY_ADD,
-    accumulate = { accumulator: AddRoleReactionEvent, value: Boolean -> accumulator.toBuilder().isVerifyAdd(value).build() },
+    accumulate = { accumulator: AddRoleReactionEvent.Builder, value: Boolean -> accumulator.isVerifyAdd(value) },
     longOption = "verify_add",
     shortOption = 'A'
 )
@@ -71,7 +71,7 @@ private val VERIFY_ADD = PresenceOption(
 /** Verify remove option.  */
 private val VERIFY_REMOVE = PresenceOption(
     aboutText = ABOUT_VERIFY_RM,
-    accumulate = { accumulator: AddRoleReactionEvent, value: Boolean -> accumulator.toBuilder().isVerifyRemove(value).build() },
+    accumulate = { accumulator: AddRoleReactionEvent.Builder, value: Boolean -> accumulator.isVerifyRemove(value) },
     longOption = "verify_remove",
     shortOption = 'R'
 )
@@ -81,7 +81,7 @@ private val VERIFY_REMOVE = PresenceOption(
  *
  * @see Command.options
  */
-private val OPTIONS = listOf<Option<Any, AddRoleReactionEvent>>(
+private val OPTIONS = listOf<Option<Any, AddRoleReactionEvent, AddRoleReactionEvent.Builder>>(
     VERIFY, VERIFY_ADD, VERIFY_REMOVE
 )
 
@@ -90,14 +90,14 @@ private val OPTIONS = listOf<Option<Any, AddRoleReactionEvent>>(
  *
  * @author Ryan Porterfield
  */
-class AddRoleReaction : Command<AddRoleReactionEvent>(
+class AddRoleReaction : Command<AddRoleReactionEvent, AddRoleReactionEvent.Builder>(
     aboutText = ABOUT,
     name = COMMAND,
     usageText = USAGE,
     options = OPTIONS
 ) {
 
-    override fun getAccumulator(): AddRoleReactionEvent {
-        return AddRoleReactionEvent()
+    override fun getAccumulator(): AddRoleReactionEvent.Builder {
+        return AddRoleReactionEvent.Builder()
     }
 }

@@ -40,17 +40,16 @@ import discord4j.core.`object`.util.Snowflake
  * @author Ryan Porterfield
  */
 class SnowflakeArgument internal constructor(
-        name: String,
-        aboutText: String) : Argument<Snowflake>(name, aboutText) {
+    name: String,
+    aboutText: String
+) : Argument<Snowflake>(name, aboutText) {
 
     override fun parse(argument: String): Snowflake {
-        val snowflake: Snowflake
-        snowflake = try {
+        return try {
             val longId = argument.toLong()
             Snowflake.of(longId)
         } catch (nfe: NumberFormatException) {
             Snowflake.of(argument)
         }
-        return snowflake
     }
 }

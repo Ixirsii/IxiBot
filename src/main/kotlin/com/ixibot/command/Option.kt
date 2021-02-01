@@ -47,11 +47,11 @@ private const val POSIX_PREFIX = "-"
  * @param <E> The type of event constructed by the consumer.
  * @author Ryan Porterfield
  */
-internal abstract class Option<out T, E : CommandEvent<E>>(
+internal abstract class Option<out T, E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B>>(
     /** About message for help text.  */
     private val aboutText: String,
     /** Consume parsed value and accumulate it into event. */
-    private val accumulate: (accumulator: E, value: T) -> E,
+    private val accumulate: (accumulator: B, value: T) -> B,
     /** POSIX long option and option name.  */
     private val longOption: String,
     /** GNU short option.  */
@@ -66,7 +66,7 @@ internal abstract class Option<out T, E : CommandEvent<E>>(
      */
     internal abstract fun parse(input: String): T
 
-    fun consume(accumulator: E, input: String): E {
+    fun consume(accumulator: B, input: String): B {
         val value: T = parse(input)
 
         return accumulate(accumulator, value)

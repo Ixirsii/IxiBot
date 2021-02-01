@@ -32,17 +32,22 @@
 
 package com.ixibot.command
 
+import com.ixibot.event.CommandEvent
+
 /**
  * Positional argument base class.
  *
- * @param <T> Type of argument.
+ * @param <T> Type of value parsed by this argument.
  * @author Ryan Porterfield
  */
-abstract class Argument<T>(
-        /** Argument name.  */
-        private val name: String,
-        /** About message for help text.  */
-        private val aboutText: String) {
+internal abstract class Argument<out T, E : CommandEvent<E>>(
+    /** About message for help text.  */
+    private val aboutText: String,
+    /** Consume parsed value and accumulate it into event. */
+    private val accumulate: (accumulator: E, value: T) -> E,
+    /** Argument name.  */
+    private val name: String
+) {
 
     /**
      * Parse value from argument string.
@@ -50,13 +55,22 @@ abstract class Argument<T>(
      * @param argument Argument string.
      * @return value parsed from argument string.
      */
-/* default */
     abstract fun parse(argument: String): T
+
+    fun consume(accumulator: E, input: String): E {
+        val value: T = parse(input)
+
+        return accumulate(accumulator, value)
+    }
+
+    fun match(argument: String): Boolean {
+        
+    }
 
     /**
      * {@inheritDoc}
      */
     override fun toString(): String {
-        return name + getSpace(name.length) + aboutText + "."
+        return "$name${getSpace(name.length)}$aboutText."
     }
 }
