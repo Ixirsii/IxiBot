@@ -47,14 +47,12 @@ internal class PresenceOption<E : CommandEvent<E, B>, B : CommandEvent.Builder<E
     accumulate: (accumulator: B, value: Boolean) -> B,
     longOption: String,
     shortOption: Char
-) :
-    Option<Boolean, E, B>(
-        aboutText = aboutText,
-        accumulate = accumulate,
-        longOption = longOption,
-        shortOption = shortOption
-    ),
-    Logging by LoggingImpl<PresenceOption<E, B>>() {
+) : Option<Boolean, E, B>(
+    aboutText = aboutText,
+    accumulate = accumulate,
+    longOption = longOption,
+    shortOption = shortOption
+) {
 
     /**
      * If parse was called we assume the argument has been matched previously and return true.

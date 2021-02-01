@@ -32,6 +32,7 @@
 
 package com.ixibot.command
 
+import com.ixibot.event.CommandEvent
 import discord4j.core.`object`.util.Snowflake
 
 /**
@@ -39,10 +40,14 @@ import discord4j.core.`object`.util.Snowflake
  *
  * @author Ryan Porterfield
  */
-class SnowflakeArgument internal constructor(
-    name: String,
-    aboutText: String
-) : Argument<Snowflake>(name, aboutText) {
+internal class SnowflakeArgument<E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B>> constructor(
+    /** About message for help text. */
+    aboutText: String,
+    /** Consume parsed value and accumulate it into event. */
+    accumulate: (accumulator: B, value: Snowflake) -> B,
+    /** Argument name. */
+    name: String
+) : Argument<Snowflake, E, B>(aboutText = aboutText, accumulate = accumulate, name = name) {
 
     override fun parse(argument: String): Snowflake {
         return try {
