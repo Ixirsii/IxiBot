@@ -45,6 +45,7 @@ private const val POSIX_PREFIX = "-"
  *
  * @param <T> Type of value parsed by this option.
  * @param <E> The type of event constructed by the consumer.
+ * @param <B> The type of Builder used to construct the event.
  * @author Ryan Porterfield
  */
 internal abstract class Option<out T, E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B>>(

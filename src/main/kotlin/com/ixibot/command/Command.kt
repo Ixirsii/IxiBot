@@ -72,7 +72,7 @@ abstract class Command<out E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B
     private val options: List<Option<Any, E, B>>
 
     init {
-        val help = PresenceOption(
+        val help = BooleanOption(
             aboutText = "Show this help message",
             accumulate = { accumulator: B, value: Boolean -> accumulator.isHelp(value) },
             longOption = "help",

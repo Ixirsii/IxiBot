@@ -32,17 +32,16 @@
 
 package com.ixibot.command
 
-import com.ixibot.Logging
-import com.ixibot.LoggingImpl
 import com.ixibot.event.CommandEvent
 
 /**
  * Command option which is true if present.
  *
  * @param <E> The type of event constructed by the consumer.
+ * @param <B> The type of Builder used to construct the event.
  * @author Ryan Porterfield
  */
-internal class PresenceOption<E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B>>(
+internal class BooleanOption<E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B>>(
     aboutText: String,
     accumulate: (accumulator: B, value: Boolean) -> B,
     longOption: String,

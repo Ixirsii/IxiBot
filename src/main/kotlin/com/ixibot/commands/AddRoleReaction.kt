@@ -34,7 +34,7 @@ package com.ixibot.commands
 
 import com.ixibot.command.Command
 import com.ixibot.command.Option
-import com.ixibot.command.PresenceOption
+import com.ixibot.command.BooleanOption
 import com.ixibot.event.AddRoleReactionEvent
 
 /** Add verify option about text.  */
@@ -53,7 +53,7 @@ private const val ABOUT = "Add a role reaction listener"
 private const val USAGE = "$COMMAND [options] <channel> <message id> <emoji> <role>"
 
 /** Verify (both verifyAdd and verifyRemove) option.  */
-private val VERIFY = PresenceOption(
+private val VERIFY = BooleanOption(
     aboutText = "Run both add and remove verify checks on this role reaction",
     accumulate = { accumulator: AddRoleReactionEvent.Builder, value: Boolean -> accumulator.isVerify(value) },
     longOption = "verify",
@@ -61,7 +61,7 @@ private val VERIFY = PresenceOption(
 )
 
 /** Verify add option.  */
-private val VERIFY_ADD = PresenceOption(
+private val VERIFY_ADD = BooleanOption(
     aboutText = ABOUT_VERIFY_ADD,
     accumulate = { accumulator: AddRoleReactionEvent.Builder, value: Boolean -> accumulator.isVerifyAdd(value) },
     longOption = "verify_add",
@@ -69,7 +69,7 @@ private val VERIFY_ADD = PresenceOption(
 )
 
 /** Verify remove option.  */
-private val VERIFY_REMOVE = PresenceOption(
+private val VERIFY_REMOVE = BooleanOption(
     aboutText = ABOUT_VERIFY_RM,
     accumulate = { accumulator: AddRoleReactionEvent.Builder, value: Boolean -> accumulator.isVerifyRemove(value) },
     longOption = "verify_remove",
