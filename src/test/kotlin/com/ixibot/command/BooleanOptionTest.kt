@@ -44,7 +44,7 @@ import testUtil.TestCommandEvent
 class BooleanOptionTest {
     private val underTest = BooleanOption(
         aboutText = ABOUT_OPTION,
-        accumulate = { accumulator: TestCommandEvent, value: Boolean -> accumulator.toBuilder().isValid(value).build() },
+        accumulate = { accumulator: TestCommandEvent.TestCommandEventBuilder, value: Boolean -> accumulator.testValue(value) },
         longOption = LONG_OPTION,
         shortOption = SHORT_OPTION
     )
@@ -100,7 +100,7 @@ class BooleanOptionTest {
     @Test
     fun `GIVEN NA WHEN parse THEN returns true`() {
         assertTrue(
-            underTest.parse(""),
+            underTest.parse("", emptyList()),
             "parse should return true"
         )
     }

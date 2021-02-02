@@ -33,6 +33,10 @@
 package com.ixibot.command
 
 import com.ixibot.event.CommandEvent
+import kotlin.jvm.Throws
+
+private val FALSE_VALUES: List<String> = listOf("f", "false", "n", "no")
+private val TRUE_VALUES: List<String> = listOf("t", "true", "y", "yes")
 
 /**
  * Command option which is true if present.
@@ -56,9 +60,39 @@ internal class BooleanOption<E : CommandEvent<E, B>, B : CommandEvent.Builder<E,
     /**
      * If parse was called we assume the argument has been matched previously and return true.
      *
-     * @return true
+     * @param input Option input which was matched by Option.match. IE --boolOpt, --boolOpt=y, -b.
+     * @param inputArgs This should usually be an empty list but occasionally may contain a single value if the user
+     *                  explicitly sets the value of the flag.
+     * @return true if input is empty, t, true, y, or yes, or false if input is f, false, n, no.
+     * @throws IllegalArgumentException if input args are unrecognized.
      */
-    override fun parse(input: String): Boolean {
-        return true
+    @Throws(IllegalArgumentException::class)
+    override fun parse(input: String, inputArgs: List<String>): Boolean {
+        val containsEquals: Boolean = input.contains('=')
+        return if (inputArgs.isEmpty() && !containsEquals) {
+            true
+        } else if ((inputArgs.isNotEmpty() && containsEquals) || inputArgs.size > 1) {
+            throw IllegalArgumentException("Unrecognized arguments $inputArgs")
+        } else if (inputArgs.isNotEmpty()) {
+            val value: String = inputArgs[0].toLowerCase()
+
+            parseValue(value)
+        } else {
+            val value: String = input.substring(input.indexOf("=") + 1)
+
+            parseValue(value)
+        }
+    }
+
+    private fun parseValue(value: String): Boolean {
+        val isTrue: Boolean = TRUE_VALUES.contains(value)
+        val isFalse: Boolean = FALSE_VALUES.contains(value)
+
+        if (!isFalse && !isTrue) {
+            // TODO: list valid values
+            throw IllegalArgumentException("Unrecognized value passed to $longOption: \"$value\".")
+        }
+
+        return isTrue
     }
 }

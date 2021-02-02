@@ -32,27 +32,15 @@
 
 package testUtil
 
-import com.ixibot.event.CommandEvent
+import com.ixibot.command.Command
 
-class TestCommandEvent(
-    isHelp: Boolean,
-    isValid: Boolean,
-    val testValue: Boolean
-) : CommandEvent<TestCommandEvent, TestCommandEvent.TestCommandEventBuilder>(isHelp = isHelp, isValid = isValid) {
-
-    override fun toBuilder(): Builder<TestCommandEvent, TestCommandEventBuilder> {
-        return TestCommandEventBuilder()
-    }
-
-    data class TestCommandEventBuilder(var testValue: Boolean = false): Builder<TestCommandEvent, TestCommandEventBuilder>() {
-        override fun build(): TestCommandEvent {
-            return TestCommandEvent(isHelp = isHelp, isValid = isValid, testValue = testValue)
-        }
-
-        override fun self(): TestCommandEventBuilder {
-            return this
-        }
-
-        fun testValue(testValue: Boolean): TestCommandEventBuilder = apply { this.testValue = testValue }
+class TestCommand : Command<TestCommandEvent, TestCommandEvent.TestCommandEventBuilder>(
+    aboutText = "A dummy command for unit tests",
+    name = "test",
+    usageText = "test [options]",
+    options = emptyList()
+) {
+    override fun getAccumulator(): TestCommandEvent.TestCommandEventBuilder {
+        return TestCommandEvent.TestCommandEventBuilder()
     }
 }

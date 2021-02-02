@@ -32,12 +32,11 @@
 
 package com.ixibot.command
 
-import com.ixibot.commands.AddRoleReaction
-import com.ixibot.event.AddRoleReactionEvent
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.lang.IllegalArgumentException
+import testUtil.TestCommand
+import testUtil.TestCommandEvent
 
 private const val COMMAND_PREFIX: String = "."
 // TODO: Add tests for multiple short options
@@ -53,7 +52,7 @@ class CommandRepositoryTest {
 
     @Test
     fun `GIVEN valid command WHEN isCommand THEN returns true`() {
-        Assertions.assertTrue(underTest.isCommand(".add_role"),
+        Assertions.assertTrue(underTest.isCommand(".test"),
             "String starting with command prefix should be a command")
     }
 
@@ -66,16 +65,17 @@ class CommandRepositoryTest {
     @Test
     fun `GIVEN registered command WHEN parse THEN returns event`() {
         // Given
-        val addRole: Command<AddRoleReactionEvent> = AddRoleReaction()
+        val addRole: Command<TestCommandEvent, TestCommandEvent.TestCommandEventBuilder> = TestCommand()
 
         underTest.register(addRole)
 
         // When
-        val actual = underTest.parse(".add_role --verify #channel 1234567890 \"EZ Clap\" @Member")
+//        val actual = underTest.parse(".test --verify #channel 1234567890 \"EZ Clap\" @Member")
+        val actual = underTest.parse(".test")
 
         // Then
         // TODO: Add more assertions for returned event
-        Assertions.assertTrue(actual is AddRoleReactionEvent, "Result should be of expected type")
+        Assertions.assertTrue(actual is TestCommandEvent, "Result should be of expected type")
     }
 
     @Test
@@ -89,50 +89,50 @@ class CommandRepositoryTest {
     @Test
     fun `GIVEN registered command WHEN unregister Command THEN returns true`() {
         // Given
-        val addRole: Command<AddRoleReactionEvent> = AddRoleReaction()
+        val addRole: Command<TestCommandEvent, TestCommandEvent.TestCommandEventBuilder> = TestCommand()
         underTest.register(addRole)
 
         // When
         val actual: Boolean = underTest.unregister(addRole)
 
         // Then
-        Assertions.assertTrue(actual, "Should unregister command successfully")
+        Assertions.assertTrue(actual, "Should unregister command")
     }
 
     @Test
     fun `GIVEN registered command WHEN unregister String THEN returns true`() {
         // Given
-        val addRole: Command<AddRoleReactionEvent> = AddRoleReaction()
+        val addRole: Command<TestCommandEvent, TestCommandEvent.TestCommandEventBuilder> = TestCommand()
         underTest.register(addRole)
 
         // When
         val actual: Boolean = underTest.unregister(addRole.name)
 
         // Then
-        Assertions.assertTrue(actual, "Should unregister command successfully")
+        Assertions.assertTrue(actual, "Should unregister command")
     }
 
     @Test
     fun `GIVEN unregistered command WHEN unregister Command THEN returns false`() {
         // Given
-        val addRole: Command<AddRoleReactionEvent> = AddRoleReaction()
+        val addRole: Command<TestCommandEvent, TestCommandEvent.TestCommandEventBuilder> = TestCommand()
 
         // When
         val actual: Boolean = underTest.unregister(addRole)
 
         // Then
-        Assertions.assertFalse(actual, "Should not unregister command successfully")
+        Assertions.assertFalse(actual, "Should not unregister command")
     }
 
     @Test
     fun `GIVEN unregistered command WHEN unregister String THEN returns false`() {
         // Given
-        val addRole: Command<AddRoleReactionEvent> = AddRoleReaction()
+        val addRole: Command<TestCommandEvent, TestCommandEvent.TestCommandEventBuilder> = TestCommand()
 
         // When
         val actual: Boolean = underTest.unregister(addRole.name)
 
         // Then
-        Assertions.assertFalse(actual, "Should not unregister command successfully")
+        Assertions.assertFalse(actual, "Should not unregister command")
     }
 }

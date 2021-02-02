@@ -101,22 +101,6 @@ abstract class Command<out E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B
 
     abstract fun getAccumulator(): B
 
-    fun parse(arguments: List<String>): E {
-        var accumulator: B = getAccumulator()
-
-        for (argument in arguments) {
-            for (option in options) {
-                if (option.match(argument)) {
-                    accumulator = option.consume(accumulator, argument)
-
-                    break
-                }
-            }
-        }
-
-        return accumulator.build()
-    }
-
     /**
      * Check if command matches this command.
      *
@@ -125,5 +109,61 @@ abstract class Command<out E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B
      */
     fun match(command: String): Boolean {
         return command == name
+    }
+
+    // TODO: Fix names
+    fun parse(arguments: List<String>): E {
+        val optionsWithArguments: Map<String, Pair<Option<Any, E, B>, List<String>>> = mapArguments(arguments)
+        var accumulator: B = getAccumulator()
+
+        for ((argument, argumentsPair) in optionsWithArguments) {
+            accumulator = argumentsPair.first.consume(accumulator, argument, argumentsPair.second)
+        }
+
+        return accumulator.build()
+    }
+
+    private fun getOptionArgs(arguments: List<String>): List<String> {
+        val optionArgs: MutableList<String> = ArrayList()
+
+        for (argument in arguments) {
+            if (options.find { it.match(argument) } != null) {
+                break
+            }
+
+            optionArgs.add(argument)
+        }
+
+        return optionArgs
+    }
+
+    private fun mapArguments(arguments: List<String>): Map<String, Pair<Option<Any, E, B>, List<String>>> {
+        val optionsWithArguments: MutableMap<String, Pair<Option<Any, E, B>, List<String>>> = HashMap()
+        var skip = 0
+
+        for ((index, argument) in arguments.withIndex()) {
+            if (skip > 0) {
+                --skip
+                continue
+            }
+
+            val option: Option<Any, E, B>? = options.find { it.match(argument) }
+
+            // TODO: Throw a better exception than IAE
+            require(option != null) {
+                "Unrecognized argument $argument"
+            }
+
+            if (arguments.size > index + 1) {
+                val optionArgs: List<String> = getOptionArgs(arguments.subList(index + 1, arguments.size))
+                skip = optionArgs.size
+
+                optionsWithArguments[argument] = Pair(option, optionArgs)
+            } else {
+                optionsWithArguments[argument] = Pair(option, emptyList())
+            }
+        }
+
+        return optionsWithArguments
     }
 }

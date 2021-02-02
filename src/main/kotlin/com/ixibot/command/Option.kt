@@ -33,6 +33,7 @@
 package com.ixibot.command
 
 import com.ixibot.event.CommandEvent
+import kotlin.jvm.Throws
 
 /** GNU long option prefix.  */
 private const val GNU_PREFIX = "--"
@@ -54,21 +55,24 @@ internal abstract class Option<out T, E : CommandEvent<E, B>, B : CommandEvent.B
     /** Consume parsed value and accumulate it into event. */
     private val accumulate: (accumulator: B, value: T) -> B,
     /** POSIX long option and option name.  */
-    private val longOption: String,
+    internal val longOption: String,
     /** GNU short option.  */
-    private val shortOption: Char
+    internal val shortOption: Char
 ) {
 
     /**
      * Parse parameters to a matched option.
      *
-     * @param input Option input (String, Pair, Triple, etc).
+     * @param input Option input which was matched by Option.match. IE --boolOpt, --boolOpt=y, -b
+     * @param inputArgs Additional arguments passed to the option. IE if the option takes a list of values.
      * @return parsed value.
+     * @throws IllegalArgumentException if input args are unrecognized.
      */
-    internal abstract fun parse(input: String): T
+    @Throws(IllegalArgumentException::class)
+    internal abstract fun parse(input: String, inputArgs: List<String>): T
 
-    fun consume(accumulator: B, input: String): B {
-        val value: T = parse(input)
+    fun consume(accumulator: B, input: String, inputArgs: List<String>): B {
+        val value: T = parse(input, inputArgs)
 
         return accumulate(accumulator, value)
     }
