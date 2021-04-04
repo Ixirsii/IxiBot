@@ -4,7 +4,7 @@ plugins {
     application
     idea
     jacoco
-    kotlin("jvm") version ("1.4.21")
+    kotlin("jvm") version ("1.4.30")
 }
 
 group = "com.ixibot"
@@ -18,7 +18,7 @@ repositories {
 
 dependencies {
     // Kotlin coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
 
     // Commons IO
     implementation("commons-io:commons-io:2.6")
@@ -50,6 +50,12 @@ application {
 
 jacoco {
     toolVersion = "0.8.5"
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    kotlinOptions {
+        useIR = true
+    }
 }
 
 tasks.compileKotlin {
