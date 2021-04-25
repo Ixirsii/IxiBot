@@ -33,8 +33,8 @@
 package com.ixibot.commands
 
 import com.ixibot.command.Command
-import com.ixibot.command.Option
 import com.ixibot.command.BooleanOption
+import com.ixibot.command.OptionalArgument
 import com.ixibot.event.AddRoleReactionEvent
 
 /** Add verify option about text.  */
@@ -81,7 +81,7 @@ private val VERIFY_REMOVE = BooleanOption(
  *
  * @see Command.options
  */
-private val OPTIONS = listOf<Option<Any, AddRoleReactionEvent, AddRoleReactionEvent.Builder>>(
+private val OPTIONS = listOf<OptionalArgument<Any, AddRoleReactionEvent, AddRoleReactionEvent.Builder>>(
     VERIFY, VERIFY_ADD, VERIFY_REMOVE
 )
 

@@ -33,16 +33,18 @@
 package com.ixibot.command
 
 import com.ixibot.event.CommandEvent
+import com.ixibot.exception.UnrecognizedArgumentException
 import kotlin.jvm.Throws
 
 private val FALSE_VALUES: List<String> = listOf("f", "false", "n", "no")
 private val TRUE_VALUES: List<String> = listOf("t", "true", "y", "yes")
+private val VALID_VALUES_MSG: String = "Valid values are false ($FALSE_VALUES) or true ($TRUE_VALUES)."
 
 /**
- * Command option which is true if present.
+ * Command option which is a boolean value.
  *
  * @param <E> The type of event constructed by the consumer.
- * @param <B> The type of Builder used to construct the event.
+ * @param <B> A builder/accumulator type which can be used to construct an E.
  * @author Ryan Porterfield
  */
 internal class BooleanOption<E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B>>(
@@ -50,47 +52,50 @@ internal class BooleanOption<E : CommandEvent<E, B>, B : CommandEvent.Builder<E,
     accumulate: (accumulator: B, value: Boolean) -> B,
     longOption: String,
     shortOption: Char
-) : Option<Boolean, E, B>(
+) : OptionalArgument<Boolean, E, B>(
     aboutText = aboutText,
     accumulate = accumulate,
-    longOption = longOption,
-    shortOption = shortOption
+    name = longOption,
+    shortName = shortOption
 ) {
-
     /**
      * If parse was called we assume the argument has been matched previously and return true.
      *
-     * @param input Option input which was matched by Option.match. IE --boolOpt, --boolOpt=y, -b.
-     * @param inputArgs This should usually be an empty list but occasionally may contain a single value if the user
+     * @param args This should usually be an empty list but occasionally may contain a single value if the user
      *                  explicitly sets the value of the flag.
-     * @return true if input is empty, t, true, y, or yes, or false if input is f, false, n, no.
-     * @throws IllegalArgumentException if input args are unrecognized.
+     * @return true if input is empty, t, true, y, or yes, or false if input is f, false, n, or no.
+     * @throws UnrecognizedArgumentException if input args are unrecognized.
      */
-    @Throws(IllegalArgumentException::class)
-    override fun parse(input: String, inputArgs: List<String>): Boolean {
-        val containsEquals: Boolean = input.contains('=')
-        return if (inputArgs.isEmpty() && !containsEquals) {
-            true
-        } else if ((inputArgs.isNotEmpty() && containsEquals) || inputArgs.size > 1) {
-            throw IllegalArgumentException("Unrecognized arguments $inputArgs")
-        } else if (inputArgs.isNotEmpty()) {
-            val value: String = inputArgs[0].toLowerCase()
+    @Throws(UnrecognizedArgumentException::class)
+    override fun parseArgs(args: List<String>): Boolean {
+        if (args.size > 1) {
+            throw UnrecognizedArgumentException("Unrecognized arguments $args")
+        }
 
-            parseValue(value)
-        } else {
-            val value: String = input.substring(input.indexOf("=") + 1)
+        return when {
+            args.isEmpty() -> {
+                true
+            }
+            else -> {
+                val value: String = args[0].toLowerCase()
 
-            parseValue(value)
+                parseValue(value)
+            }
         }
     }
 
+    /**
+     *
+     * @throws UnrecognizedArgumentException
+     */
+    @Throws(UnrecognizedArgumentException::class)
     private fun parseValue(value: String): Boolean {
         val isTrue: Boolean = TRUE_VALUES.contains(value)
         val isFalse: Boolean = FALSE_VALUES.contains(value)
 
         if (!isFalse && !isTrue) {
-            // TODO: list valid values
-            throw IllegalArgumentException("Unrecognized value passed to $longOption: \"$value\".")
+            val errorMsg = "Unrecognized value passed to $name: \"$value\". $VALID_VALUES_MSG"
+            throw UnrecognizedArgumentException(errorMsg)
         }
 
         return isTrue

@@ -65,11 +65,11 @@ abstract class Command<out E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B
     /** Command format message for help text. */
     val usageText: String,
     /** List of options accepted by this command. */
-    options: List<Option<Any, E, B>>
+    options: List<OptionalArgument<Any, E, B>>
 ) {
 
     /** List of options accepted by this command. */
-    private val options: List<Option<Any, E, B>>
+    private val options: List<OptionalArgument<Any, E, B>>
 
     init {
         val help = BooleanOption(
@@ -78,7 +78,7 @@ abstract class Command<out E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B
             longOption = "help",
             shortOption = 'h'
         )
-        val mutable: MutableList<Option<Any, E, B>> = mutableListOf(help)
+        val mutable: MutableList<OptionalArgument<Any, E, B>> = mutableListOf(help)
         mutable.addAll(options)
         this.options = mutable
     }
@@ -113,7 +113,7 @@ abstract class Command<out E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B
 
     // TODO: Fix names
     fun parse(arguments: List<String>): E {
-        val optionsWithArguments: Map<String, Pair<Option<Any, E, B>, List<String>>> = mapArguments(arguments)
+        val optionsWithArguments: Map<String, Pair<OptionalArgument<Any, E, B>, List<String>>> = mapArguments(arguments)
         var accumulator: B = getAccumulator()
 
         for ((argument, argumentsPair) in optionsWithArguments) {
@@ -127,7 +127,7 @@ abstract class Command<out E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B
         val optionArgs: MutableList<String> = ArrayList()
 
         for (argument in arguments) {
-            if (options.find { it.match(argument) } != null) {
+            if (options.find { it.isMatch(argument) } != null) {
                 break
             }
 
@@ -137,8 +137,8 @@ abstract class Command<out E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B
         return optionArgs
     }
 
-    private fun mapArguments(arguments: List<String>): Map<String, Pair<Option<Any, E, B>, List<String>>> {
-        val optionsWithArguments: MutableMap<String, Pair<Option<Any, E, B>, List<String>>> = HashMap()
+    private fun mapArguments(arguments: List<String>): Map<String, Pair<OptionalArgument<Any, E, B>, List<String>>> {
+        val optionsWithArguments: MutableMap<String, Pair<OptionalArgument<Any, E, B>, List<String>>> = HashMap()
         var skip = 0
 
         for ((index, argument) in arguments.withIndex()) {
@@ -147,7 +147,7 @@ abstract class Command<out E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B
                 continue
             }
 
-            val option: Option<Any, E, B>? = options.find { it.match(argument) }
+            val option: OptionalArgument<Any, E, B>? = options.find { it.isMatch(argument) }
 
             // TODO: Throw a better exception than IAE
             require(option != null) {

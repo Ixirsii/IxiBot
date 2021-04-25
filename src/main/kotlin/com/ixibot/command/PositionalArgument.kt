@@ -33,35 +33,39 @@
 package com.ixibot.command
 
 import com.ixibot.event.CommandEvent
-import com.ixibot.exception.UnrecognizedArgumentException
-import discord4j.core.`object`.util.Snowflake
-import java.lang.IllegalArgumentException
 
 /**
- * Command argument which takes a Snowflake.
+ * Base class for positional arguments.
  *
+ * @param <T> Type of value parsed by this argument.
+ * @param <E> The type of event constructed by the consumer.
+ * @param <B> A builder/accumulator type which can be used to construct an E.
  * @author Ryan Porterfield
  */
-internal class SnowflakeArgument<E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B>> constructor(
+internal abstract class PositionalArgument<out T, E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B>>(
     /** About message for help text. */
     aboutText: String,
     /** Consume parsed value and accumulate it into event. */
-    accumulate: (accumulator: B, value: Snowflake) -> B,
-    /** Argument name. */
+    accumulate: (accumulator: B, value: T) -> B,
+    /** Argument's name. */
     name: String
-) : PositionalArgument<Snowflake, E, B>(aboutText = aboutText, accumulate = accumulate, name = name) {
+) : Argument<T, E, B>(aboutText = aboutText, accumulate = accumulate, name = name) {
+    /**
+     * Check if input matches this argument.
+     *
+     * @param input Argument passed to command.
+     * @return true if the input matches this argument, otherwise false.
+     */
+    override fun match(input: String): Boolean {
+        return true
+    }
 
-    override fun parseArgs(args: List<String>): Snowflake {
-        if (args.isEmpty()) {
-            throw IllegalArgumentException("Argument \"$name\" requires 1 argument")
-        } else if (args.size > 1) {
-            throw IllegalArgumentException("Too many arguments passed to \"$name\": $args")
-        }
-
-        return try {
-            Snowflake.of(args[0])
-        } catch (nfe: NumberFormatException) {
-            throw UnrecognizedArgumentException("Unrecognized arguments $args")
-        }
+    /**
+     * Convert option to string for logging and help text.
+     *
+     * @return help text for option.
+     */
+    override fun toString(): String {
+        return "$name${getSpace(name.length)}$aboutText."
     }
 }

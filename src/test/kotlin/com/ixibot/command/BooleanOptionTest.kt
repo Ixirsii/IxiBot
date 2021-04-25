@@ -100,7 +100,7 @@ class BooleanOptionTest {
     @Test
     fun `GIVEN NA WHEN parse THEN returns true`() {
         assertTrue(
-            underTest.parse("", emptyList()),
+            underTest.parseArgs("", emptyList()),
             "parse should return true"
         )
     }
