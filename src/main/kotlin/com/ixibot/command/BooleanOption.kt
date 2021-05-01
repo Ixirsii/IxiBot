@@ -32,6 +32,7 @@
 
 package com.ixibot.command
 
+import com.ixibot.contracts.requireExactlyOneArgument
 import com.ixibot.event.CommandEvent
 import com.ixibot.exception.UnrecognizedArgumentException
 import kotlin.jvm.Throws
@@ -68,9 +69,7 @@ internal class BooleanOption<E : CommandEvent<E, B>, B : CommandEvent.Builder<E,
      */
     @Throws(UnrecognizedArgumentException::class)
     override fun parseArgs(args: List<String>): Boolean {
-        if (args.size > 1) {
-            throw UnrecognizedArgumentException("Unrecognized arguments $args")
-        }
+        requireExactlyOneArgument(name, args)
 
         return when {
             args.isEmpty() -> {

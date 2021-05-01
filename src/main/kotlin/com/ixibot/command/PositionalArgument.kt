@@ -54,10 +54,10 @@ internal abstract class PositionalArgument<out T, E : CommandEvent<E, B>, B : Co
      * Check if input matches this argument.
      *
      * @param input Argument passed to command.
-     * @return true if the input matches this argument, otherwise false.
+     * @return false because we use positional matching in Command.
      */
     override fun match(input: String): Boolean {
-        return true
+        return false
     }
 
     /**

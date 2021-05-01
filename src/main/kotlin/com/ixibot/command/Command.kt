@@ -32,7 +32,9 @@
 
 package com.ixibot.command
 
+import com.ixibot.contracts.requireArgumentToExist
 import com.ixibot.event.CommandEvent
+import kotlin.contracts.ExperimentalContracts
 
 /** Length of columns in help message.  */
 private const val COLUMN_LENGTH = 24
@@ -61,9 +63,9 @@ abstract class Command<out E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B
     /** Command name. */
     val name: String,
     /** Command about message for help text. */
-    val aboutText: String,
+    private val aboutText: String,
     /** Command format message for help text. */
-    val usageText: String,
+    private val usageText: String,
     /** List of options accepted by this command. */
     options: List<OptionalArgument<Any, E, B>>
 ) {
@@ -137,6 +139,7 @@ abstract class Command<out E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B
         return optionArgs
     }
 
+    @OptIn(ExperimentalContracts::class)
     private fun mapArguments(arguments: List<String>): Map<String, Pair<OptionalArgument<Any, E, B>, List<String>>> {
         val optionsWithArguments: MutableMap<String, Pair<OptionalArgument<Any, E, B>, List<String>>> = HashMap()
         var skip = 0
@@ -149,10 +152,7 @@ abstract class Command<out E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B
 
             val option: OptionalArgument<Any, E, B>? = options.find { it.isMatch(argument) }
 
-            // TODO: Throw a better exception than IAE
-            require(option != null) {
-                "Unrecognized argument $argument"
-            }
+            requireArgumentToExist(option)
 
             if (arguments.size > index + 1) {
                 val optionArgs: List<String> = getOptionArgs(arguments.subList(index + 1, arguments.size))

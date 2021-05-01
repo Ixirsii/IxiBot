@@ -32,6 +32,7 @@
 
 package com.ixibot.command
 
+import com.ixibot.contracts.requireExactlyOneArgument
 import com.ixibot.event.CommandEvent
 import com.ixibot.exception.UnrecognizedArgumentException
 import discord4j.core.`object`.util.Snowflake
@@ -52,16 +53,12 @@ internal class SnowflakeArgument<E : CommandEvent<E, B>, B : CommandEvent.Builde
 ) : PositionalArgument<Snowflake, E, B>(aboutText = aboutText, accumulate = accumulate, name = name) {
 
     override fun parseArgs(args: List<String>): Snowflake {
-        if (args.isEmpty()) {
-            throw IllegalArgumentException("Argument \"$name\" requires 1 argument")
-        } else if (args.size > 1) {
-            throw IllegalArgumentException("Too many arguments passed to \"$name\": $args")
-        }
+        requireExactlyOneArgument(name, args)
 
         return try {
             Snowflake.of(args[0])
         } catch (nfe: NumberFormatException) {
-            throw UnrecognizedArgumentException("Unrecognized arguments $args")
+            throw UnrecognizedArgumentException("$name requires a snowflake, got <${args[0]}>")
         }
     }
 }
