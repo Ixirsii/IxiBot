@@ -1,5 +1,5 @@
 plugins {
-    id("org.jetbrains.dokka") version "0.10.0"
+    id("org.jetbrains.dokka") version "1.4.32"
 
     application
     idea
@@ -17,6 +17,9 @@ repositories {
 }
 
 dependencies {
+    // Dokka HTML plugin
+    dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.4.32")
+
     // Kotlin coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
 
@@ -66,11 +69,6 @@ tasks.compileKotlin {
         javaParameters = true
         jvmTarget = "1.8"
     }
-}
-
-tasks.dokka {
-    outputFormat = "html"
-    outputDirectory = "$buildDir/javadoc"
 }
 
 val excludePaths: Set<String> = setOf(

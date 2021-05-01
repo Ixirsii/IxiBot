@@ -32,10 +32,9 @@
 
 package com.ixibot.command
 
-import com.ixibot.contracts.requireExactlyOneArgument
+import com.ixibot.contracts.requireZeroOrOneArguments
 import com.ixibot.event.CommandEvent
 import com.ixibot.exception.UnrecognizedArgumentException
-import kotlin.jvm.Throws
 
 private val FALSE_VALUES: List<String> = listOf("f", "false", "n", "no")
 private val TRUE_VALUES: List<String> = listOf("t", "true", "y", "yes")
@@ -60,7 +59,7 @@ internal class BooleanOption<E : CommandEvent<E, B>, B : CommandEvent.Builder<E,
     shortName = shortOption
 ) {
     /**
-     * If parse was called we assume the argument has been matched previously and return true.
+     * Parse parameters to a matched argument.
      *
      * @param args This should usually be an empty list but occasionally may contain a single value if the user
      *                  explicitly sets the value of the flag.
@@ -69,7 +68,7 @@ internal class BooleanOption<E : CommandEvent<E, B>, B : CommandEvent.Builder<E,
      */
     @Throws(UnrecognizedArgumentException::class)
     override fun parseArgs(args: List<String>): Boolean {
-        requireExactlyOneArgument(name, args)
+        requireZeroOrOneArguments(name, args)
 
         return when {
             args.isEmpty() -> {
@@ -93,8 +92,7 @@ internal class BooleanOption<E : CommandEvent<E, B>, B : CommandEvent.Builder<E,
         val isFalse: Boolean = FALSE_VALUES.contains(value)
 
         if (!isFalse && !isTrue) {
-            val errorMsg = "Unrecognized value passed to $name: \"$value\". $VALID_VALUES_MSG"
-            throw UnrecognizedArgumentException(errorMsg)
+            throw UnrecognizedArgumentException("$name requires a boolean, got <$value>. $VALID_VALUES_MSG")
         }
 
         return isTrue

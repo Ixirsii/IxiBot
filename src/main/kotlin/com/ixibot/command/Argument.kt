@@ -62,9 +62,9 @@ internal abstract class Argument<out T, E : CommandEvent<E, B>, B : CommandEvent
     protected abstract fun match(input: String): Boolean
 
     /**
-     * Parse parameters to a matched option.
+     * Parse parameters to a matched argument.
      *
-     * @param args Additional arguments passed to the option. IE if the option takes a list of values.
+     * @param args Additional arguments passed to the option.
      * @return parsed value.
      * @throws UnrecognizedArgumentException if input args are unrecognized.
      */
