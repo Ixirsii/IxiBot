@@ -76,11 +76,7 @@ abstract class CommandEvent<out E : CommandEvent<E, B>, B : CommandEvent.Builder
          * @param isHelp value.
          * @return this.
          */
-        fun isHelp(isHelp: Boolean): B {
-            this.isHelp = isHelp
-
-            return this.self()
-        }
+        fun isHelp(isHelp: Boolean): B = this.apply { this.isHelp = isHelp }
 
         /**
          * Set isValid.
@@ -88,8 +84,15 @@ abstract class CommandEvent<out E : CommandEvent<E, B>, B : CommandEvent.Builder
          * @param isValid value.
          * @return this.
          */
-        fun isValid(isValid: Boolean): B {
-            this.isValid = isValid
+        fun isValid(isValid: Boolean): B = this.apply { this.isValid = isValid }
+
+        /**
+         * Local override of apply which returns this#self instead of this.
+         *
+         * @return
+         */
+        private fun apply(function: () -> Unit): B {
+            function()
 
             return this.self()
         }

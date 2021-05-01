@@ -58,19 +58,16 @@ class CommandRepositoryTest {
 
     @Test
     fun `GIVEN invalid command WHEN isCommand THEN returns false`() {
-        Assertions.assertFalse(underTest.isCommand("add_role"),
+        Assertions.assertFalse(underTest.isCommand("test"),
             "String not starting with command prefix should not be a command")
     }
 
     @Test
     fun `GIVEN registered command WHEN parse THEN returns event`() {
         // Given
-        val addRole: Command<TestCommandEvent, TestCommandEvent.TestCommandEventBuilder> = TestCommand()
-
-        underTest.register(addRole)
+        underTest.register(TestCommand())
 
         // When
-//        val actual = underTest.parse(".test --verify #channel 1234567890 \"EZ Clap\" @Member")
         val actual = underTest.parse(".test")
 
         // Then
