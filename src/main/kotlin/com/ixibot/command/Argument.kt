@@ -33,9 +33,10 @@
 package com.ixibot.command
 
 import com.ixibot.event.CommandEvent
-import com.ixibot.exception.UnrecognizedArgumentException
 
-/**
+private const val EQUALS: Char = '='
+
+/** TODO: Rename "sub"-arguments to parameters
  * Base class for arguments.
  *
  * @param <T> Type of value parsed by this argument.
@@ -47,29 +48,20 @@ internal abstract class Argument<out T, E : CommandEvent<E, B>, B : CommandEvent
     /** About message for help text. */
     internal val aboutText: String,
     /** Consume parsed value and accumulate it into event. */
-    private val accumulate: (accumulator: B, value: T) -> B,
+    private val accumulate: (B, T) -> B,
     /** Argument's name. */
-    internal val name: String
+    internal val name: String,
+    /** Function which parses arguments into values. */
+    private val parser: (String, List<String>) -> T
 ) {
-    private val equals: Char = '='
 
     /**
      * Check if input matches this argument.
      *
-     * @param input Argument passed to command.
-     * @return true if the input matches this argument, otherwise false.
+     * @param input Input passed to command.
+     * @return `true` if the input matches this argument, otherwise `false`.
      */
     protected abstract fun match(input: String): Boolean
-
-    /**
-     * Parse parameters to a matched argument.
-     *
-     * @param args Additional arguments passed to the option.
-     * @return parsed value.
-     * @throws UnrecognizedArgumentException if input args are unrecognized.
-     */
-    @Throws(UnrecognizedArgumentException::class)
-    protected abstract fun parseArgs(args: List<String>): T
 
     /**
      * Consume argument input and any sub-arguments passed to the argument.
@@ -90,9 +82,15 @@ internal abstract class Argument<out T, E : CommandEvent<E, B>, B : CommandEvent
         return accumulate(accumulator, value)
     }
 
+    /**
+     * Check if input matches this argument.
+     *
+     * @param input Input passed to command.
+     * @return `true` if input matches this argument, otherwise `false`.
+     */
     fun isMatch(input: String): Boolean {
-        if (input.contains(equals)) {
-            val namedArgument: String = input.substring(0, input.indexOf(equals))
+        if (input.contains(EQUALS)) {
+            val namedArgument: String = input.substring(0, input.indexOf(EQUALS))
 
             return name == namedArgument
         }
@@ -100,8 +98,15 @@ internal abstract class Argument<out T, E : CommandEvent<E, B>, B : CommandEvent
         return match(input)
     }
 
+    /**
+     * Parse input into values.
+     *
+     * @param input Call to argument. IE. --option, --option=value, namedParameter=value
+     * @param inputArgs Sub-arguments passed to this argument.
+     * @return parsed value.
+     */
     private fun parse(input: String, inputArgs: List<String>): T {
-        val args: List<String> = if (input.contains(equals)) {
+        val args: List<String> = if (input.contains(EQUALS)) {
             val values: String = input.substring(input.indexOf("=") + 1)
 
             // TODO: Tokenize function which skips commas inside of quotations
@@ -110,6 +115,6 @@ internal abstract class Argument<out T, E : CommandEvent<E, B>, B : CommandEvent
             inputArgs
         }
 
-        return parseArgs(args)
+        return parser(name, args)
     }
 }

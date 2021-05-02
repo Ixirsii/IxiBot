@@ -40,7 +40,7 @@ import org.junit.jupiter.api.Test
 import testUtil.YAML_MAPPER
 
 class BotConfigurationTest {
-    private lateinit var underTest: BotConfiguration
+    private val underTest: BotConfiguration
 
     init {
         javaClass.classLoader.getResourceAsStream(CONFIG_FILE_NAME).use { configResource ->

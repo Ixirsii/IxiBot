@@ -42,14 +42,16 @@ import com.ixibot.event.CommandEvent
  * @param <B> A builder/accumulator type which can be used to construct an E.
  * @author Ryan Porterfield
  */
-internal abstract class PositionalArgument<out T, E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B>>(
+internal class PositionalArgument<out T, E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B>>(
     /** About message for help text. */
     aboutText: String,
     /** Consume parsed value and accumulate it into event. */
     accumulate: (accumulator: B, value: T) -> B,
     /** Argument's name. */
-    name: String
-) : Argument<T, E, B>(aboutText = aboutText, accumulate = accumulate, name = name) {
+    name: String,
+    /** Function which parses arguments into values. */
+    parser: (String, List<String>) -> T,
+) : Argument<T, E, B>(aboutText, accumulate, name, parser) {
     /**
      * Check if input matches this argument.
      *

@@ -35,10 +35,10 @@ package com.ixibot.command
 import com.ixibot.event.CommandEvent
 
 /** GNU long option prefix.  */
-private const val GNU_PREFIX = "--"
+private const val GNU_PREFIX: String = "--"
 
 /** POSIX short option prefix.  */
-private const val POSIX_PREFIX = "-"
+private const val POSIX_PREFIX: String = "-"
 
 /**
  * Base class for optional arguments.
@@ -48,16 +48,18 @@ private const val POSIX_PREFIX = "-"
  * @param <B> A builder/accumulator type which can be used to construct an E.
  * @author Ryan Porterfield
  */
-internal abstract class OptionalArgument<out T, E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B>>(
+internal class OptionalArgument<out T, E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B>>(
     /** About message for help text.  */
     aboutText: String,
     /** Consume parsed value and accumulate it into event. */
-    accumulate: (accumulator: B, value: T) -> B,
+    accumulate: (B, T) -> B,
     /** POSIX long option and option name.  */
-    name: String,
+    longOption: String,
+    /** Function which parses arguments into values. */
+    parser: (String, List<String>) -> T,
     /** GNU short option.  */
-    internal val shortName: Char
-) : Argument<T, E, B>(aboutText = aboutText, accumulate = accumulate, name = name) {
+    private val shortOption: Char
+) : Argument<T, E, B>(aboutText, accumulate, longOption, parser) {
     /**
      * Check if input matches this argument.
      *
@@ -96,7 +98,7 @@ internal abstract class OptionalArgument<out T, E : CommandEvent<E, B>, B : Comm
              * If length is > 1 multiple short options were passed together, (IE. ps -ef) and we
              *  check if one of those arguments matches this option.
              */
-            input.indexOf(shortName) > -1
+            input.indexOf(shortOption) > -1
         }
     }
 
@@ -115,7 +117,7 @@ internal abstract class OptionalArgument<out T, E : CommandEvent<E, B>, B : Comm
      * @return POSIX style short option.
      */
     private fun getShortOption(): String {
-        return POSIX_PREFIX + shortName
+        return POSIX_PREFIX + shortOption
     }
 
     /**

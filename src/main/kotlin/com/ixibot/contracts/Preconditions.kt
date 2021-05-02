@@ -44,6 +44,20 @@ import kotlin.contracts.contract
  * @throws UnrecognizedArgumentException when args does not contain exactly 1 argument.
  */
 @Throws(UnrecognizedArgumentException::class)
+fun requireAtLeastOneArgument(name: String, args: List<String>) {
+    if (args.isEmpty()) {
+        throw UnrecognizedArgumentException("\"$name\" requires at least one argument")
+    }
+}
+
+/**
+ * Throw an [UnrecognizedArgumentException] when args does not contain exactly 1 argument.
+ *
+ * @param name Name of the option/argument making the check.
+ * @param args List of arguments passed to the option/argument.
+ * @throws UnrecognizedArgumentException when args does not contain exactly 1 argument.
+ */
+@Throws(UnrecognizedArgumentException::class)
 fun requireExactlyOneArgument(name: String, args: List<String>) {
     if (args.size != 1) {
         throw UnrecognizedArgumentException("\"$name\" requires exactly one argument, got: <${args.size}>")

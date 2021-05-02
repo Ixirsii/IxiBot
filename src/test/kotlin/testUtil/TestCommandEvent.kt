@@ -38,7 +38,7 @@ class TestCommandEvent(
     isHelp: Boolean,
     isValid: Boolean,
     val testValue: Boolean
-) : CommandEvent<TestCommandEvent, TestCommandEvent.TestCommandEventBuilder>(isHelp = isHelp, isValid = isValid) {
+) : CommandEvent<TestCommandEvent, TestCommandEvent.TestCommandEventBuilder>(isHelp, isValid) {
 
     override fun toBuilder(): Builder<TestCommandEvent, TestCommandEventBuilder> {
         return TestCommandEventBuilder()
@@ -46,7 +46,7 @@ class TestCommandEvent(
 
     data class TestCommandEventBuilder(var testValue: Boolean = false): Builder<TestCommandEvent, TestCommandEventBuilder>() {
         override fun build(): TestCommandEvent {
-            return TestCommandEvent(isHelp = isHelp, isValid = isValid, testValue = testValue)
+            return TestCommandEvent(isHelp, isValid, testValue)
         }
 
         override fun self(): TestCommandEventBuilder {

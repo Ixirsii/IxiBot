@@ -74,15 +74,14 @@ abstract class Command<out E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B
     private val options: List<OptionalArgument<Any, E, B>>
 
     init {
-        val help = BooleanOption(
+        val help = OptionalArgument(
             aboutText = "Show this help message",
             accumulate = { accumulator: B, value: Boolean -> accumulator.isHelp(value) },
             longOption = "help",
+            parser = ::booleanParser,
             shortOption = 'h'
         )
-        val mutable: MutableList<OptionalArgument<Any, E, B>> = mutableListOf(help)
-        mutable.addAll(options)
-        this.options = mutable
+        this.options = listOf(help) + options
     }
 
     /**
