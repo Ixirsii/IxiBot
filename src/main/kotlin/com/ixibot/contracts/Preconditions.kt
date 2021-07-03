@@ -32,74 +32,74 @@
 
 package com.ixibot.contracts
 
-import com.ixibot.exception.UnrecognizedArgumentException
+import com.ixibot.exception.InvalidParameterCountException
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
 /**
- * Throw an [UnrecognizedArgumentException] when args does not contain exactly 1 argument.
+ * Throw an [InvalidParameterCountException] when args does not contain exactly 1 argument.
  *
  * @param name Name of the option/argument making the check.
  * @param args List of arguments passed to the option/argument.
- * @throws UnrecognizedArgumentException when args does not contain exactly 1 argument.
+ * @throws InvalidParameterCountException when args does not contain exactly 1 argument.
  */
-@Throws(UnrecognizedArgumentException::class)
-fun requireAtLeastOneArgument(name: String, args: List<String>) {
+@Throws(InvalidParameterCountException::class)
+fun requireAtLeastOneParameter(name: String, args: List<String>) {
     if (args.isEmpty()) {
-        throw UnrecognizedArgumentException("\"$name\" requires at least one argument")
+        throw InvalidParameterCountException("\"$name\" requires at least one argument")
     }
 }
 
 /**
- * Throw an [UnrecognizedArgumentException] when args does not contain exactly 1 argument.
+ * Throw an [InvalidParameterCountException] when args does not contain exactly 1 argument.
  *
  * @param name Name of the option/argument making the check.
  * @param args List of arguments passed to the option/argument.
- * @throws UnrecognizedArgumentException when args does not contain exactly 1 argument.
+ * @throws InvalidParameterCountException when args does not contain exactly 1 argument.
  */
-@Throws(UnrecognizedArgumentException::class)
-fun requireExactlyOneArgument(name: String, args: List<String>) {
+@Throws(InvalidParameterCountException::class)
+fun requireExactlyOneParameter(name: String, args: List<String>) {
     if (args.size != 1) {
-        throw UnrecognizedArgumentException("\"$name\" requires exactly one argument, got: <${args.size}>")
+        throw InvalidParameterCountException("\"$name\" requires exactly one argument but got: <${args.size}>")
     }
 }
 
 /**
- * Throw an [UnrecognizedArgumentException] when string length does not equal 1.
+ * Throw an [InvalidParameterCountException] when string length does not equal 1.
  *
  * @param name Name of the option/argument making the check.
  * @param input Input string.
- * @throws UnrecognizedArgumentException when string length does not equal 1.
+ * @throws InvalidParameterCountException when string length does not equal 1.
  */
-@Throws(UnrecognizedArgumentException::class)
+@Throws(InvalidParameterCountException::class)
 fun requireSingleCharacter(name: String, input: String) {
     if (input.length != 1) {
-        throw UnrecognizedArgumentException("\"$name\" requires a single character, got: <$input>")
+        throw InvalidParameterCountException("\"$name\" requires a single character but got: <$input>")
     }
 }
 
 /**
- * Throw an [UnrecognizedArgumentException] when `args` contains more than 1 element.
+ * Throw an [InvalidParameterCountException] when `args` contains more than 1 element.
  *
  * @param name Name of the option/argument making the check.
  * @param args List of arguments passed to the option/argument.
- * @throws UnrecognizedArgumentException when `args` contains more than 1 element.
+ * @throws InvalidParameterCountException when `args` contains more than 1 element.
  */
-@Throws(UnrecognizedArgumentException::class)
-fun requireZeroOrOneArguments(name: String, args: List<String>) {
+@Throws(InvalidParameterCountException::class)
+fun requireZeroOrOneParameters(name: String, args: List<String>) {
     if (args.size > 1) {
-        throw UnrecognizedArgumentException("\"$name\" requires zero or one argument, got: <${args.size}>")
+        throw InvalidParameterCountException("\"$name\" requires zero or one argument but got: <${args.size}>")
     }
 }
 
 /**
- * Throw an [UnrecognizedArgumentException] when argument is null.
+ * Throw an [InvalidParameterCountException] when argument is null.
  *
  * @param argument Argument to check.
- * @throws UnrecognizedArgumentException when argument is null.
+ * @throws InvalidParameterCountException when argument is null.
  */
 @ExperimentalContracts
-@Throws(UnrecognizedArgumentException::class)
+@Throws(InvalidParameterCountException::class)
 fun <T: Any> requireArgumentToExist(argument: T?) {
     contract { returns() implies (argument != null) }
 
@@ -109,19 +109,19 @@ fun <T: Any> requireArgumentToExist(argument: T?) {
 }
 
 /**
- * Throw an [UnrecognizedArgumentException] when argument is null.
+ * Throw an [InvalidParameterCountException] when argument is null.
  *
  * @param argument Argument to check.
  * @param lazyMessage Supplier of exception message called only if the check fails.
- * @throws UnrecognizedArgumentException when argument is null.
+ * @throws InvalidParameterCountException when argument is null.
  */
 @ExperimentalContracts
-@Throws(UnrecognizedArgumentException::class)
+@Throws(InvalidParameterCountException::class)
 inline fun <T: Any> requireArgumentToExist(argument: T?, lazyMessage: () -> Any) {
     contract { returns() implies (argument != null) }
 
     if (argument == null) {
         val message = lazyMessage()
-        throw UnrecognizedArgumentException(message.toString())
+        throw InvalidParameterCountException(message.toString())
     }
 }

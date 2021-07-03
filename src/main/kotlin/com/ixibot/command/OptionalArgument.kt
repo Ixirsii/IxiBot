@@ -55,7 +55,7 @@ internal class OptionalArgument<out T, E : CommandEvent<E, B>, B : CommandEvent.
     accumulate: (B, T) -> B,
     /** POSIX long option and option name.  */
     longOption: String,
-    /** Function which parses arguments into values. */
+    /** Function which parses parameters into values. */
     parser: (String, List<String>) -> T,
     /** GNU short option.  */
     private val shortOption: Char
@@ -64,7 +64,7 @@ internal class OptionalArgument<out T, E : CommandEvent<E, B>, B : CommandEvent.
      * Check if input matches this argument.
      *
      * @param input Argument passed to command.
-     * @return true if the input matches this argument, otherwise false.
+     * @return `true` if the input matches this argument, otherwise `false`.
      */
     override fun match(input: String): Boolean {
         return when {
@@ -82,11 +82,10 @@ internal class OptionalArgument<out T, E : CommandEvent<E, B>, B : CommandEvent.
     }
 
     /**
-     * Check if argument matches the POSIX short form of this option.
+     * Check if input matches the short form of this option.
      *
      * @param input Argument passed to command.
-     * @return `true` if argument matches the short form of this option, otherwise
-     * `false`
+     * @return `true` if input matches the short form of this option, otherwise `false`.
      */
     private fun matchShortOption(input: String): Boolean {
         return if (input.length == getShortOption().length) {

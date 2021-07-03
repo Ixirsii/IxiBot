@@ -51,7 +51,7 @@ internal abstract class Argument<out T, E : CommandEvent<E, B>, B : CommandEvent
     private val accumulate: (B, T) -> B,
     /** Argument's name. */
     internal val name: String,
-    /** Function which parses arguments into values. */
+    /** Function which parses parameters into values. */
     private val parser: (String, List<String>) -> T
 ) {
 
@@ -64,7 +64,7 @@ internal abstract class Argument<out T, E : CommandEvent<E, B>, B : CommandEvent
     protected abstract fun match(input: String): Boolean
 
     /**
-     * Consume argument input and any sub-arguments passed to the argument.
+     * Consume argument input and any parameters passed to it.
      *
      * @param accumulator Builder/accumulator which consumes arguments and constructs an event.
      * @param input Argument call. This will be:
@@ -73,11 +73,11 @@ internal abstract class Argument<out T, E : CommandEvent<E, B>, B : CommandEvent
      *                  <li><bold>argumentName=</bold> if this is a positional argument with the name passed</li>
      *                  <li><bold>empty</bold> if this is a positional argument without the name passed.</li>
      *              </ul>
-     * @param inputArgs List of sub-arguments passed to the argument.
+     * @param parameters List of parameters passed to the argument.
      * @return
      */
-    fun consume(accumulator: B, input: String, inputArgs: List<String>): B {
-        val value: T = parse(input, inputArgs)
+    fun consume(accumulator: B, input: String, parameters: List<String>): B {
+        val value: T = parse(input, parameters)
 
         return accumulate(accumulator, value)
     }
@@ -102,17 +102,17 @@ internal abstract class Argument<out T, E : CommandEvent<E, B>, B : CommandEvent
      * Parse input into values.
      *
      * @param input Call to argument. IE. --option, --option=value, namedParameter=value
-     * @param inputArgs Sub-arguments passed to this argument.
+     * @param parameters Parameters passed to this argument.
      * @return parsed value.
      */
-    private fun parse(input: String, inputArgs: List<String>): T {
+    private fun parse(input: String, parameters: List<String>): T {
         val args: List<String> = if (input.contains(EQUALS)) {
             val values: String = input.substring(input.indexOf("=") + 1)
 
             // TODO: Tokenize function which skips commas inside of quotations
-            values.split(',') + inputArgs
+            values.split(',') + parameters
         } else {
-            inputArgs
+            parameters
         }
 
         return parser(name, args)

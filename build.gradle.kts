@@ -58,6 +58,7 @@ jacoco {
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     kotlinOptions {
         useIR = true
+        kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
     }
 }
 
@@ -72,16 +73,19 @@ tasks.compileKotlin {
 }
 
 val excludePaths: Set<String> = setOf(
-        "com/ixibot/api/**",
-        "com/ixibot/**/*Discord*")
+    "com/ixibot/api/**",
+    "com/ixibot/data/**",
+    "com/ixibot/event/**",
+    "com/ixibot/exception/**"
+)
 
 tasks.jacocoTestReport {
     classDirectories.setFrom(
-            classDirectories.files.map {
-                fileTree(it).apply {
-                    exclude(excludePaths)
-                }
+        classDirectories.files.map {
+            fileTree(it).apply {
+                exclude(excludePaths)
             }
+        }
     )
     reports {
         csv.isEnabled = false
@@ -93,11 +97,11 @@ tasks.jacocoTestReport {
 
 tasks.jacocoTestCoverageVerification {
     classDirectories.setFrom(
-            classDirectories.files.map {
-                fileTree(it).apply {
-                    exclude(excludePaths)
-                }
+        classDirectories.files.map {
+            fileTree(it).apply {
+                exclude(excludePaths)
             }
+        }
     )
     violationRules {
         rule {

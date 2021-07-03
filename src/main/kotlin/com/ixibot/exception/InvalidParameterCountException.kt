@@ -33,11 +33,11 @@
 package com.ixibot.exception
 
 /**
- * Exception for command API when an argument is unrecognized.
+ * Exception for command API when an incorrect number of parameters is passed to an argument.
  *
  * @author Ryan Porterfield
  */
-class UnrecognizedArgumentException : Exception {
+class InvalidParameterCountException : Exception {
     constructor(message: String) : super(message)
     constructor(message: String, exception: Exception) : super(message, exception)
 }
