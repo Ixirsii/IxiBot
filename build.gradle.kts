@@ -26,7 +26,7 @@ dependencies {
     // Commons IO
     implementation("commons-io:commons-io:2.6")
     // Google Guava
-    implementation("com.google.guava:guava:29.0-jre")
+    implementation("com.google.guava:guava:30.1.1-jre")
     // Discord4J
     implementation("com.discord4j:discord4j-core:3.0.14")
     // Jackson
