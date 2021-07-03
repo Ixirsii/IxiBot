@@ -38,7 +38,7 @@ import com.ixibot.contracts.requireSingleCharacter
 import com.ixibot.contracts.requireZeroOrOneParameters
 import com.ixibot.exception.InvalidParameterCountException
 import com.ixibot.exception.InvalidParameterException
-import discord4j.core.`object`.util.Snowflake
+import discord4j.common.util.Snowflake
 import kotlin.jvm.Throws
 
 private val FALSE_VALUES: List<String> = listOf("f", "false", "n", "no")

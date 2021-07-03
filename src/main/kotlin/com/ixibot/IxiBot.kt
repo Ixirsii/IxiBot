@@ -87,7 +87,6 @@ class IxiBot(
      */
     override fun close() {
         log.trace("Shutting down bot")
-        discordAPI.logout()
         shutdownScheduler()
         try {
             database.close()
@@ -103,7 +102,6 @@ class IxiBot(
      */
     @Throws(ConnectException::class)
     fun init() {
-        discordAPI.init()
         running = true
     }
 

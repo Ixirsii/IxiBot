@@ -43,8 +43,10 @@ import com.ixibot.IxiBot
 import com.ixibot.api.DiscordAPI
 import com.ixibot.data.BotConfiguration
 import com.ixibot.database.Database
+import com.ixibot.exception.APIException
 import discord4j.core.DiscordClient
 import discord4j.core.DiscordClientBuilder
+import discord4j.core.GatewayDiscordClient
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledThreadPoolExecutor
 
@@ -59,10 +61,12 @@ private const val THREAD_POOL_SIZE = 4
  * @param botConfiguration Bot configuration.
  * @return Discord client.
  */
-fun discordClient(botConfiguration: BotConfiguration): DiscordClient {
-    return DiscordClientBuilder(
-            botConfiguration.discordToken)
-            .build()
+fun discordClient(botConfiguration: BotConfiguration): GatewayDiscordClient {
+    return DiscordClientBuilder.create(botConfiguration.discordToken)
+        .build()
+        .login()
+        .onErrorMap { throwable: Throwable -> APIException("Failed to connect to Discord API", throwable) }
+        .block()!!
 }
 
 /**
@@ -75,15 +79,17 @@ fun discordClient(botConfiguration: BotConfiguration): DiscordClient {
  * @return IxiBot instance.
  */
 fun ixiBot(
-        database: Database,
-        discordAPI: DiscordAPI,
-        botConfiguration: BotConfiguration,
-        scheduler: ScheduledExecutorService?): IxiBot {
+    database: Database,
+    discordAPI: DiscordAPI,
+    botConfiguration: BotConfiguration,
+    scheduler: ScheduledExecutorService?
+): IxiBot {
     return IxiBot(
-            database,
-            discordAPI,
-            botConfiguration.roleVerifyDelay,
-            scheduler!!)
+        database,
+        discordAPI,
+        botConfiguration.roleVerifyDelay,
+        scheduler!!
+    )
 }
 
 /**
@@ -102,8 +108,8 @@ fun scheduler(): ScheduledExecutorService {
  */
 fun yamlMapper(): ObjectMapper {
     return ObjectMapper(YAMLFactory())
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .registerModule(ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
-            .registerModule(Jdk8Module())
-            .registerModule(KotlinModule())
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        .registerModule(ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
+        .registerModule(Jdk8Module())
+        .registerModule(KotlinModule())
 }

@@ -35,17 +35,13 @@ package com.ixibot.api
 import com.ixibot.Logging
 import com.ixibot.LoggingImpl
 import com.ixibot.data.RoleReaction
-import com.ixibot.listener.DiscordListener
-import discord4j.core.DiscordClient
+import discord4j.common.util.Snowflake
+import discord4j.core.GatewayDiscordClient
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
 import discord4j.core.`object`.entity.User
-import discord4j.core.`object`.util.Snowflake
-import discord4j.core.event.domain.message.MessageCreateEvent
-import discord4j.core.event.domain.message.ReactionAddEvent
-import discord4j.core.event.domain.message.ReactionRemoveEvent
-import java.net.ConnectException
+import reactor.core.publisher.Mono
 
 /**
  * Discord4J wrapper.
@@ -53,48 +49,9 @@ import java.net.ConnectException
  * @author Ryan Porterfield
  */
 class DiscordAPI(
-        /** Discord client. */
-        private val discordClient: DiscordClient,
-        /** Listener for Discord messages and events. */
-        private val discordListener: DiscordListener,
-        /** If `true` this API wrapper will throw an exception on failure to connect. */
-        private val isDiscordRequired: Boolean = false) : Logging by LoggingImpl<DiscordAPI>() {
-
-    /**
-     * Initialize Discord API.
-     *
-     * @throws ConnectException on failure to connect to API.
-     */
-    @Throws(ConnectException::class)
-    fun init() {
-        registerDiscordListeners()
-        discordClient.login().block()
-        if (isDiscordRequired && !discordClient.isConnected) {
-            throw ConnectException("Failed to connect to Discord API")
-        }
-    }
-
-    /**
-     * Stop the bot and clean up resources.
-     */
-    fun logout() {
-        log.debug("Logging out of Discord")
-        if (discordClient.isConnected) {
-            discordClient.logout().block()
-        }
-    }
-
-    /**
-     * Register Discord event listeners.
-     */
-    private fun registerDiscordListeners() {
-        discordClient.eventDispatcher.on(MessageCreateEvent::class.java)
-                .subscribe { event: MessageCreateEvent? -> discordListener.messageCreateListener(event!!) }
-        discordClient.eventDispatcher.on(ReactionAddEvent::class.java)
-                .subscribe { event: ReactionAddEvent? -> discordListener.reactionAddListener(event!!) }
-        discordClient.eventDispatcher.on(ReactionRemoveEvent::class.java)
-                .subscribe { event: ReactionRemoveEvent? -> discordListener.reactionRemoveListener(event!!) }
-    }
+    /** Discord client. */
+    private val discordClient: GatewayDiscordClient
+) : Logging by LoggingImpl<DiscordAPI>() {
 
     /**
      * Check all role assignment reactions and update roles for all members accordingly.
@@ -102,22 +59,21 @@ class DiscordAPI(
      * @param reactionsMap Map of guild ID to list of role reactions in that guild.
      */
     fun updateAllRoles(reactionsMap: Map<Snowflake, List<RoleReaction>>) {
-        // TODO: Clean this up
         reactionsMap.forEach { (guildID: Snowflake, verifiedReactions: List<RoleReaction>) ->
-            discordClient.getGuildById(guildID)
-                    .subscribe { guild: Guild ->
-                        guild.members.collectList().subscribe { members: List<Member> ->
-                            for (reaction in verifiedReactions) {
-                                discordClient.getMessageById(
-                                        reaction.channelID,
-                                        reaction.messageID)
-                                        .subscribe { message: Message ->
-                                            updateReactionRoles(guild, members, message, reaction)
-                                        }
-                            }
-                        }
+            discordClient.getGuildById(guildID).subscribe { guild: Guild -> updateGuildRoles(guild, verifiedReactions) }
+        }
+    }
 
-                    }
+    /**
+     * Verify all role assignments for a guild.
+     *
+     * @param guild Guild to verify reactions in.
+     * @param verifiedReactions List of role reactions to verify.
+     */
+    private fun updateGuildRoles(guild: Guild, verifiedReactions: List<RoleReaction>) {
+        for (reaction in verifiedReactions) {
+            discordClient.getMessageById(reaction.channelID, reaction.messageID)
+                .subscribe { message: Message -> updateReactionRoles(guild, message, reaction) }
         }
     }
 
@@ -125,56 +81,58 @@ class DiscordAPI(
      * Verify all role assignments for a message reaction.
      *
      * @param guild Guild containing message.
-     * @param members Members in the guild.
      * @param message Message containing reaction.
      * @param verifiedReaction Role assignment reaction.
      */
     private fun updateReactionRoles(
-            guild: Guild,
-            members: List<Member>,
-            message: Message,
-            verifiedReaction: RoleReaction) {
-        val reactors = message.getReactors(verifiedReaction.reactionEmoji)
-                .collectList()
-                .block()
-        if (reactors == null) {
-            log.error("Unable to get list of reactors for message {}", message.id)
-            return
-        }
-        if (verifiedReaction.isAddVerified) {
-            verifyAddRoles(guild, reactors, message, verifiedReaction)
-        }
-        if (verifiedReaction.isRemoveVerified) {
-            verifyRemoveRoles(members, reactors, message, verifiedReaction)
-        }
+        guild: Guild,
+        message: Message,
+        verifiedReaction: RoleReaction
+    ) {
+        message.getReactors(verifiedReaction.reactionEmoji)
+            .collectList()
+            .subscribe { reactors: List<User> ->
+                if (verifiedReaction.isAddVerified) {
+                    verifyAddRoles(guild.id, reactors, message, verifiedReaction)
+                }
+                if (verifiedReaction.isRemoveVerified) {
+                    guild.members.collectList().subscribe { members: List<Member> ->
+                        verifyRemoveRoles(members, reactors, message, verifiedReaction)
+                    }
+                }
+            }
     }
 
     /**
      * Verify that users who have added a role reaction have the role added.
      *
-     * @param guild Guild containing message.
+     * @param guildId Guild containing message.
      * @param reactors Users who have reacted with the reaction to the message.
      * @param message Message containing reaction.
      * @param verifiedReaction Role assignment reaction.
      */
     private fun verifyAddRoles(
-            guild: Guild,
-            reactors: List<User>,
-            message: Message,
-            verifiedReaction: RoleReaction) {
-        for (reactor in reactors) {
-            reactor.asMember(guild.id).subscribe { member: Member ->
-                if (!member.roleIds.contains(verifiedReaction.roleID)) {
-                    val addRoleReason = String.format(
+        guildId: Snowflake,
+        reactors: List<User>,
+        message: Message,
+        verifiedReaction: RoleReaction
+    ) {
+        reactors.stream()
+            .map { reactor: User -> reactor.asMember(guildId) }
+            .forEach { memberMono: Mono<Member> ->
+                memberMono.subscribe { member: Member ->
+                    if (!member.roleIds.contains(verifiedReaction.roleID)) {
+                        val addRoleReason = String.format(
                             "User %s reacted to message %d with reaction %s but did not have role.",
                             member.displayName,
                             message.id.asLong(),
-                            verifiedReaction.reactionEmoji)
-                    log.info(addRoleReason)
-                    member.addRole(verifiedReaction.roleID, addRoleReason).subscribe()
+                            verifiedReaction.reactionEmoji
+                        )
+                        log.info(addRoleReason)
+                        member.addRole(verifiedReaction.roleID, addRoleReason).subscribe()
+                    }
                 }
             }
-        }
     }
 
     /**
@@ -186,25 +144,25 @@ class DiscordAPI(
      * @param verifiedReaction Role assignment reaction.
      */
     private fun verifyRemoveRoles(
-            members: List<Member>,
-            reactors: List<User>,
-            message: Message,
-            verifiedReaction: RoleReaction) {
-        for (member in members) {
-            if (member.roleIds.contains(verifiedReaction.roleID)) {
-                val optionalReactor = reactors.stream()
-                        .filter { user: User -> user.id == member.id }
-                        .findAny()
-                if (!optionalReactor.isPresent) {
-                    val removeRoleReason = String.format(
-                            "User %s had not reacted to message %d with reaction %s but had role.",
-                            member.displayName,
-                            message.id.asLong(),
-                            verifiedReaction.reactionEmoji)
-                    log.info(removeRoleReason)
-                    member.removeRole(verifiedReaction.roleID, removeRoleReason).subscribe()
-                }
+        members: List<Member>,
+        reactors: List<User>,
+        message: Message,
+        verifiedReaction: RoleReaction
+    ) {
+        members.stream()
+            .filter { member: Member -> member.roleIds.contains(verifiedReaction.roleID) }
+            .filter { member: Member ->
+                !reactors.stream().filter { user: User -> user.id == member.id }.findAny().isPresent
             }
-        }
+            .forEach { member: Member ->
+                val removeRoleReason: String = String.format(
+                    "User %s had not reacted to message %d with reaction %s but had role.",
+                    member.displayName,
+                    message.id.asLong(),
+                    verifiedReaction.reactionEmoji
+                )
+                log.info(removeRoleReason)
+                member.removeRole(verifiedReaction.roleID, removeRoleReason).subscribe()
+            }
     }
 }

@@ -32,12 +32,7 @@
 
 package com.ixibot.exception
 
-/**
- * Exception for command API when an argument parameter can't be parsed.
- *
- * @author Ryan Porterfield
- */
-class InvalidParameterException : Exception {
+class APIException: Exception {
     constructor(message: String) : super(message)
-    constructor(message: String, exception: Exception) : super(message, exception)
+    constructor(message: String, cause: Throwable) : super(message, cause)
 }

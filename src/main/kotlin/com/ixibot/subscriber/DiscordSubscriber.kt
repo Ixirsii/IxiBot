@@ -38,10 +38,10 @@ import com.ixibot.LoggingImpl
 import com.ixibot.data.RoleReaction
 import com.ixibot.database.Database
 import com.ixibot.event.DiscordReactionEvent
+import discord4j.common.util.Snowflake
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
 import discord4j.core.`object`.reaction.ReactionEmoji
-import discord4j.core.`object`.util.Snowflake
 import reactor.core.Disposable
 import java.util.Optional
 

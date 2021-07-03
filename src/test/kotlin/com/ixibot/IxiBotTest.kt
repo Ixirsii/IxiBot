@@ -55,7 +55,6 @@ class IxiBotTest {
         underTest.close()
 
         verifySequence {
-            discordAPIMock.logout()
             schedulerMock.shutdown()
             schedulerMock.awaitTermination(30, TimeUnit.SECONDS)
             databaseMock.close()
@@ -71,7 +70,6 @@ class IxiBotTest {
         underTest.close()
 
         verifySequence {
-            discordAPIMock.logout()
             schedulerMock.shutdown()
             schedulerMock.awaitTermination(30, TimeUnit.SECONDS)
             databaseMock.close()
@@ -81,7 +79,5 @@ class IxiBotTest {
     @Test
     fun `GIVEN successful discord connection WHEN init THEN initializes`() {
         underTest.init()
-
-        verifySequence { discordAPIMock.init() }
     }
 }

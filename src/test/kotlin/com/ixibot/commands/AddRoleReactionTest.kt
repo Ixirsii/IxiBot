@@ -33,8 +33,8 @@
 package com.ixibot.commands
 
 import com.ixibot.event.AddRoleReactionEvent
+import discord4j.common.util.Snowflake
 import discord4j.core.`object`.reaction.ReactionEmoji
-import discord4j.core.`object`.util.Snowflake
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

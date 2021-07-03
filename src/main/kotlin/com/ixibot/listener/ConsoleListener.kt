@@ -52,13 +52,12 @@ private const val QUIT_COMMAND = "quit"
  * @author Ryan Porterfield
  */
 class ConsoleListener(
-        /** Event bus to publish events to. */
-        private val eventBus: EventBus,
-        override val coroutineContext: CoroutineContext) :
-        CoroutineScope,
-        Logging by LoggingImpl<ConsoleListener>() {
+    /** Event bus to publish events to. */
+    private val eventBus: EventBus,
+    override val coroutineContext: CoroutineContext
+) : AutoCloseable, CoroutineScope, Logging by LoggingImpl<ConsoleListener>() {
 
-    fun close() {
+    override fun close() {
         cancel()
     }
 

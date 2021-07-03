@@ -48,6 +48,7 @@ import com.ixibot.module.userConfigFile
 import com.ixibot.module.yamlMapper
 import com.ixibot.subscriber.DatabaseSubscriber
 import com.ixibot.subscriber.DiscordSubscriber
+import discord4j.core.GatewayDiscordClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import org.apache.commons.io.FileUtils
@@ -55,7 +56,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
-import java.net.ConnectException
 
 /**
  * Logger.
@@ -72,25 +72,31 @@ fun main() {
         val configFile = File(USER_CONFIG_FILE)
 
         generateUserConfig(configFile)
-    } else {
-        val database: Database = database(connection())
-        val eventBus = EventBus()
-        val ixiBot: IxiBot = ixiBot(
-            database,
-            DiscordAPI(
-                discordClient(botConfiguration),
-                DiscordListener(eventBus),
-                botConfiguration.isDiscordRequired
-            ),
-            botConfiguration,
-            scheduler()
-        )
-        val consoleListener = ConsoleListener(eventBus, CoroutineScope(Dispatchers.Default).coroutineContext)
 
-        listOf<Any>(DatabaseSubscriber(database), DiscordSubscriber(database))
-            .forEach(eventBus::register)
+        return
+    }
 
+    val database: Database = database(connection())
+    val discordClient: GatewayDiscordClient = discordClient(botConfiguration)
+    val eventBus = EventBus()
+    val ixiBot: IxiBot = ixiBot(
+        database,
+        DiscordAPI(discordClient),
+        botConfiguration,
+        scheduler()
+    )
+    val consoleListener = ConsoleListener(eventBus, CoroutineScope(Dispatchers.Default).coroutineContext)
+    val discordListener = DiscordListener(discordClient.eventDispatcher, eventBus)
+
+    listOf<Any>(DatabaseSubscriber(database), DiscordSubscriber(database))
+        .forEach(eventBus::register)
+
+
+    try {
         run(consoleListener, ixiBot)
+    } finally {
+        ixiBot.close()
+        consoleListener.close()
     }
 }
 
@@ -99,7 +105,7 @@ fun main() {
  *
  * @param configFile File path to user config file.
  */
-fun generateUserConfig(configFile: File) {
+private fun generateUserConfig(configFile: File) {
     try {
         resourceLoader.getResourceAsStream(CONFIG_FILE_NAME).use { configResource ->
             log.debug("Writing new user config file to \"{}\"", configFile.absolutePath)
@@ -127,18 +133,11 @@ fun generateUserConfig(configFile: File) {
  * @param consoleListener Coroutine which listens for console input.
  * @param ixiBot Bot instance.
  */
-fun run(consoleListener: ConsoleListener, ixiBot: IxiBot) {
+private fun run(consoleListener: ConsoleListener, ixiBot: IxiBot) {
     // Start coroutines
     consoleListener.run()
 
     // Run the bot
-    try {
-        ixiBot.init()
-        ixiBot.run()
-    } catch (ce: ConnectException) {
-        log.error("Failed to connect to a required API, exiting", ce)
-    } finally {
-        ixiBot.close()
-        consoleListener.close()
-    }
+    ixiBot.init()
+    ixiBot.run()
 }
