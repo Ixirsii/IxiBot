@@ -1,110 +1,83 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
-    id("org.jetbrains.dokka") version "1.4.32"
+    kotlin("jvm") version ("1.5.31")
 
     application
     idea
     jacoco
-    kotlin("jvm") version ("1.4.30")
+
+    id("org.jetbrains.dokka") version "1.5.31"
 }
 
 group = "com.ixibot"
-
 version = "1.0-SNAPSHOT"
 
 repositories {
-    jcenter()
-    maven("https://plugins.gradle.org/m2/")
+    mavenCentral()
 }
 
 dependencies {
-    // Dokka HTML plugin
-    dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.4.32")
-
     // Kotlin coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
+
+    // Dokka HTML plugin
+    dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.5.31")
 
     // Commons IO
-    implementation("commons-io:commons-io:2.6")
+    implementation("commons-io:commons-io:2.11.0")
     // Google Guava
-    implementation("com.google.guava:guava:30.1.1-jre")
+    implementation("com.google.guava:guava:31.0.1-jre")
     // Discord4J
-    implementation("com.discord4j:discord4j-core:3.1.6")
+    implementation("com.discord4j:discord4j-core:3.2.1")
     // Jackson
-    implementation("com.fasterxml.jackson.core:jackson-core:2.12.+")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.12.+")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.12.+")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.+")
-    implementation("com.fasterxml.jackson.module:jackson-module-parameter-names:2.12.+")
-    // Log4J-SLF4J
-    implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.12.0")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.13.0")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.0")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.13.0")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
+    implementation("com.fasterxml.jackson.module:jackson-module-parameter-names:2.13.0")
+    // Logback
+    implementation("ch.qos.logback:logback-classic:1.2.7")
     // SQLite3 drivers
-    implementation("org.xerial:sqlite-jdbc:3.7.2")
+    implementation("org.xerial:sqlite-jdbc:3.36.0.2")
 
     // JUnit testing framework
-    testImplementation("org.junit.jupiter:junit-jupiter:5.5.0")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.5.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.1")
     // MockK
-    testImplementation("io.mockk:mockk:1.9.3")
+    testImplementation("io.mockk:mockk:1.12.0")
 }
 
 application {
-    mainClassName = "com.ixibot.Mainkt"
+    mainClass.set("Mainkt")
 }
 
 jacoco {
-    toolVersion = "0.8.5"
+    toolVersion = "0.8.7"
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    kotlinOptions {
-        useIR = true
-        kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
-    }
-}
-
-tasks.compileKotlin {
-    sourceCompatibility = "1.8"
-    targetCompatibility = "1.8"
+tasks.withType<KotlinCompile> {
+    sourceCompatibility = "11"
+    targetCompatibility = "11"
 
     kotlinOptions {
         javaParameters = true
-        jvmTarget = "1.8"
+        jvmTarget = "11"
+        freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
     }
 }
 
-val excludePaths: Set<String> = setOf(
-    "com/ixibot/api/**",
-    "com/ixibot/data/**",
-    "com/ixibot/event/**",
-    "com/ixibot/exception/**"
+val excludePaths: List<String> = listOf(
+    "com.ixibot.api.*",
+    "com.ixibot.data.*",
+    "com.ixibot.event.*",
+    "com.ixibot.exception.*"
 )
 
-tasks.jacocoTestReport {
-    classDirectories.setFrom(
-        classDirectories.files.map {
-            fileTree(it).apply {
-                exclude(excludePaths)
-            }
-        }
-    )
-    reports {
-        csv.isEnabled = false
-        xml.isEnabled = true
-        xml.destination = file("${buildDir}/reports/jacoco/report.xml")
-        html.destination = file("${buildDir}/reports/jacoco")
-    }
-}
-
 tasks.jacocoTestCoverageVerification {
-    classDirectories.setFrom(
-        classDirectories.files.map {
-            fileTree(it).apply {
-                exclude(excludePaths)
-            }
-        }
-    )
     violationRules {
         rule {
+            excludes = excludePaths
             limit {
                 minimum = 0.1.toBigDecimal()
             }
@@ -112,9 +85,38 @@ tasks.jacocoTestCoverageVerification {
     }
 }
 
+tasks.jacocoTestReport {
+    description = "Generates Code coverage report."
+    dependsOn(tasks.test)
+
+    val reportExclusions = excludePaths.map {
+        it.replace('.', '/')
+    }
+
+    classDirectories.setFrom(
+        classDirectories.files.map {
+            fileTree(it).apply {
+                exclude(reportExclusions)
+            }
+        }
+    )
+
+    reports {
+        csv.required.set(false)
+        html.required.set(true)
+        xml.required.set(true)
+    }
+}
+
 tasks.test {
-    useJUnitPlatform()
     finalizedBy(tasks.jacocoTestReport)
+
+    systemProperty("junit.jupiter.execution.parallel.enabled", true)
+    systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
+
+    useJUnitPlatform() {
+        excludeTags("integration")
+    }
 }
 
 val check: DefaultTask by tasks

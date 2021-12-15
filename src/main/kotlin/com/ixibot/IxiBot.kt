@@ -64,18 +64,19 @@ const val USER_CONFIG_FILE = CONFIG_DIRECTORY + CONFIG_FILE_NAME
  * @author Ryan Porterfield
  */
 class IxiBot(
-        /** Database interface. */
-        private val database: Database,
-        /** Discord API interface. */
-        private val discordAPI: DiscordAPI,
-        /** Interval (in minutes) between Discord role verification checks. */
-        private val roleVerifyDelay: Long,
-        /**
-         * Thread pool executor for scheduled async actions.
-         *
-         * TODO: Replace this with coroutines
-         */
-        private val scheduler: ScheduledExecutorService) : AutoCloseable, Logging by LoggingImpl<IxiBot>() {
+    /** Database interface. */
+    private val database: Database,
+    /** Discord API interface. */
+    private val discordAPI: DiscordAPI,
+    /** Interval (in minutes) between Discord role verification checks. */
+    private val roleVerifyDelay: Long,
+    /**
+     * Thread pool executor for scheduled async actions.
+     *
+     * TODO: Replace this with coroutines
+     */
+    private val scheduler: ScheduledExecutorService
+) : AutoCloseable, Logging by LoggingImpl<IxiBot>() {
 
     /**
      * `true` while bot is running, `false` when bot is terminating.
@@ -110,16 +111,18 @@ class IxiBot(
      */
     fun run() {
         scheduler.scheduleAtFixedRate(
-                {
-                    val roleReactions: List<RoleReaction> = database.allRoleReactions
-                    discordAPI.updateAllRoles(
-                            roleReactions.stream()
-                                    .filter(RoleReaction::isVerified)
-                                    .collect(Collectors.groupingBy(RoleReaction::guildID)))
-                },
-                0,
-                roleVerifyDelay,
-                TimeUnit.MINUTES)
+            {
+                val roleReactions: List<RoleReaction> = database.allRoleReactions
+                discordAPI.updateAllRoles(
+                    roleReactions.stream()
+                        .filter(RoleReaction::isVerified)
+                        .collect(Collectors.groupingBy(RoleReaction::guildID))
+                )
+            },
+            0,
+            roleVerifyDelay,
+            TimeUnit.MINUTES
+        )
 
         // Keep main thread alive
         while (running) {
