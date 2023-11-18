@@ -36,29 +36,27 @@ import com.ixibot.Logging
 import com.ixibot.LoggingImpl
 import com.ixibot.data.RoleReaction
 import com.ixibot.listener.DiscordListener
-import discord4j.core.DiscordClient
+import discord4j.common.util.Snowflake
+import discord4j.core.GatewayDiscordClient
+import discord4j.core.event.domain.message.MessageCreateEvent
+import discord4j.core.event.domain.message.ReactionAddEvent
+import discord4j.core.event.domain.message.ReactionRemoveEvent
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
 import discord4j.core.`object`.entity.User
-import discord4j.core.`object`.util.Snowflake
-import discord4j.core.event.domain.message.MessageCreateEvent
-import discord4j.core.event.domain.message.ReactionAddEvent
-import discord4j.core.event.domain.message.ReactionRemoveEvent
 import java.net.ConnectException
 
 /**
  * Discord4J wrapper.
  *
- * @author Ryan Porterfield
+ * @author Ixirsii <ixirsii@ixirsii.tech>
  */
 class DiscordAPI(
         /** Discord client. */
-        private val discordClient: DiscordClient,
+        private val discordClient: GatewayDiscordClient,
         /** Listener for Discord messages and events. */
-        private val discordListener: DiscordListener,
-        /** If `true` this API wrapper will throw an exception on failure to connect. */
-        private val isDiscordRequired: Boolean = false) : Logging by LoggingImpl<DiscordAPI>() {
+        private val discordListener: DiscordListener) : Logging by LoggingImpl<DiscordAPI>() {
 
     /**
      * Initialize Discord API.
@@ -68,10 +66,6 @@ class DiscordAPI(
     @Throws(ConnectException::class)
     fun init() {
         registerDiscordListeners()
-        discordClient.login().block()
-        if (isDiscordRequired && !discordClient.isConnected) {
-            throw ConnectException("Failed to connect to Discord API")
-        }
     }
 
     /**
@@ -79,9 +73,7 @@ class DiscordAPI(
      */
     fun logout() {
         log.debug("Logging out of Discord")
-        if (discordClient.isConnected) {
-            discordClient.logout().block()
-        }
+        discordClient.logout().block()
     }
 
     /**

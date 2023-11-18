@@ -1,70 +1,56 @@
 plugins {
-    id("org.jetbrains.dokka") version "0.10.0"
+    id("org.jetbrains.dokka") version "1.9.10"
 
     application
     idea
     jacoco
-    kotlin("jvm") version ("1.4.21")
+    kotlin("jvm") version ("1.9.20")
 }
 
 group = "com.ixibot"
 
-version = "1.0-SNAPSHOT"
+version = "1.0.0"
 
 repositories {
-    jcenter()
-    maven("https://plugins.gradle.org/m2/")
+    mavenCentral()
 }
 
 dependencies {
     // Kotlin coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
 
     // Commons IO
-    implementation("commons-io:commons-io:2.6")
+    implementation("commons-io:commons-io:2.15.0")
     // Google Guava
-    implementation("com.google.guava:guava:29.0-jre")
+    implementation("com.google.guava:guava:32.1.3-jre")
     // Discord4J
-    implementation("com.discord4j:discord4j-core:3.0.14")
+    implementation("com.discord4j:discord4j-core:3.2.6")
     // Jackson
-    implementation("com.fasterxml.jackson.core:jackson-core:2.10.2")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.10.2")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.10.2")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.1")
-    implementation("com.fasterxml.jackson.module:jackson-module-parameter-names:2.10.2")
-    // Log4J-SLF4J
-    implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.12.0")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.15.3")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.3")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.3")
+    implementation("com.fasterxml.jackson.module:jackson-module-parameter-names:2.15.3")
+    // SLF4J
+    implementation("org.slf4j:slf4j-api:2.0.9")
+    // Logback
+    implementation("ch.qos.logback:logback-classic:1.4.0")
     // SQLite3 drivers
-    implementation("org.xerial:sqlite-jdbc:3.7.2")
+    implementation("org.xerial:sqlite-jdbc:3.44.0.0")
 
     // JUnit testing framework
-    testImplementation("org.junit.jupiter:junit-jupiter:5.5.0")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.5.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.1")
     // MockK
-    testImplementation("io.mockk:mockk:1.9.3")
+    testImplementation("io.mockk:mockk:1.13.8")
 }
 
 application {
-    mainClassName = "com.ixibot.Mainkt"
+    mainClass.set("MainKt")
 }
 
 jacoco {
-    toolVersion = "0.8.5"
-}
-
-tasks.compileKotlin {
-    sourceCompatibility = "1.8"
-    targetCompatibility = "1.8"
-
-    kotlinOptions {
-        javaParameters = true
-        jvmTarget = "1.8"
-    }
-}
-
-tasks.dokka {
-    outputFormat = "html"
-    outputDirectory = "$buildDir/javadoc"
+    toolVersion = "0.8.11"
 }
 
 val excludePaths: Set<String> = setOf(
@@ -80,10 +66,10 @@ tasks.jacocoTestReport {
             }
     )
     reports {
-        csv.isEnabled = false
-        xml.isEnabled = true
-        xml.destination = file("${buildDir}/reports/jacoco/report.xml")
-        html.destination = file("${buildDir}/reports/jacoco")
+        csv.required = false
+        xml.required = true
+        xml.outputLocation = file("${buildDir}/reports/jacoco/report.xml")
+        html.outputLocation = file("${buildDir}/reports/jacoco")
     }
 }
 

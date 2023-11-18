@@ -44,7 +44,6 @@ import com.ixibot.api.DiscordAPI
 import com.ixibot.data.BotConfiguration
 import com.ixibot.database.Database
 import discord4j.core.DiscordClient
-import discord4j.core.DiscordClientBuilder
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledThreadPoolExecutor
 
@@ -60,9 +59,7 @@ private const val THREAD_POOL_SIZE = 4
  * @return Discord client.
  */
 fun discordClient(botConfiguration: BotConfiguration): DiscordClient {
-    return DiscordClientBuilder(
-            botConfiguration.discordToken)
-            .build()
+    return DiscordClient.create(botConfiguration.discordToken)
 }
 
 /**
@@ -105,5 +102,5 @@ fun yamlMapper(): ObjectMapper {
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .registerModule(ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
             .registerModule(Jdk8Module())
-            .registerModule(KotlinModule())
+            .registerModule(KotlinModule.Builder().build())
 }
