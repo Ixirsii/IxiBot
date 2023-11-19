@@ -32,7 +32,7 @@
 
 package com.ixibot.data
 
-import discord4j.core.`object`.util.Snowflake
+import discord4j.common.util.Snowflake
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull

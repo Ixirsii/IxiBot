@@ -35,7 +35,7 @@ package com.ixibot.event
 /**
  * Base class for bot command events.
  */
-abstract class CommandEvent<out E : CommandEvent<E>>(
+abstract class CommandEvent<out E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B>>(
     /** Is the help flag present in the command? */
     val isHelp: Boolean,
     /** Is the command valid? */
@@ -47,12 +47,12 @@ abstract class CommandEvent<out E : CommandEvent<E>>(
      *
      * @return a Builder pre-populated with the values in this event.
      */
-    abstract fun toBuilder(): Builder<E>
+    abstract fun toBuilder(): Builder<E, B>
 
     /**
      * Base class for CommandEvent builders.
      */
-    abstract class Builder<out E : CommandEvent<E>> {
+    abstract class Builder<out E : CommandEvent<E, B>, B : Builder<E, B>> {
         /** Mutable placeholder for CommandEvent#isHelp. */
         protected var isHelp: Boolean = false
             private set
@@ -68,13 +68,15 @@ abstract class CommandEvent<out E : CommandEvent<E>>(
          */
         abstract fun build(): E
 
+        abstract fun self(): B
+
         /**
          * Set isHelp.
          *
          * @param isHelp value.
          * @return this.
          */
-        fun isHelp(isHelp: Boolean): Builder<E> = apply { this.isHelp = isHelp }
+        fun isHelp(isHelp: Boolean): B = this.apply { this.isHelp = isHelp }
 
         /**
          * Set isValid.
@@ -82,6 +84,17 @@ abstract class CommandEvent<out E : CommandEvent<E>>(
          * @param isValid value.
          * @return this.
          */
-        fun isValid(isValid: Boolean): Builder<E> = apply { this.isValid = isValid }
+        fun isValid(isValid: Boolean): B = this.apply { this.isValid = isValid }
+
+        /**
+         * Local override of apply which returns this#self instead of this.
+         *
+         * @return
+         */
+        private fun apply(function: () -> Unit): B {
+            function()
+
+            return this.self()
+        }
     }
 }

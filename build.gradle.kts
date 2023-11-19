@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id("org.jetbrains.dokka") version "1.9.10"
 
@@ -18,6 +20,9 @@ repositories {
 dependencies {
     // Kotlin coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+
+    // Dokka HTML plugin
+    dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.5.31")
 
     // Commons IO
     implementation("commons-io:commons-io:2.15.0")
@@ -74,15 +79,9 @@ tasks.jacocoTestReport {
 }
 
 tasks.jacocoTestCoverageVerification {
-    classDirectories.setFrom(
-            classDirectories.files.map {
-                fileTree(it).apply {
-                    exclude(excludePaths)
-                }
-            }
-    )
     violationRules {
         rule {
+            excludes = excludePaths
             limit {
                 minimum = 0.1.toBigDecimal()
             }
@@ -90,9 +89,38 @@ tasks.jacocoTestCoverageVerification {
     }
 }
 
+tasks.jacocoTestReport {
+    description = "Generates Code coverage report."
+    dependsOn(tasks.test)
+
+    val reportExclusions = excludePaths.map {
+        it.replace('.', '/')
+    }
+
+    classDirectories.setFrom(
+        classDirectories.files.map {
+            fileTree(it).apply {
+                exclude(reportExclusions)
+            }
+        }
+    )
+
+    reports {
+        csv.required.set(false)
+        html.required.set(true)
+        xml.required.set(true)
+    }
+}
+
 tasks.test {
-    useJUnitPlatform()
     finalizedBy(tasks.jacocoTestReport)
+
+    systemProperty("junit.jupiter.execution.parallel.enabled", true)
+    systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
+
+    useJUnitPlatform() {
+        excludeTags("integration")
+    }
 }
 
 val check: DefaultTask by tasks

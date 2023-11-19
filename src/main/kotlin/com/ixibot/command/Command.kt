@@ -32,7 +32,9 @@
 
 package com.ixibot.command
 
+import com.ixibot.contracts.requireArgumentToExist
 import com.ixibot.event.CommandEvent
+import kotlin.contracts.ExperimentalContracts
 
 /** Length of columns in help message.  */
 private const val COLUMN_LENGTH = 24
@@ -57,30 +59,29 @@ fun getSpace(optionLength: Int): String {
  * @param <E> Type of event emitted by this command.
  * @author Ryan Porterfield
  */
-abstract class Command<out E : CommandEvent<E>> internal constructor(
+abstract class Command<out E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B>> internal constructor(
     /** Command name. */
     val name: String,
     /** Command about message for help text. */
-    val aboutText: String,
+    private val aboutText: String,
     /** Command format message for help text. */
-    val usageText: String,
+    private val usageText: String,
     /** List of options accepted by this command. */
-    options: List<Option<Any, E>>
+    options: List<OptionalArgument<Any, E, B>>
 ) {
 
     /** List of options accepted by this command. */
-    private val options: List<Option<Any, E>>
+    private val options: List<OptionalArgument<Any, E, B>>
 
     init {
-        val help = PresenceOption(
+        val help = OptionalArgument(
             aboutText = "Show this help message",
-            function = { accumulator: E, value: Boolean -> accumulator.toBuilder().isHelp(value).build() },
+            accumulate = { accumulator: B, value: Boolean -> accumulator.isHelp(value) },
             longOption = "help",
+            parser = ::booleanParser,
             shortOption = 'h'
         )
-        val mutable: MutableList<Option<Any, E>> = mutableListOf(help)
-        mutable.addAll(options)
-        this.options = mutable
+        this.options = listOf(help) + options
     }
 
     /**
@@ -99,23 +100,7 @@ abstract class Command<out E : CommandEvent<E>> internal constructor(
             return stringBuilder.toString()
         }
 
-    abstract fun getAccumulator(): E
-
-    fun parse(arguments: List<String>): E {
-        var accumulator: E = getAccumulator()
-
-        for (argument in arguments) {
-            for (option in options) {
-                if (option.match(argument)) {
-                    accumulator = option.consume(accumulator, argument)
-
-                    break
-                }
-            }
-        }
-
-        return accumulator
-    }
+    abstract fun getAccumulator(): B
 
     /**
      * Check if command matches this command.
@@ -125,5 +110,59 @@ abstract class Command<out E : CommandEvent<E>> internal constructor(
      */
     fun match(command: String): Boolean {
         return command == name
+    }
+
+    // TODO: Fix names
+    fun parse(arguments: List<String>): E {
+        val optionsWithArguments: Map<String, Pair<OptionalArgument<Any, E, B>, List<String>>> = mapArguments(arguments)
+        var accumulator: B = getAccumulator()
+
+        for ((argument, argumentsPair) in optionsWithArguments) {
+            accumulator = argumentsPair.first.consume(accumulator, argument, argumentsPair.second)
+        }
+
+        return accumulator.build()
+    }
+
+    private fun getOptionArgs(arguments: List<String>): List<String> {
+        val optionArgs: MutableList<String> = ArrayList()
+
+        for (argument in arguments) {
+            if (options.find { it.isMatch(argument) } != null) {
+                break
+            }
+
+            optionArgs.add(argument)
+        }
+
+        return optionArgs
+    }
+
+    @OptIn(ExperimentalContracts::class)
+    private fun mapArguments(arguments: List<String>): Map<String, Pair<OptionalArgument<Any, E, B>, List<String>>> {
+        val optionsWithArguments: MutableMap<String, Pair<OptionalArgument<Any, E, B>, List<String>>> = HashMap()
+        var skip = 0
+
+        for ((index, argument) in arguments.withIndex()) {
+            if (skip > 0) {
+                --skip
+                continue
+            }
+
+            val option: OptionalArgument<Any, E, B>? = options.find { it.isMatch(argument) }
+
+            requireArgumentToExist(option)
+
+            if (arguments.size > index + 1) {
+                val optionArgs: List<String> = getOptionArgs(arguments.subList(index + 1, arguments.size))
+                skip = optionArgs.size
+
+                optionsWithArguments[argument] = Pair(option, optionArgs)
+            } else {
+                optionsWithArguments[argument] = Pair(option, emptyList())
+            }
+        }
+
+        return optionsWithArguments
     }
 }

@@ -40,8 +40,8 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
 import com.ixibot.data.RoleReaction
+import discord4j.common.util.Snowflake
 import discord4j.core.`object`.reaction.ReactionEmoji
-import discord4j.core.`object`.util.Snowflake
 
 const val ABOUT_OPTION = "This is an option used for testing"
 const val LONG_OPTION = "long-option"

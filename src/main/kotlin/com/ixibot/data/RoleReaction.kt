@@ -32,8 +32,8 @@
 
 package com.ixibot.data
 
+import discord4j.common.util.Snowflake
 import discord4j.core.`object`.reaction.ReactionEmoji
-import discord4j.core.`object`.util.Snowflake
 import java.util.Optional
 
 /**

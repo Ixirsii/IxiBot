@@ -33,8 +33,8 @@
 package com.ixibot.commands
 
 import com.ixibot.command.Command
-import com.ixibot.command.Option
-import com.ixibot.command.PresenceOption
+import com.ixibot.command.OptionalArgument
+import com.ixibot.command.booleanParser
 import com.ixibot.event.AddRoleReactionEvent
 
 /** Add verify option about text.  */
@@ -53,26 +53,29 @@ private const val ABOUT = "Add a role reaction listener"
 private const val USAGE = "$COMMAND [options] <channel> <message id> <emoji> <role>"
 
 /** Verify (both verifyAdd and verifyRemove) option.  */
-private val VERIFY = PresenceOption(
+private val VERIFY = OptionalArgument(
     aboutText = "Run both add and remove verify checks on this role reaction",
-    function = { accumulator: AddRoleReactionEvent, value: Boolean -> accumulator.toBuilder().isVerify(value).build() },
+    accumulate = { accumulator: AddRoleReactionEvent.Builder, value: Boolean -> accumulator.isVerify(value) },
     longOption = "verify",
+    parser = ::booleanParser,
     shortOption = 'V'
 )
 
 /** Verify add option.  */
-private val VERIFY_ADD = PresenceOption(
+private val VERIFY_ADD = OptionalArgument(
     aboutText = ABOUT_VERIFY_ADD,
-    function = { accumulator: AddRoleReactionEvent, value: Boolean -> accumulator.toBuilder().isVerifyAdd(value).build() },
+    accumulate = { accumulator: AddRoleReactionEvent.Builder, value: Boolean -> accumulator.isVerifyAdd(value) },
     longOption = "verify_add",
+    parser = ::booleanParser,
     shortOption = 'A'
 )
 
 /** Verify remove option.  */
-private val VERIFY_REMOVE = PresenceOption(
+private val VERIFY_REMOVE = OptionalArgument(
     aboutText = ABOUT_VERIFY_RM,
-    function = { accumulator: AddRoleReactionEvent, value: Boolean -> accumulator.toBuilder().isVerifyRemove(value).build() },
+    accumulate = { accumulator: AddRoleReactionEvent.Builder, value: Boolean -> accumulator.isVerifyRemove(value) },
     longOption = "verify_remove",
+    parser = ::booleanParser,
     shortOption = 'R'
 )
 
@@ -81,7 +84,7 @@ private val VERIFY_REMOVE = PresenceOption(
  *
  * @see Command.options
  */
-private val OPTIONS = listOf<Option<Any, AddRoleReactionEvent>>(
+private val OPTIONS = listOf<OptionalArgument<Any, AddRoleReactionEvent, AddRoleReactionEvent.Builder>>(
     VERIFY, VERIFY_ADD, VERIFY_REMOVE
 )
 
@@ -90,14 +93,14 @@ private val OPTIONS = listOf<Option<Any, AddRoleReactionEvent>>(
  *
  * @author Ryan Porterfield
  */
-class AddRoleReaction : Command<AddRoleReactionEvent>(
+class AddRoleReaction : Command<AddRoleReactionEvent, AddRoleReactionEvent.Builder>(
     aboutText = ABOUT,
     name = COMMAND,
     usageText = USAGE,
     options = OPTIONS
 ) {
 
-    override fun getAccumulator(): AddRoleReactionEvent {
-        return AddRoleReactionEvent()
+    override fun getAccumulator(): AddRoleReactionEvent.Builder {
+        return AddRoleReactionEvent.Builder()
     }
 }

@@ -30,52 +30,44 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.ixibot.listener
+package com.ixibot.command
 
-import com.google.common.eventbus.EventBus
-import com.ixibot.Logging
-import com.ixibot.LoggingImpl
-import com.ixibot.event.StopBotEvent
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
+import com.ixibot.event.CommandEvent
 
 /**
- * Command to stop execution.
- */
-private const val QUIT_COMMAND = "quit"
-
-/**
- * Listen to console input.
+ * Base class for positional arguments.
  *
+ * @param <T> Type of value parsed by this argument.
+ * @param <E> The type of event constructed by the consumer.
+ * @param <B> A builder/accumulator type which can be used to construct an E.
  * @author Ryan Porterfield
  */
-class ConsoleListener(
-    /** Event bus to publish events to. */
-    private val eventBus: EventBus,
-    override val coroutineContext: CoroutineContext
-) : AutoCloseable, CoroutineScope, Logging by LoggingImpl<ConsoleListener>() {
-
-    override fun close() {
-        cancel()
+internal class PositionalArgument<out T, E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B>>(
+    /** About message for help text. */
+    aboutText: String,
+    /** Consume parsed value and accumulate it into event. */
+    accumulate: (accumulator: B, value: T) -> B,
+    /** Argument's name. */
+    name: String,
+    /** Function which parses arguments into values. */
+    parser: (String, List<String>) -> T,
+) : Argument<T, E, B>(aboutText, accumulate, name, parser) {
+    /**
+     * Check if input matches this argument.
+     *
+     * @param input Argument passed to command.
+     * @return false because we use positional matching in Command.
+     */
+    override fun match(input: String): Boolean {
+        return false
     }
 
     /**
-     * Launch async process to listen for console input.
+     * Convert option to string for logging and help text.
+     *
+     * @return help text for option.
      */
-    fun run() {
-        launch {
-            log.info("Type \"quit\" to exit")
-            while (true) {
-                val input: String? = readLine()
-                log.debug("Got user input: {}", input)
-                // TODO: Map of command -> dispatcher instead of if statements
-                if (QUIT_COMMAND == input) {
-                    val event = StopBotEvent(true)
-                    eventBus.post(event)
-                }
-            }
-        }
+    override fun toString(): String {
+        return "$name${getSpace(name.length)}$aboutText."
     }
 }
