@@ -58,7 +58,7 @@ jacoco {
     toolVersion = "0.8.11"
 }
 
-val excludePaths: Set<String> = setOf(
+val excludePaths: List<String> = listOf(
         "com/ixibot/api/**",
         "com/ixibot/**/*Discord*")
 
