@@ -24,6 +24,8 @@ dependencies {
     // Dokka HTML plugin
     dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.5.31")
 
+    // Arrow
+    implementation("io.arrow-kt:arrow-core:1.2.1")
     // Commons IO
     implementation("commons-io:commons-io:2.15.0")
     // Google Guava
