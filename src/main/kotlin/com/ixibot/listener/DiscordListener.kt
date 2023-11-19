@@ -1,10 +1,9 @@
 package com.ixibot.listener
 
 import com.google.common.eventbus.EventBus
-import com.ixibot.Logging
-import com.ixibot.LoggingImpl
+import com.ixibot.logging.Logging
+import com.ixibot.logging.LoggingImpl
 import com.ixibot.event.DiscordReactionEvent
-import discord4j.core.GatewayDiscordClient
 import discord4j.core.`object`.entity.Member
 import discord4j.core.event.EventDispatcher
 import discord4j.core.event.domain.message.MessageCreateEvent

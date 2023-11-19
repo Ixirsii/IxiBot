@@ -1,8 +1,8 @@
 package com.ixibot.listener
 
 import com.google.common.eventbus.EventBus
-import com.ixibot.Logging
-import com.ixibot.LoggingImpl
+import com.ixibot.logging.Logging
+import com.ixibot.logging.LoggingImpl
 import com.ixibot.event.StopBotEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel

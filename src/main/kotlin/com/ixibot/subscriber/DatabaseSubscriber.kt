@@ -1,8 +1,8 @@
 package com.ixibot.subscriber
 
 import com.google.common.eventbus.Subscribe
-import com.ixibot.Logging
-import com.ixibot.LoggingImpl
+import com.ixibot.logging.Logging
+import com.ixibot.logging.LoggingImpl
 import com.ixibot.database.Database
 import com.ixibot.event.AddRoleReactionEvent
 import java.sql.SQLException

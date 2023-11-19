@@ -3,6 +3,8 @@ package com.ixibot
 import com.ixibot.api.DiscordAPI
 import com.ixibot.data.RoleReaction
 import com.ixibot.database.Database
+import com.ixibot.logging.Logging
+import com.ixibot.logging.LoggingImpl
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import java.net.ConnectException

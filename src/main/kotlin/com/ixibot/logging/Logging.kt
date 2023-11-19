@@ -1,4 +1,4 @@
-package com.ixibot
+package com.ixibot.logging
 
 import org.slf4j.Logger
 

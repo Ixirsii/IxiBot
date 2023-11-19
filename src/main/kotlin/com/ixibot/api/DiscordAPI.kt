@@ -1,7 +1,7 @@
 package com.ixibot.api
 
-import com.ixibot.Logging
-import com.ixibot.LoggingImpl
+import com.ixibot.logging.Logging
+import com.ixibot.logging.LoggingImpl
 import com.ixibot.data.RoleReaction
 import discord4j.common.util.Snowflake
 import discord4j.core.GatewayDiscordClient
