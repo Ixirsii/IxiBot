@@ -57,26 +57,6 @@ class RoleReactionTest {
     }
 
     @Test
-    fun `GIVEN isAddVerified WHEN isAddVerified THEN returns true`() {
-        assertTrue(ROLE_REACTION_1.isAddVerified, "isAddVerified should be true")
-    }
-
-    @Test
-    fun `GIVEN not isAddVerified WHEN isAddVerified THEN returns false`() {
-        assertFalse(ROLE_REACTION_2.isAddVerified, "isAddVerified should be false")
-    }
-
-    @Test
-    fun `GIVEN isRemoveVerified WHEN isRemoveVerified THEN returns true`() {
-        assertTrue(ROLE_REACTION_2.isRemoveVerified, "isRemoveVerified should be true")
-    }
-
-    @Test
-    fun `GIVEN not isRemoveVerified WHEN isRemoveVerified THEN returns false`() {
-        assertFalse(ROLE_REACTION_1.isRemoveVerified, "isRemoveVerified should be false")
-    }
-
-    @Test
     fun `GIVEN messageID WHEN messageID THEN returns messageID`() {
         assertEquals(snowflake, ROLE_REACTION_1.messageID, "messageID should equal expected")
     }
@@ -120,26 +100,5 @@ class RoleReactionTest {
                 UNICODE_EMOJI.raw,
                 ROLE_REACTION_2.reactionEmojiName,
                 "Unicode reaction emoji name should equal expected")
-    }
-
-    @Test
-    fun `GIVEN addVerified WHEN isVerified THEN returns true`() {
-        assertTrue(
-                ROLE_REACTION_1.isVerified,
-                "Add verified reaction should be verified")
-    }
-
-    @Test
-    fun `GIVEN removedVerified WHEN isVerified THEN returns true`() {
-        assertTrue(
-                ROLE_REACTION_2.isVerified,
-                "Remove verified reaction should be verified")
-    }
-
-    @Test
-    fun `GIVEN not verified WHEN isVerified THEN returns false`() {
-        assertFalse(
-                ROLE_REACTION_3.isVerified,
-                "Unverified reaction should not be verified")
     }
 }

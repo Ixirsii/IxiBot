@@ -54,14 +54,12 @@ val UNICODE_EMOJI: ReactionEmoji.Unicode = ReactionEmoji.unicode("ixiNose")
 val ROLE_REACTION_1 = RoleReaction(
         channelID = Snowflake.of(1L),
         guildID = Snowflake.of(1L),
-        isAddVerified = true,
         messageID = Snowflake.of(1L),
         reactionEmoji = CUSTOM_EMOJI,
         roleID = Snowflake.of(1L))
 val ROLE_REACTION_2 = RoleReaction(
         channelID = Snowflake.of(2L),
         guildID = Snowflake.of(2L),
-        isRemoveVerified = true,
         messageID = Snowflake.of(2L),
         reactionEmoji = UNICODE_EMOJI,
         roleID = Snowflake.of(2L))
@@ -71,9 +69,3 @@ val ROLE_REACTION_3 = RoleReaction(
         messageID = Snowflake.of(3L),
         reactionEmoji = CUSTOM_EMOJI,
         roleID = Snowflake.of(3L))
-
-val YAML_MAPPER: ObjectMapper = ObjectMapper(YAMLFactory())
-        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        .registerModule(ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
-        .registerModule(Jdk8Module())
-        .registerModule(KotlinModule())

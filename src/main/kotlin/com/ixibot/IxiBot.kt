@@ -38,14 +38,6 @@ class IxiBot(
     private val database: Database,
     /** Discord API interface. */
     private val discordAPI: DiscordAPI,
-    /** Interval (in minutes) between Discord role verification checks. */
-    private val roleVerifyDelay: Long,
-    /**
-     * Thread pool executor for scheduled async actions.
-     *
-     * TODO: Replace this with coroutines
-     */
-    private val scheduler: ScheduledExecutorService,
 ) : AutoCloseable, Logging by LoggingImpl<IxiBot>() {
 
     /**
@@ -58,7 +50,6 @@ class IxiBot(
      */
     override fun close() {
         log.trace("Shutting down bot")
-        shutdownScheduler()
         try {
             database.close()
         } catch (ex: SQLException) {
@@ -74,54 +65,5 @@ class IxiBot(
     @Throws(ConnectException::class)
     fun init() {
         running = true
-    }
-
-    /**
-     * Run the bot.
-     */
-    fun run() {
-        scheduler.scheduleAtFixedRate(
-            {
-                val roleReactions: List<RoleReaction> = database.allRoleReactions
-                discordAPI.updateAllRoles(
-                    roleReactions.stream()
-                        .filter(RoleReaction::isVerified)
-                        .collect(Collectors.groupingBy(RoleReaction::guildID))
-                )
-            },
-            0,
-            roleVerifyDelay,
-            TimeUnit.MINUTES
-        )
-
-        // Keep main thread alive
-        while (running) {
-            runBlocking {
-                delay(1000L)
-            }
-        }
-    }
-
-    /**
-     * Shutdown thread pool scheduler.
-     */
-    private fun shutdownScheduler() {
-        scheduler.shutdown()
-        // Wait for the thread pool to shut down
-        try { // Wait for tasks to terminate
-            if (!scheduler.awaitTermination(30, TimeUnit.SECONDS)) { // (Attempt to) force stop thread pool
-                scheduler.shutdownNow()
-                // Wait for tasks to respond to being cancelled
-                if (!scheduler.awaitTermination(30, TimeUnit.SECONDS)) {
-                    log.error("Failed to shut down thread pool")
-                }
-            }
-        } catch (ie: InterruptedException) {
-            log.error("Thread interrupted while waiting for thread pool to shutdown", ie)
-            // Verify that thread pool is shutdown
-            scheduler.shutdownNow()
-            // Preserve interrupt status
-            Thread.currentThread().interrupt()
-        }
     }
 }

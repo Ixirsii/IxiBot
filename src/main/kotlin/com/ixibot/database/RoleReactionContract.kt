@@ -1,11 +1,6 @@
 package com.ixibot.database
 
 /**
- * Add verified key.
- */
-const val ADD_VERIFIED = "add_verified"
-
-/**
  * Reaction emoji is animated key.
  */
 const val ANIMATED = "animated"
@@ -36,11 +31,6 @@ const val REACTION_ID = "reaction_id"
 const val REACTION_NAME = "reaction_name"
 
 /**
- * Remove verified key.
- */
-const val REMOVE_VERIFIED = "remove_verified"
-
-/**
  * Guild role ID key.
  */
 const val ROLE_ID = "role_id"
@@ -54,20 +44,20 @@ const val TABLE_NAME = "role_reactions"
  * SQL statement for creating the table.
  */
 val CREATE_TABLE = String.format(
-    "CREATE TABLE IF NOT EXISTS %s (%s INTEGER NOT NULL, %s INTEGER NOT NULL," +
+    "CREATE TABLE IF NOT EXISTS %s (%s INTEGER NOT NULL," +
             " %s INTEGER NOT NULL, %s INTEGER, %s INTEGER NOT NULL, %s INTEGER NOT NULL," +
-            " %s TEXT NOT NULL, %s INTEGER NOT NULL, %s INTEGER NOT NULL, " +
-            "PRIMARY KEY(%s, %s))", /* Table name */
-    TABLE_NAME, /* Columns */
-    ADD_VERIFIED,
+            " %s TEXT NOT NULL, %s INTEGER NOT NULL, PRIMARY KEY(%s, %s))",
+    /* Table name */
+    TABLE_NAME,
+    /* Columns */
     ANIMATED,
     CHANNEL_ID,
     GUILD_ID,
     MESSAGE_ID,
     REACTION_ID,
     REACTION_NAME,
-    REMOVE_VERIFIED,
-    ROLE_ID, /* Primary key */
+    ROLE_ID,
+    /* Primary key */
     MESSAGE_ID,
     REACTION_NAME
 )

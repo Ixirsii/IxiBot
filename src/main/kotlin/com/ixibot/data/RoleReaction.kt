@@ -9,25 +9,11 @@ import java.util.Optional
  *
  * @author Ixirsii <ixirsii@ixirsii.tech>
  */
-data class RoleReaction constructor(
+data class RoleReaction(
     /** Channel ID containing the message. */
     val channelID: Snowflake,
     /** Guild ID containing the channel. */
     val guildID: Snowflake,
-    /**
-     * Is the role add verified.
-     *
-     * If this is true, the bot will periodically check all users who have reacted with this
-     * reaction and assign them the role if they don't have it.
-     */
-    val isAddVerified: Boolean = false,
-    /**
-     * Is the role remove verified.
-     *
-     * If this is true, the bot will periodically check all users and remove the role from
-     * all users in the guild who haven't reacted with this reaction.
-     */
-    val isRemoveVerified: Boolean = false,
     /** Message ID containing the reaction. */
     val messageID: Snowflake,
     /** Reaction emoji name/raw. */
@@ -60,18 +46,7 @@ data class RoleReaction constructor(
         get() {
             val optionalCustom: Optional<ReactionEmoji.Custom> = reactionEmoji.asCustomEmoji()
             val optionalUnicode = reactionEmoji.asUnicodeEmoji()
-            return optionalCustom.map<String> { it.name }
-                .orElseGet { optionalUnicode.map<String> { it.raw }.orElse("") }
+            return optionalCustom.map { it.name }
+                .orElseGet { optionalUnicode.map { it.raw }.orElse("") }
         }
-
-    /**
-     * Is the role add or remove verified.
-     *
-     * @return `true` if either addVerified or removeVerified is `true`,
-     * otherwise `false`.
-     * @see RoleReaction.isAddVerified
-     * @see RoleReaction.isRemoveVerified
-     */
-    val isVerified: Boolean
-        get() = isAddVerified || isRemoveVerified
 }

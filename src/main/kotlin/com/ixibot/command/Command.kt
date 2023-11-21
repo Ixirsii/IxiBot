@@ -59,10 +59,13 @@ abstract class Command<out E : CommandEvent<E, B>, B : CommandEvent.Builder<E, B
      */
     val helpMessage: String
         get() {
-            val stringBuilder = StringBuilder("$aboutText\n\nUsage:\n$usageText\n\nOptions:\n")
+            val stringBuilder = StringBuilder(
+                "$aboutText${System.lineSeparator()}${System.lineSeparator()}Usage:${System.lineSeparator()}" +
+                        "$usageText${System.lineSeparator()}${System.lineSeparator()}Options:${System.lineSeparator()}"
+            )
 
             for (option in options) {
-                stringBuilder.append(option.toString()).append('\n')
+                stringBuilder.append(option.toString()).append(System.lineSeparator())
             }
 
             return stringBuilder.toString()

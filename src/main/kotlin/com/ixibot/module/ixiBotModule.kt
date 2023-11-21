@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
+import com.fasterxml.jackson.module.kotlin.KotlinFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
 import com.ixibot.IxiBot
@@ -41,31 +42,10 @@ fun discordClient(botConfiguration: BotConfiguration): GatewayDiscordClient {
  *
  * @param database Database interface.
  * @param discordAPI Discord4J wrapper.
- * @param botConfiguration Bot configuration.
- * @param scheduler Thread pool scheduler.
  * @return IxiBot instance.
  */
-fun ixiBot(
-    database: Database,
-    discordAPI: DiscordAPI,
-    botConfiguration: BotConfiguration,
-    scheduler: ScheduledExecutorService?,
-): IxiBot {
-    return IxiBot(
-        database,
-        discordAPI,
-        botConfiguration.roleVerifyDelay,
-        scheduler!!
-    )
-}
-
-/**
- * Thread pool provider.
- *
- * @return scheduled thread pool executor singleton.
- */
-fun scheduler(): ScheduledExecutorService {
-    return ScheduledThreadPoolExecutor(THREAD_POOL_SIZE)
+fun ixiBot(database: Database, discordAPI: DiscordAPI): IxiBot {
+    return IxiBot(database, discordAPI)
 }
 
 /**
@@ -78,5 +58,12 @@ fun yamlMapper(): ObjectMapper {
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         .registerModule(ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
         .registerModule(Jdk8Module())
-        .registerModule(KotlinModule())
+        .registerModule(
+            KotlinModule.Builder()
+                .withReflectionCacheSize(512)
+                .configure(KotlinFeature.NullToEmptyCollection, true)
+                .configure(KotlinFeature.NullToEmptyMap, true)
+                .configure(KotlinFeature.NullIsSameAsDefault, true)
+                .build()
+        )
 }

@@ -12,7 +12,6 @@ import com.ixibot.module.connection
 import com.ixibot.module.database
 import com.ixibot.module.discordClient
 import com.ixibot.module.ixiBot
-import com.ixibot.module.scheduler
 import com.ixibot.module.userConfigFile
 import com.ixibot.module.yamlMapper
 import com.ixibot.subscriber.DatabaseSubscriber
@@ -20,7 +19,6 @@ import com.ixibot.subscriber.DiscordSubscriber
 import discord4j.core.GatewayDiscordClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import org.apache.commons.io.FileUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -48,12 +46,7 @@ fun main() {
     val database: Database = database(connection())
     val discordClient: GatewayDiscordClient = discordClient(botConfiguration)
     val eventBus = EventBus()
-    val ixiBot: IxiBot = ixiBot(
-        database,
-        DiscordAPI(discordClient),
-        botConfiguration,
-        scheduler()
-    )
+    val ixiBot: IxiBot = ixiBot(database, DiscordAPI(discordClient))
     val consoleListener = ConsoleListener(eventBus, CoroutineScope(Dispatchers.Default).coroutineContext)
     val discordListener = DiscordListener(discordClient.eventDispatcher, eventBus)
 
@@ -105,5 +98,5 @@ private fun run(consoleListener: ConsoleListener, ixiBot: IxiBot) {
 
     // Run the bot
     ixiBot.init()
-    ixiBot.run()
+    // ixiBot.run()
 }

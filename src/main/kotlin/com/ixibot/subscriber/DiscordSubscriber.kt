@@ -118,7 +118,7 @@ class DiscordSubscriber(
         }
 
         val reactionOptional: Optional<RoleReaction> = database.allRoleReactions.stream().filter(filter).findFirst()
-        val (_, _, _, _, _, reactionEmoji, roleID) = reactionOptional.get()
+        val (_, _, _, reactionEmoji, roleID) = reactionOptional.get()
 
         if (reactionOptional.isPresent) {
             event.messageMono.subscribe { message: Message ->

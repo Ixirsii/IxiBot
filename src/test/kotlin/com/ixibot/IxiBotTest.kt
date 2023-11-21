@@ -45,18 +45,13 @@ import java.util.concurrent.TimeUnit
 class IxiBotTest {
     private val databaseMock: Database = mockk(relaxed = true, relaxUnitFun = true)
     private val discordAPIMock: DiscordAPI = mockk(relaxed = true, relaxUnitFun = true)
-    private val schedulerMock: ScheduledExecutorService = mockk(relaxed = true, relaxUnitFun = true)
-    private val underTest: IxiBot = IxiBot(databaseMock, discordAPIMock, 10L, schedulerMock)
+    private val underTest: IxiBot = IxiBot(databaseMock, discordAPIMock)
 
     @Test
     fun `GIVEN success WHEN close THEN closes resources`() {
-        every { schedulerMock.awaitTermination(any(), any()) } returns true
-
         underTest.close()
 
         verifySequence {
-            schedulerMock.shutdown()
-            schedulerMock.awaitTermination(30, TimeUnit.SECONDS)
             databaseMock.close()
         }
 
@@ -64,14 +59,11 @@ class IxiBotTest {
 
     @Test
     fun `GIVEN SQLE WHEN close THEN closes resources`() {
-        every { schedulerMock.awaitTermination(any(), any()) } returns true
         every { databaseMock.close() } throws SQLException()
 
         underTest.close()
 
         verifySequence {
-            schedulerMock.shutdown()
-            schedulerMock.awaitTermination(30, TimeUnit.SECONDS)
             databaseMock.close()
         }
     }

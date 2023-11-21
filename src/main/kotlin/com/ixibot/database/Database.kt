@@ -35,24 +35,19 @@ class Database(
     fun addRoleReaction(roleReaction: RoleReaction): Boolean {
         log.trace("Adding role reaction to database: {}", roleReaction)
         val insertStatement = String.format(
-            "INSERT INTO %s(%s, %s, %s, %s, %s, %s, %s, %s)" +
-                    " VALUES (%s, %s, %s, %s, %d, %s, %s, %s)",
+            "INSERT INTO %s(%s, %s, %s, %s, %s, %s) VALUES (%s, %s, %d, %s, %s, %s)",
             TABLE_NAME,
-            ADD_VERIFIED,
             CHANNEL_ID,
             GUILD_ID,
             MESSAGE_ID,
             REACTION_ID,
             REACTION_NAME,
-            REMOVE_VERIFIED,
             ROLE_ID,
-            roleReaction.isAddVerified,
             roleReaction.channelID,
             roleReaction.guildID,
             roleReaction.messageID,
             roleReaction.boxedReactionEmojiID,
             roleReaction.reactionEmojiName,
-            roleReaction.isRemoveVerified,
             roleReaction.roleID
         )
 
@@ -151,8 +146,6 @@ class Database(
                         val roleReaction = RoleReaction(
                             Snowflake.of(resultSet.getLong(CHANNEL_ID)),
                             Snowflake.of(resultSet.getLong(GUILD_ID)),
-                            resultSet.getBoolean(ADD_VERIFIED),
-                            resultSet.getBoolean(REMOVE_VERIFIED),
                             Snowflake.of(resultSet.getLong(MESSAGE_ID)),
                             reactionEmoji,
                             Snowflake.of(resultSet.getLong(ROLE_ID))
