@@ -36,7 +36,7 @@ class ConsoleListener(
         launch {
             log.info("Type \"quit\" to exit")
             while (true) {
-                val input: String? = readLine()
+                val input: String? = readlnOrNull()
                 log.debug("Got user input: {}", input)
                 // TODO: Map of command -> dispatcher instead of if statements
                 if (QUIT_COMMAND == input) {
