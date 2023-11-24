@@ -89,7 +89,6 @@ inline fun <T : Any> requireArgumentToExist(argument: T?, lazyMessage: () -> Any
     contract { returns() implies (argument != null) }
 
     if (argument == null) {
-        val message = lazyMessage()
-        throw InvalidParameterCountException(message.toString())
+        throw InvalidParameterCountException(lazyMessage().toString())
     }
 }

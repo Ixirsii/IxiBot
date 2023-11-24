@@ -11,7 +11,7 @@ IE ConsoleInterface, DiscordInterface, TwitchInterface.
 There are 2 separate event pipelines (should probably have 2 different EventBuses for these):
 1. **Event listener bus**  
    Listeners (console, Discord, Twitch, etc.) publish events to this bus (Discord reactions, leave/join events)
-1. **Input listener bus**  
+2. **Input listener bus**  
    Text input listeners parse commands then publish internal events to trigger the command action
 
 ## Command pipeline
@@ -30,7 +30,7 @@ to database) has to happen first. Console output may or may not be present in th
 ### Option 2: Commands can return multiple events to be published
 
 In this case AddRoleReaction would publish an event to write a reaction to the database as well as an event to print 
-some text to the interface. However the command would not know the result of the database event at the time of 
+some text to the interface. However, the command would not know the result of the database event at the time of 
 creating the output event so success/failure status is unknown.
 
 ### Option 3: Subscribers are publishers too
