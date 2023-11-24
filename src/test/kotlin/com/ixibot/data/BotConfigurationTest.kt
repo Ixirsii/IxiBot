@@ -32,6 +32,7 @@
 
 package com.ixibot.data
 
+import com.google.common.io.Resources
 import com.ixibot.CONFIG_FILE_NAME
 import com.ixibot.module.yamlMapper
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -43,14 +44,21 @@ class BotConfigurationTest {
     private val underTest: BotConfiguration
 
     init {
-        javaClass.classLoader.getResourceAsStream(CONFIG_FILE_NAME).use { configResource ->
-            underTest = yamlMapper().readValue(configResource, BotConfiguration::class.java)
-        }
+        val json = String(Resources.toByteArray(Resources.getResource(CONFIG_FILE_NAME)))
+        underTest = yamlMapper().readValue(json, BotConfiguration::class.java)
     }
 
     @Test
     fun `GIVEN valid config file WHEN read user config THEN successfully builds BotConfiguration`() {
         assertNotNull(underTest, "Mapped object should not be null")
+    }
+
+    @Test
+    fun `GIVEN default value WHEN commandPrefix THEN returns expected`() {
+        assertEquals(
+            "./",
+            underTest.commandPrefix,
+            "Command prefix should equal expected")
     }
 
     @Test
