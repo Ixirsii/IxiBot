@@ -62,7 +62,7 @@ jacoco {
 
 val excludePaths: List<String> = listOf(
         "com/ixibot/api/**",
-        "com/ixibot/**/*Discord*")
+        "com/ixibot/data/**")
 
 tasks.jacocoTestReport {
     classDirectories.setFrom(

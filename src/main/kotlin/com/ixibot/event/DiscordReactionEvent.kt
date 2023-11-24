@@ -1,5 +1,6 @@
 package com.ixibot.event
 
+import arrow.core.Option
 import discord4j.common.util.Snowflake
 import discord4j.core.`object`.entity.Message
 import discord4j.core.`object`.reaction.ReactionEmoji
@@ -20,7 +21,11 @@ data class DiscordReactionEvent(
      */
     val isAdd: Boolean,
     /**
-     * Mono that can be subscribed to to get the message that was reacted to.
+     * ID of the guild the reaction was in.
+     */
+    val guildID: Option<Snowflake>,
+    /**
+     * Mono that can be subscribed to, to get the message that was reacted to.
      */
     val messageMono: Mono<Message>,
     /**
@@ -30,7 +35,7 @@ data class DiscordReactionEvent(
     /**
      * Emoji the user reacted with.
      */
-    val reactionEmoji: ReactionEmoji,
+    val name: String,
     /**
      * ID of the user who reacted on the message.
      */

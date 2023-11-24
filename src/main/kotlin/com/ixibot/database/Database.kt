@@ -1,194 +1,41 @@
 package com.ixibot.database
 
-import com.ixibot.logging.Logging
-import com.ixibot.logging.LoggingImpl
+import arrow.core.Either
+import arrow.core.Option
 import com.ixibot.data.RoleReaction
+import com.ixibot.exception.DatabaseException
 import discord4j.common.util.Snowflake
-import discord4j.core.`object`.reaction.ReactionEmoji
-import java.sql.Connection
-import java.sql.SQLException
+import java.util.Optional
 
 /**
- * Database version number.
- */
-private const val DATABASE_VERSION: Long = 1
-
-/**
- * SQLite database connector.
+ * Database interface.
  *
  * @author Ixirsii <ixirsii@ixirsii.tech>
  */
-class Database(
-    /** Connection to SQLite database. */
-    private val connection: Connection,
-) : AutoCloseable, Logging by LoggingImpl<Database>() {
+interface Database : AutoCloseable {
+    /**
+     * List of all role reactions.
+     */
+    val roleReactions: Either<DatabaseException, List<RoleReaction>>
 
     /**
-     * Insert a role assignment reaction into the database.
-     *
-     * @param roleReaction Role assignment reaction to persist to the database.
-     * @return `true` if the first result is a `ResultSet` object;
-     * `false` if the first result is an update count or there is no result.
-     * @throws SQLException if a database access error occurs.
+     * Add/create a role reaction.
      */
-    @Throws(SQLException::class)
-    fun addRoleReaction(roleReaction: RoleReaction): Boolean {
-        log.trace("Adding role reaction to database: {}", roleReaction)
-        val insertStatement = String.format(
-            "INSERT INTO %s(%s, %s, %s, %s, %s, %s) VALUES (%s, %s, %d, %s, %s, %s)",
-            TABLE_NAME,
-            CHANNEL_ID,
-            GUILD_ID,
-            MESSAGE_ID,
-            REACTION_ID,
-            REACTION_NAME,
-            ROLE_ID,
-            roleReaction.channelID,
-            roleReaction.guildID,
-            roleReaction.messageID,
-            roleReaction.boxedReactionEmojiID,
-            roleReaction.reactionEmojiName,
-            roleReaction.roleID
-        )
-
-        connection.prepareStatement(insertStatement).use { statement -> return statement.execute() }
-    }
+    fun addRoleReaction(
+        guildID: Snowflake,
+        channelID: Snowflake,
+        messageID: Snowflake,
+        name: String,
+        roleID: Snowflake,
+    ): Either<DatabaseException, Boolean>
 
     /**
-     * Close database connection.
-     *
-     * @throws SQLException if a database access error occurs.
+     * Get role reaction.
      */
-    @Throws(SQLException::class)
-    override fun close() {
-        log.trace("Closing database connection")
-        connection.close()
-    }
+    fun getRoleReaction(messageID: Snowflake, name: String): Either<DatabaseException, Option<RoleReaction>>
 
     /**
-     * Create role assignment reactions table.
-     *
-     * @throws SQLException if a database access error occurs.
+     * Remove/delete a role reaction.
      */
-    @Throws(SQLException::class)
-    private fun createTable() {
-        log.trace("Creating role assignment reactions table")
-        connection.prepareStatement(
-            CREATE_TABLE
-        ).use { createStatement -> createStatement.execute() }
-        connection.prepareStatement(String.format("PRAGMA user_version = %d", DATABASE_VERSION))
-            .use { versionStatement -> versionStatement.execute() }
-    }
-
-    /**
-     * Delete a role assignment reaction from the database.
-     *
-     * @param reaction Role assignment reaction to delete from the database.
-     * @return `true` if the first result is a `ResultSet` object;
-     * `false` if the first result is an update count or there is no result.
-     * @throws SQLException if a database access error occurs.
-     */
-    @Throws(SQLException::class)
-    fun deleteRoleReaction(reaction: RoleReaction): Boolean {
-        log.trace("Deleting role reaction from database: {}", reaction)
-        val deleteStatement = String.format(
-            "DELETE FROM %s WHERE %s = %d AND %s = %s",
-            TABLE_NAME,
-            MESSAGE_ID,
-            reaction.messageID.asLong(),
-            REACTION_NAME,
-            reaction.reactionEmojiName
-        )
-        connection.prepareStatement(deleteStatement).use { statement -> return statement.execute() }
-    }
-
-    /**
-     * Drop role assignment reactions table.
-     *
-     * @throws SQLException if a database access error occurs.
-     */
-    @Throws(SQLException::class)
-    private fun dropTable() {
-        log.trace("Dropping role assignment reactions table")
-        val dropStatement = String.format(
-            "DROP TABLE IF EXISTS %s",
-            TABLE_NAME
-        )
-        connection.prepareStatement(dropStatement).use { statement -> statement.execute() }
-    }
-
-    /**
-     * Get all role reactions from database.
-     *
-     * @return List of all role reactions.
-     * @throws SQLException if a database access error occurs.
-     */
-    @get:Throws(SQLException::class)
-    val allRoleReactions: List<RoleReaction>
-        get() {
-            log.trace("Getting all role assignment reactions")
-            val roleReactions: MutableList<RoleReaction> = ArrayList()
-            val selectStatement = String.format(
-                "SELECT * FROM %s",
-                TABLE_NAME
-            )
-            connection.prepareStatement(selectStatement).use { statement ->
-                statement.executeQuery().use { resultSet ->
-                    while (resultSet.next()) {
-                        val animated = resultSet.getBoolean(ANIMATED)
-                        val reactionId = resultSet.getLong(REACTION_ID)
-                        val reactionName = resultSet.getString(REACTION_NAME)
-                        val reactionEmoji: ReactionEmoji = ReactionEmoji.of(
-                            reactionId,
-                            reactionName,
-                            animated
-                        )
-                        val roleReaction = RoleReaction(
-                            Snowflake.of(resultSet.getLong(CHANNEL_ID)),
-                            Snowflake.of(resultSet.getLong(GUILD_ID)),
-                            Snowflake.of(resultSet.getLong(MESSAGE_ID)),
-                            reactionEmoji,
-                            Snowflake.of(resultSet.getLong(ROLE_ID))
-                        )
-                        roleReactions.add(roleReaction)
-                    }
-                }
-            }
-            return roleReactions
-        }
-
-    /**
-     * Update the database if the existing database version is out of date.
-     *
-     * @throws SQLException if a database access error occurs.
-     */
-    @Throws(SQLException::class)
-    fun init() {
-        createTable()
-        log.trace("Getting database version")
-        connection.createStatement().use { statement ->
-            statement.executeQuery("PRAGMA user_version").use { versionResult ->
-                val databaseVersion: Long = if (versionResult.next()) {
-                    versionResult.getLong(1)
-                } else {
-                    0
-                }
-
-                if (databaseVersion < DATABASE_VERSION) {
-                    updateDatabase()
-                }
-            }
-        }
-    }
-
-    /**
-     * Update database version.
-     *
-     * @throws SQLException if a database access error occurs.
-     */
-    @Throws(SQLException::class)
-    private fun updateDatabase() {
-        dropTable()
-        createTable()
-    }
+    fun removeRoleReaction(messageID: Snowflake, name: String): Either<DatabaseException, Boolean>
 }

@@ -1,5 +1,6 @@
 package com.ixibot
 
+import arrow.core.Option
 import com.google.common.eventbus.EventBus
 import com.google.common.io.Resources
 import com.ixibot.api.DiscordAPI
@@ -33,33 +34,29 @@ private val log: Logger = LoggerFactory.getLogger(IxiBot::class.java)
  * Main method.
  */
 fun main() {
-    val botConfiguration: BotConfiguration = botConfiguration(userConfigFile(), yamlMapper())
+    val configFile = userConfigFile()
+    val configurationOption: Option<BotConfiguration> = botConfiguration(configFile, yamlMapper())
 
-    if (botConfiguration.isDefaultConfig) {
-        val configFile = File(USER_CONFIG_FILE)
+    configurationOption.onNone { generateUserConfig(configFile) }
+        .onSome {
+            // TODO: Move some of these into modules
+            val database: Database = database(connection())
+            val discordClient: GatewayDiscordClient = discordClient(it)
+            val eventBus = EventBus()
+            val ixiBot: IxiBot = ixiBot(database, DiscordAPI(discordClient))
+            val consoleListener = ConsoleListener(eventBus, CoroutineScope(Dispatchers.Default).coroutineContext)
+            val discordListener = DiscordListener(discordClient.eventDispatcher, eventBus)
 
-        generateUserConfig(configFile)
+            listOf<Any>(DatabaseSubscriber(database), DiscordSubscriber(database))
+                .forEach(eventBus::register)
 
-        return
-    }
-
-    val database: Database = database(connection())
-    val discordClient: GatewayDiscordClient = discordClient(botConfiguration)
-    val eventBus = EventBus()
-    val ixiBot: IxiBot = ixiBot(database, DiscordAPI(discordClient))
-    val consoleListener = ConsoleListener(eventBus, CoroutineScope(Dispatchers.Default).coroutineContext)
-    val discordListener = DiscordListener(discordClient.eventDispatcher, eventBus)
-
-    listOf<Any>(DatabaseSubscriber(database), DiscordSubscriber(database))
-        .forEach(eventBus::register)
-
-
-    try {
-        run(consoleListener, ixiBot)
-    } finally {
-        ixiBot.close()
-        consoleListener.close()
-    }
+            try {
+                run(consoleListener, ixiBot)
+            } finally {
+                ixiBot.close()
+                consoleListener.close()
+            }
+        }
 }
 
 /**
@@ -75,11 +72,13 @@ private fun generateUserConfig(configFile: File) {
             "Generated new user config file at \"{}\". Please customize your configuration then restart the bot",
             configFile.absolutePath
         )
-    } catch (ioe: IOException) {
+    } catch (ex: IllegalArgumentException) {
+        log.error("Failed to get resource {}", CONFIG_FILE_NAME, ex)
+    } catch (ex: IOException) {
         log.error(
             "Encountered exception while trying to write new user config file to \"{}\"",
             configFile.absolutePath,
-            ioe
+            ex
         )
     }
 }
