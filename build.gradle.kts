@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     id("org.jetbrains.dokka") version "1.9.10"
 
@@ -10,46 +8,58 @@ plugins {
 }
 
 group = "com.ixibot"
-
 version = "1.0.0"
 
 repositories {
     mavenCentral()
 }
 
+val arrowVersion: String by project
+val commonsIOVersion: String by project
+val discord4JVersion: String by project
+val dokkaVersion: String by project
+val guavaVersion: String by project
+val jacksonVersion: String by project
+val junitVersion: String by project
+val kotlinxVersion: String by project
+val logbackVersion: String by project
+val mockkVersion: String by project
+val slf4JVersion: String by project
+val sqliteVersion: String by project
+
 dependencies {
     // Kotlin coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxVersion")
 
     // Dokka HTML plugin
-    dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.5.31")
+    dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:$dokkaVersion")
 
     // Arrow
-    implementation("io.arrow-kt:arrow-core:1.2.1")
+    implementation("io.arrow-kt:arrow-core:$arrowVersion")
     // Commons IO
-    implementation("commons-io:commons-io:2.15.0")
+    implementation("commons-io:commons-io:$commonsIOVersion")
     // Google Guava
-    implementation("com.google.guava:guava:32.1.3-jre")
+    implementation("com.google.guava:guava:$guavaVersion")
     // Discord4J
-    implementation("com.discord4j:discord4j-core:3.2.6")
+    implementation("com.discord4j:discord4j-core:$discord4JVersion")
     // Jackson
-    implementation("com.fasterxml.jackson.core:jackson-core:2.15.3")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.3")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.3")
-    implementation("com.fasterxml.jackson.module:jackson-module-parameter-names:2.15.3")
+    implementation("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")
+    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+    implementation("com.fasterxml.jackson.module:jackson-module-parameter-names:$jacksonVersion")
     // SLF4J
-    implementation("org.slf4j:slf4j-api:2.0.9")
+    implementation("org.slf4j:slf4j-api:$slf4JVersion")
     // Logback
-    implementation("ch.qos.logback:logback-classic:1.4.0")
+    implementation("ch.qos.logback:logback-classic:$logbackVersion")
     // SQLite3 drivers
-    implementation("org.xerial:sqlite-jdbc:3.44.0.0")
+    implementation("org.xerial:sqlite-jdbc:$sqliteVersion")
 
     // JUnit testing framework
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
     // MockK
-    testImplementation("io.mockk:mockk:1.13.8")
+    testImplementation("io.mockk:mockk:$mockkVersion")
 }
 
 application {
