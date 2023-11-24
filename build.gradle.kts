@@ -1,4 +1,5 @@
 plugins {
+    id("com.google.devtools.ksp") version "1.9.20-1.0.14"
     id("org.jetbrains.dokka") version "1.9.10"
 
     application
@@ -21,6 +22,8 @@ val dokkaVersion: String by project
 val guavaVersion: String by project
 val jacksonVersion: String by project
 val junitVersion: String by project
+val koinVersion: String by project
+val koinKspVersion: String by project
 val kotlinxVersion: String by project
 val logbackVersion: String by project
 val mockkVersion: String by project
@@ -48,6 +51,10 @@ dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-parameter-names:$jacksonVersion")
+    // Koin
+    implementation("io.insert-koin:koin-core:$koinVersion")
+    implementation("io.insert-koin:koin-annotations:$koinKspVersion")
+    ksp("io.insert-koin:koin-ksp-compiler:$koinKspVersion")
     // SLF4J
     implementation("org.slf4j:slf4j-api:$slf4JVersion")
     // Logback

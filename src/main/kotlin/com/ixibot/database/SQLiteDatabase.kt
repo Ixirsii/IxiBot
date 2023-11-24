@@ -6,6 +6,7 @@ import com.ixibot.exception.DatabaseException
 import com.ixibot.logging.Logging
 import com.ixibot.logging.LoggingImpl
 import discord4j.common.util.Snowflake
+import org.koin.core.annotation.Single
 import java.sql.Connection
 import java.sql.SQLException
 import javax.xml.crypto.Data
@@ -20,10 +21,11 @@ private const val DATABASE_VERSION: Long = 1
  *
  * @author Ixirsii <ixirsii@ixirsii.tech>
  */
+@Single
 class SQLiteDatabase(
     /** Connection to SQLite database. */
     private val connection: Connection,
-) : AutoCloseable, Database(), Logging by LoggingImpl<SQLiteDatabase>() {
+) : AutoCloseable, Database, Logging by LoggingImpl<SQLiteDatabase>() {
 
     /**
      * Get all role reactions from database.

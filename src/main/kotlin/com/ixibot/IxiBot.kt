@@ -7,6 +7,9 @@ import com.ixibot.logging.Logging
 import com.ixibot.logging.LoggingImpl
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.koin.core.annotation.Single
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.net.ConnectException
 import java.sql.SQLException
 import java.util.concurrent.ScheduledExecutorService
@@ -33,12 +36,11 @@ const val USER_CONFIG_FILE = CONFIG_DIRECTORY + CONFIG_FILE_NAME
  *
  * @author Ixirsii <ixirsii@ixirsii.tech>
  */
-class IxiBot(
+class IxiBot : AutoCloseable, KoinComponent, Logging by LoggingImpl<IxiBot>() {
     /** Database interface. */
-    private val database: Database,
+    private val database: Database by inject()
     /** Discord API interface. */
-    private val discordAPI: DiscordAPI,
-) : AutoCloseable, Logging by LoggingImpl<IxiBot>() {
+    private val discordAPI: DiscordAPI by inject()
 
     /**
      * `true` while bot is running, `false` when bot is terminating.
