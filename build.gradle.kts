@@ -53,6 +53,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-parameter-names:$jacksonVersion")
     // Koin
     implementation("io.insert-koin:koin-core:$koinVersion")
+    implementation("io.insert-koin:koin-logger-slf4j:$koinVersion")
     implementation("io.insert-koin:koin-annotations:$koinKspVersion")
     ksp("io.insert-koin:koin-ksp-compiler:$koinKspVersion")
     // SLF4J
