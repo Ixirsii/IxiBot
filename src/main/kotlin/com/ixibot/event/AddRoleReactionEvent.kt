@@ -37,13 +37,13 @@ class AddRoleReactionEvent(
      * Builder class for AddRoleReactionEvent.
      */
     data class Builder(
-        var channelID: Snowflake? = null,
-        var isVerify: Boolean = false,
-        var isVerifyAdd: Boolean = false,
-        var isVerifyRemove: Boolean = false,
-        var messageID: Snowflake? = null,
-        var reactionEmoji: ReactionEmoji? = null,
-        var roleID: Snowflake? = null,
+        private var channelID: Snowflake? = null,
+        private var isVerify: Boolean = false,
+        private var isVerifyAdd: Boolean = false,
+        private var isVerifyRemove: Boolean = false,
+        private var messageID: Snowflake? = null,
+        private var reactionEmoji: ReactionEmoji? = null,
+        private var roleID: Snowflake? = null,
     ) : CommandEvent.Builder<AddRoleReactionEvent, Builder>() {
 
         override fun build(): AddRoleReactionEvent {

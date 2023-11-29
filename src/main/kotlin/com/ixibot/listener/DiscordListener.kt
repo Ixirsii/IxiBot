@@ -3,7 +3,7 @@ package com.ixibot.listener
 import arrow.core.Option
 import com.google.common.eventbus.EventBus
 import com.ixibot.event.DiscordReactionEvent
-import com.ixibot.extensions.toOption
+import com.ixibot.extension.toOption
 import com.ixibot.logging.Logging
 import com.ixibot.logging.LoggingImpl
 import discord4j.common.util.Snowflake

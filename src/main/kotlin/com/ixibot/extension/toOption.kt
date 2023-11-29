@@ -1,4 +1,4 @@
-package com.ixibot.extensions
+package com.ixibot.extension
 
 import arrow.core.Option
 import arrow.core.none
