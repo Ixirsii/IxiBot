@@ -8,7 +8,7 @@ import org.koin.core.context.startKoin
  */
 fun main() {
     startKoin {
-        modules(BotModule().module, DatabaseModule().module)
+        modules(botModule, databaseModule)
     }
 
     IxiBot().use {

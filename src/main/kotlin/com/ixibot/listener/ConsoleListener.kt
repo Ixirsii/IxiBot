@@ -5,7 +5,9 @@ import com.ixibot.logging.Logging
 import com.ixibot.logging.LoggingImpl
 import com.ixibot.event.StopBotEvent
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
@@ -32,17 +34,14 @@ class ConsoleListener(
     /**
      * Launch async process to listen for console input.
      */
-    fun run() {
-        launch {
-            log.info("Type \"quit\" to exit")
-            while (true) {
-                val input: String? = readlnOrNull()
-                log.debug("Got user input: {}", input)
-                // TODO: Map of command -> dispatcher instead of if statements
-                if (QUIT_COMMAND == input) {
-                    val event = StopBotEvent(true)
-                    eventBus.post(event)
-                }
+    fun run(): Job = launch {
+        log.info("Type \"quit\" to exit")
+        while (isActive) {
+            val input: String = readln()
+            log.debug("Got user input: {}", input)
+            // TODO: Map of command -> dispatcher instead of if statements
+            if (QUIT_COMMAND == input) {
+                eventBus.post(StopBotEvent(true))
             }
         }
     }

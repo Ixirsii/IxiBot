@@ -3,9 +3,7 @@ package com.ixibot
 import arrow.core.Option
 import com.google.common.eventbus.EventBus
 import com.google.common.io.Resources
-import com.ixibot.api.DiscordAPI
 import com.ixibot.data.BotConfiguration
-import com.ixibot.data.RoleReaction
 import com.ixibot.database.Database
 import com.ixibot.listener.ConsoleListener
 import com.ixibot.listener.DiscordListener
@@ -13,20 +11,18 @@ import com.ixibot.logging.Logging
 import com.ixibot.logging.LoggingImpl
 import com.ixibot.subscriber.DatabaseSubscriber
 import com.ixibot.subscriber.DiscordSubscriber
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import discord4j.core.GatewayDiscordClient
+import discord4j.core.event.domain.lifecycle.ReadyEvent
+import discord4j.core.event.domain.message.ReactionAddEvent
+import discord4j.core.event.domain.message.ReactionRemoveEvent
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
-import org.koin.core.annotation.Single
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import org.koin.core.qualifier.named
 import java.io.File
 import java.io.IOException
-import java.net.ConnectException
 import java.sql.SQLException
-import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.TimeUnit
-import java.util.stream.Collectors
 
 /**
  * Bot configuration file.
@@ -39,12 +35,7 @@ const val CONFIG_FILE_NAME = "config.yaml"
 const val CONFIG_DIRECTORY = "config/"
 
 /**
- * Config file configured by the user.
- */
-const val USER_CONFIG_FILE = CONFIG_DIRECTORY + CONFIG_FILE_NAME
-
-/**
- * Bot logic class once startup is complete and user configuration is loaded.
+ * Main class.
  *
  * @author Ixirsii <ixirsii@ixirsii.tech>
  */
@@ -60,14 +51,24 @@ class IxiBot : AutoCloseable, KoinComponent, Logging by LoggingImpl<IxiBot>() {
     private val configurationOption: Option<BotConfiguration> by inject()
 
     /**
+     * Console input listener.
+     */
+    private val consoleListener: ConsoleListener by inject()
+
+    /**
      * Database interface.
      */
     private val database: Database by inject()
 
     /**
-     * Discord API interface.
+     * Discord client.
      */
-    private val discordAPI: DiscordAPI by inject()
+    private val discordClient: GatewayDiscordClient by inject()
+
+    /**
+     * Discord event listener.
+     */
+    private val discordListener: DiscordListener by inject()
 
     /**
      * Pub/sub event bus.
@@ -75,28 +76,13 @@ class IxiBot : AutoCloseable, KoinComponent, Logging by LoggingImpl<IxiBot>() {
     private val eventBus: EventBus by inject()
 
     /**
-     * `true` while bot is running, `false` when bot is terminating.
+     * Default config resource file.
      */
-    private var running = false
+    private val resourceFilePath: String by inject(named("resourceFilePath"))
 
-    init {
-        configurationOption.onNone { generateUserConfig(configFile) }
-            .onSome {
-                val consoleListener = ConsoleListener(eventBus, CoroutineScope(Dispatchers.Default).coroutineContext)
-                val discordListener = DiscordListener(discordClient.eventDispatcher, eventBus)
-
-                listOf<Any>(DatabaseSubscriber(database), DiscordSubscriber(database))
-                    .forEach(eventBus::register)
-
-                consoleListener.use { it.run() }
-            }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     override fun close() {
         log.trace("Shutting down bot")
+
         try {
             database.close()
         } catch (ex: SQLException) {
@@ -106,12 +92,26 @@ class IxiBot : AutoCloseable, KoinComponent, Logging by LoggingImpl<IxiBot>() {
 
     /**
      * Initialize bot instance.
-     *
-     * @throws ConnectException on failure to connect to API.
      */
-    @Throws(ConnectException::class)
     fun init() {
-        running = true
+        configurationOption.onNone { generateUserConfig(configFile, resourceFilePath) }
+            .onSome {
+                discordClient.eventDispatcher.on(ReadyEvent::class.java).subscribe(discordListener::readyListener)
+                discordClient.eventDispatcher.on(ReactionAddEvent::class.java)
+                    .subscribe(discordListener::reactionAddListener)
+                discordClient.eventDispatcher.on(ReactionRemoveEvent::class.java)
+                    .subscribe(discordListener::reactionRemoveListener)
+
+                listOf<Any>(DatabaseSubscriber(database), DiscordSubscriber(database)).forEach(eventBus::register)
+            }
+    }
+
+    fun run() {
+        val consoleListenerJob: Job = consoleListener.use { it.run() }
+
+        runBlocking {
+            consoleListenerJob.join()
+        }
     }
 
     /* **************************************** Private utility methods ***************************************** */
@@ -121,16 +121,20 @@ class IxiBot : AutoCloseable, KoinComponent, Logging by LoggingImpl<IxiBot>() {
      *
      * @param configFile File path to user config file.
      */
-    private fun generateUserConfig(configFile: File) {
+    private fun generateUserConfig(configFile: File, resourceFile: String) {
         try {
-            configFile.writeBytes(Resources.toByteArray(Resources.getResource(CONFIG_FILE_NAME)))
+            if (!configFile.parentFile.exists()) {
+                configFile.parentFile.mkdirs()
+            }
+
+            configFile.writeBytes(Resources.toByteArray(Resources.getResource(resourceFile)))
 
             log.info(
                 "Generated new user config file at \"{}\". Please customize your configuration then restart the bot",
                 configFile.absolutePath
             )
         } catch (ex: IllegalArgumentException) {
-            log.error("Failed to get resource {}", CONFIG_FILE_NAME, ex)
+            log.error("Failed to get resource {}", resourceFile, ex)
         } catch (ex: IOException) {
             log.error(
                 "Encountered exception while trying to write new user config file to \"{}\"",

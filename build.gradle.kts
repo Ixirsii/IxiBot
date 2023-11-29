@@ -1,11 +1,11 @@
 plugins {
-    id("com.google.devtools.ksp") version "1.9.20-1.0.14"
+    kotlin("jvm") version "1.9.20"
+
     id("org.jetbrains.dokka") version "1.9.10"
 
     application
     idea
     jacoco
-    kotlin("jvm") version ("1.9.20")
 }
 
 group = "com.ixibot"
@@ -23,7 +23,6 @@ val guavaVersion: String by project
 val jacksonVersion: String by project
 val junitVersion: String by project
 val koinVersion: String by project
-val koinKspVersion: String by project
 val kotlinxVersion: String by project
 val logbackVersion: String by project
 val mockkVersion: String by project
@@ -54,8 +53,6 @@ dependencies {
     // Koin
     implementation("io.insert-koin:koin-core:$koinVersion")
     implementation("io.insert-koin:koin-logger-slf4j:$koinVersion")
-    implementation("io.insert-koin:koin-annotations:$koinKspVersion")
-    ksp("io.insert-koin:koin-ksp-compiler:$koinKspVersion")
     // SLF4J
     implementation("org.slf4j:slf4j-api:$slf4JVersion")
     // Logback
@@ -66,6 +63,9 @@ dependencies {
     // JUnit testing framework
     testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
+    // Koin
+    testImplementation("io.insert-koin:koin-test-junit5:$koinVersion")
+    testImplementation("io.insert-koin:koin-test:$koinVersion")
     // MockK
     testImplementation("io.mockk:mockk:$mockkVersion")
 }
@@ -134,9 +134,6 @@ tasks.jacocoTestReport {
 
 tasks.test {
     finalizedBy(tasks.jacocoTestReport)
-
-    systemProperty("junit.jupiter.execution.parallel.enabled", true)
-    systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
 
     useJUnitPlatform() {
         excludeTags("integration")

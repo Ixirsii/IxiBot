@@ -34,7 +34,7 @@ fun booleanParser(name: String, parameters: List<String>): Boolean {
         }
 
         else -> {
-            val value: String = parameters[0].toLowerCase()
+            val value: String = parameters[0].lowercase()
             val isTrue: Boolean = TRUE_VALUES.contains(value)
             val isFalse: Boolean = FALSE_VALUES.contains(value)
 

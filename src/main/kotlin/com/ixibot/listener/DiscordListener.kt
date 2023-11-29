@@ -7,7 +7,7 @@ import com.ixibot.extensions.toOption
 import com.ixibot.logging.Logging
 import com.ixibot.logging.LoggingImpl
 import discord4j.common.util.Snowflake
-import discord4j.core.event.EventDispatcher
+import discord4j.core.event.domain.lifecycle.ReadyEvent
 import discord4j.core.event.domain.message.ReactionAddEvent
 import discord4j.core.event.domain.message.ReactionRemoveEvent
 
@@ -17,25 +17,16 @@ import discord4j.core.event.domain.message.ReactionRemoveEvent
  * @author Ixirsii <ixirsii@ixirsii.tech>
  */
 class DiscordListener(
-    /** Discord Gateway event dispatcher. */
-    eventDispatcher: EventDispatcher,
     /** Event bus to publish events to. */
     private val eventBus: EventBus,
 ) : Logging by LoggingImpl<DiscordListener>() {
-
-    init {
-        eventDispatcher.on(ReactionAddEvent::class.java)
-            .subscribe(::reactionAddListener)
-        eventDispatcher.on(ReactionRemoveEvent::class.java)
-            .subscribe(::reactionRemoveListener)
-    }
 
     /**
      * ReactionAddEvent listener.
      *
      * @param event Event to handle.
      */
-    private fun reactionAddListener(event: ReactionAddEvent) {
+    fun reactionAddListener(event: ReactionAddEvent) {
         val guildID: Option<Snowflake> = event.guildId.toOption()
 
         val name: String = if (event.emoji.asCustomEmoji().isPresent) {
@@ -62,7 +53,7 @@ class DiscordListener(
      *
      * @param event Event to handle.
      */
-    private fun reactionRemoveListener(event: ReactionRemoveEvent) {
+    fun reactionRemoveListener(event: ReactionRemoveEvent) {
         val guildID: Option<Snowflake> = event.guildId.toOption()
 
         val name: String = if (event.emoji.asCustomEmoji().isPresent) {
@@ -82,5 +73,9 @@ class DiscordListener(
         )
 
         eventBus.post(internalEvent)
+    }
+
+    fun readyListener(event: ReadyEvent) {
+        log.info("Connected to Discord {}", event)
     }
 }
