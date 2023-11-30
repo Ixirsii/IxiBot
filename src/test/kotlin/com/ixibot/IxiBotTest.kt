@@ -9,6 +9,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.justRun
+import io.mockk.mockk
 import io.mockk.mockkClass
 import io.mockk.mockkStatic
 import io.mockk.verifySequence
@@ -23,7 +24,6 @@ import org.koin.test.inject
 import org.koin.test.junit5.KoinTestExtension
 import org.koin.test.junit5.mock.MockProviderExtension
 import org.koin.test.mock.declare
-import org.koin.test.mock.declareMock
 import java.io.File
 import java.io.IOException
 import java.sql.SQLException
@@ -35,11 +35,11 @@ import kotlin.test.assertTrue
 class IxiBotTest: KoinTest {
     @MockK
     private lateinit var botConfiguration: BotConfiguration
+
     @MockK
-    private lateinit var configFileMock: File
+    private lateinit var database: Database
 
     private val configFile: File by inject()
-    private val database: Database by inject()
 
     private val underTest: IxiBot = IxiBot()
 
@@ -50,6 +50,7 @@ class IxiBotTest: KoinTest {
             module {
                 single { botConfiguration.some() }
                 single { File(CONFIG_DIRECTORY + CONFIG_FILE_NAME) }
+                single { database }
                 single(named("resourceFilePath")) { CONFIG_FILE_NAME }
             }
         )
@@ -69,7 +70,7 @@ class IxiBotTest: KoinTest {
     @Test
     internal fun `GIVEN success WHEN close THEN closes resources`() {
         // Given
-        declareMock<Database> { justRun { close() } }
+        justRun { database.close() }
 
         // When
         underTest.close()
@@ -78,13 +79,12 @@ class IxiBotTest: KoinTest {
         verifySequence {
             database.close()
         }
-
     }
 
     @Test
     internal fun `GIVEN SQLException WHEN close THEN closes resources`() {
         // Given
-        declareMock<Database> { every { close() } throws SQLException() }
+        every { database.close() } throws SQLException()
 
         // When
         underTest.close()
@@ -122,6 +122,8 @@ class IxiBotTest: KoinTest {
     @Test
     internal fun `GIVEN IOException WHEN init THEN does nothing`() {
         // Given
+        val configFileMock: File = mockk()
+
         declare { none<BotConfiguration>() }
         declare { configFileMock }
 
