@@ -10,7 +10,7 @@
     <appender name="APPLICATION_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder>
             <pattern>
-                %d{HH:mm:ss.SSS} [%X{Correlation-ID}] [%logger{36}] %-5level - %msg%n
+                %d{HH:mm:ss.SSS} [%X{Correlation-ID}] [%thread] [%logger{36}] %-5level - %msg%n
             </pattern>
         </encoder>
         <file>log/application.log</file>
@@ -26,9 +26,7 @@
         <appender-ref ref="CONSOLE"/>
     </root>
 
-    <!-- <logger name="java.io" level="INFO"/> -->
-    <!-- <logger name="javax.management" level="WARN"/> -->
-    <!-- <logger name="jdk" level="WARN"/> -->
-    <!-- <logger name="sun.rmi" level="WARN"/> -->
-    <!-- <logger name="org.apache" level="INFO"/> -->
+    <logger name="discord4j" level="WARN"/>
+    <logger name="io.netty" level="WARN"/>
+    <logger name="reactor" level="WARN"/>
 </configuration>

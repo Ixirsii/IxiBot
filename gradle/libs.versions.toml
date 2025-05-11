@@ -16,6 +16,7 @@ discord4j-core = { module = "com.discord4j:discord4j-core", version.ref = "disco
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 guice = { module = "com.google.inject:guice", version.ref = "guice" }
 jackson = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-dataformat-yaml = { module = 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml', version.ref = 'jackson' }
 jackson-datatype-java8 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jdk8", version.ref = "jackson" }
 jackson-datatype-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
 jackson-module-parameter-names = { module = "com.fasterxml.jackson.module:jackson-module-parameter-names", version.ref = "jackson" }
@@ -31,7 +32,7 @@ reactor-core = { module = "io.projectreactor:reactor-core" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4J" }
 
 [bundles]
-jackson = ["jackson", "jackson-datatype-java8", "jackson-datatype-jsr310", "jackson-module-parameter-names"]
+jackson = ["jackson", "jackson-dataformat-yaml", "jackson-datatype-java8", "jackson-datatype-jsr310", "jackson-module-parameter-names"]
 junit = ["junit-jupiter", "junit-jupiter-params"]
 mockito = ["mockito-core", "mockito-junit-jupiter"]
 
