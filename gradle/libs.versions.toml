@@ -1,5 +1,5 @@
 [versions]
-axion = "1.18.18"
+axion = "1.19.0"
 discord4J = "3.2.8"
 guava = "33.4.8-jre"
 guice = "7.0.0"
